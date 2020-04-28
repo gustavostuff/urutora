@@ -1,6 +1,8 @@
 local urutora = {
   nodes = {},
   stateStack = {},
+  sx = love.graphics.getWidth(),
+  sy = love.graphics.getHeight(),
   font = love.graphics.newFont(14),
   defaults = {
     cb = function() end,
@@ -30,19 +32,10 @@ local urutora = {
 local utils = require('urutora-utils')(urutora)
 
 urutora.style = {
-  padding = urutora.font:getHeight() / 2,
+  p = urutora.font:getHeight() / 2, -- padding
   bgColor = utils.colors.LOVE_BLUE,
-  hoverBgColor = utils.colors.LOVE_BLUE_LIGHT,
   fgColor = utils.colors.WHITE,
-  hoverFgColor = utils.colors.WHITE,
-  cornerRadius = 2
 }
-
----------------------------------------------------------------------------
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
----------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
@@ -85,15 +78,20 @@ function urutora.slider(data)
   data = data or {}
   local node = {}
   utils.initNode(node, data)
+  node.callback = urutora.defaults.cb
+  node.type = urutora.nodeTypes.SLIDER
   
   function node:draw()
     local _, fgc = utils.getLayerColors(self)
     love.graphics.setColor(fgc)
-    
-    love.graphics.circle('fill',
-      math.floor(self.px + (self.w - self.padding * 2) * self.value),
-      math.floor(self.y + self.h / 2),
-      self.padding
+    local x = self.px + (self.w - self.p * 2) * self.value
+    local y = self.y + self.h / 2
+
+    utils.rect('fill',
+      x - self.p / 2,
+      y - self.p,
+      self.p,
+      self.p * 2
     )
   end
   
@@ -101,14 +99,12 @@ function urutora.slider(data)
     local x, y = utils.getMouse()
 
     if self.pressed then
-      self.value = (x - (self.px)) / (self.w - self.padding * 2)
+      self.value = (x - (self.px)) / (self.w - self.p * 2)
       if self.value > 1 then self.value = 1 end
       if self.value < 0 then self.value = 0 end
     end
   end
 
-  node.type = urutora.nodeTypes.SLIDER
-  node.callback = urutora.defaults.cb
   node.value = data.value or urutora.defaults.sliderValue
   
   table.insert(urutora.nodes, node)
@@ -122,21 +118,23 @@ function urutora.toggle(data)
   data = data or {}
   local node = {}
   utils.initNode(node, data)
+  node.callback = urutora.defaults.cb
+  node.type = urutora.nodeTypes.TOGGLE
+
   function node:update() end
   function node:draw()
-    self.bgColor, self.fgColor = utils.getLayerColors(self)
-    if not self.value then
-      self.bgColor, self.fgColor = utils.colors.GRAY, utils.colors.DARK_GRAY
+    if self.value then
+      utils.drawBaseRectangle(self)
+    else
+      utils.drawBaseRectangle(self, utils.colors.GRAY)
     end
-    utils.drawBaseRectangle(self)
   end
   function node:change()
     self.value = not self.value
   end
 
-  node.type = urutora.nodeTypes.TOGGLE
-  node.callback = urutora.defaults.cb
   node.value = data.value
+  node.text = data.text
   
   table.insert(urutora.nodes, node)
   return node
@@ -149,6 +147,9 @@ function urutora.multi(data)
   data = data or {}
   local node = {}
   utils.initNode(node, data)
+  node.callback = urutora.defaults.cb
+  node.type = urutora.nodeTypes.MULTI
+
   function node:update() end
   function node:draw()
     local text = self.items[self.index]
@@ -159,13 +160,12 @@ function urutora.multi(data)
   function node:change()
     self.index = self.index + 1
     if self.index > #self.items then self.index = 1 end
+    self.text = self.items[self.index]
   end
 
-  node.type = urutora.nodeTypes.MULTI
-  node.callback = urutora.defaults.cb
   node.items = data.items or {}
   node.index = 1
-  node.value = node.items[node.index]
+  node.text = node.items[node.index]
   
   table.insert(urutora.nodes, node)
   return node
@@ -177,43 +177,35 @@ function urutora.text(data)
   data = data or {}
   local node = {}
   utils.initNode(node, data)
+  node.callback = urutora.defaults.cb
+  node.type = urutora.nodeTypes.TEXT
 
   function node:update() end
   function node:draw()
     local _, fgc = utils.getLayerColors(self)
     love.graphics.setColor(fgc)
-    local y = self.y + self.h / 2 - utils.textHeight() / 2
-    p(self.value, self.x, y)
+    local y = self.centerY + self.p
+    love.graphics.line(self.x, y, self.x + self.w, y)
 
     if self.focused then
-      local x = self.x + utils.textWidth(self.value)
-      p('_', x, y)
+      utils.p('_',
+        self.x + utils.textWidth(self),
+        self.centerY - utils.textHeight(self) / 2
+      )
     end
-
-    love.graphics.line(
-      self.x,
-      self.y + self.h,
-      self.x + self.w,
-      self.y + self.h
-    )
   end
   function node:textInput(text, scancode)
     if scancode == urutora.scanCodes.BACKSPACE then
-      self.pressingBS = true
-      self.value = self.value:sub(1, #self.value - 1)
+      self.text = self.text:sub(1, #self.text - 1)
     else
-      self.pressingBS = false
-      if utils.textWidth(self.value .. '__') < self.w then
-        self.value = self.value .. (text or '')
+      if utils.textWidth(self) <= self.npw then
+        self.text = self.text .. (text or '')
       end
     end
   end
 
-  node.type = urutora.nodeTypes.TEXT
-  node.callback = urutora.defaults.cb
-  node.baseMode = 'line'
-  node.value =  data.value or ''
-  
+  node.textAlign = urutora.textAlignments.LEFT
+  node.text =  data.text or ''
   table.insert(urutora.nodes, node)
   return node
 end
@@ -225,10 +217,12 @@ function urutora.panel(data)
   data = data or {}
   local node = {}
   utils.initNode(node, data)
-
+  node.callback = urutora.defaults.cb
+  node.type = urutora.nodeTypes.PANEL
+  
   function node:update() end
   function node:draw() end
-  function node:add(newNode, row, col)
+  function node:addAt(row, col, newNode)
     local w, h = (self.w / self.cols), (self.h / self.rows)
     local x, y = self.x + w * (col - 1), self.y + h * (row - 1)
     local s = self.spacing / 2
@@ -236,16 +230,14 @@ function urutora.panel(data)
     w, h = w - s * 2, h - s * 2
 
     utils.setBounds(newNode, x, y, w, h)
-    table.insert(self.childrenReferences, newNode)
+    table.insert(self.children, newNode)
     return self
   end
 
-  node.type = urutora.nodeTypes.PANEL
-  node.callback = urutora.defaults.cb
-  node.childrenReferences = {}
+  node.children = {}
   node.rows = data.rows or 1
   node.cols = data.cols or 1
-  node.spacing = data.spacing or 3
+  node.spacing = data.spacing or 4
   
   table.insert(urutora.nodes, node)
   return node
@@ -254,21 +246,11 @@ end
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 
----------------------------------------------------------------------------
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
----------------------------------------------------------------------------
-
-function urutora.setFilter(mode)
-  urutora.canvas:setFilter(mode, mode)
-end
-
-function urutora.setResolution(w, h)
-  urutora.w, urutora.h = w, h
-  urutora.canvas = love.graphics.newCanvas(w, h)
-  urutora.sx = love.graphics.getWidth() / urutora.canvas:getWidth()
-  urutora.sy = love.graphics.getHeight() / urutora.canvas:getHeight()
+function urutora.setResolution(canvas)
+  urutora.canvas = canvas
+  urutora.w, urutora.h = canvas:getWidth(), canvas:getHeight()
+  urutora.sx = love.graphics.getWidth() / urutora.w
+  urutora.sy = love.graphics.getHeight() / urutora.h
 end
 
 function urutora.setGroupEnabled(g, value)
@@ -293,6 +275,18 @@ function urutora.disableGroup(g) urutora.setGroupEnabled(g, false) end
 function urutora.showGroup(g) urutora.setGroupVisible(g, true) end
 function urutora.hideGroup(g) urutora.setGroupVisible(g, false) end
 
+function urutora.activateGroup(g)
+  urutora.setGroupEnabled(g, true)
+  urutora.setGroupVisible(g, true)
+  return urutora
+end
+
+function urutora.deactivateGroup(g)
+  urutora.setGroupEnabled(g, false)
+  urutora.setGroupVisible(g, false)
+  return urutora
+end
+
 function urutora.update(dt)
   for _, node in ipairs(urutora.nodes) do
     local x, y = utils.getMouse()
@@ -307,9 +301,6 @@ end
 
 function urutora.draw()
   love.graphics.push('all')
-
-  love.graphics.setCanvas(urutora.canvas)
-  love.graphics.clear(0, 0, 0, 0)
 
   love.graphics.setFont(urutora.font)
   love.graphics.setLineWidth(2)
@@ -328,10 +319,6 @@ function urutora.draw()
 
     ::continue::
   end
-
-  love.graphics.setCanvas()
-  love.graphics.setColor(utils.colors.WHITE)
-  love.graphics.draw(urutora.canvas, 0, 0, 0, urutora.sx, urutora.sy)
   
   love.graphics.pop()
 end
@@ -356,14 +343,7 @@ function urutora.pressed(x, y)
   end
 end
 
-function urutora.moved(x, y)
-  --[[
-  for _, node in ipairs(urutora.nodes) do
-    if not node.enabled then break end
-    --
-  end
-  ]]
-end
+function urutora.moved(x, y) end
 
 function urutora.released(x, y)
   for _, node in ipairs(urutora.nodes) do
@@ -424,5 +404,4 @@ function urutora.performAction(data)
   node.pressed = false
 end
 
-urutora.setResolution(love.graphics.getDimensions())
 return urutora

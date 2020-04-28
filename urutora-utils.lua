@@ -6,8 +6,14 @@ function utils.isPanel(node) return node.type == urutora.nodeTypes.PANEL end
 function utils.isMulti(node) return node.type == urutora.nodeTypes.MULTI_OPTION end
 function utils.isButton(node) return node.type == urutora.nodeTypes.BUTTON end
 function utils.isTextField(node) return node.type == urutora.nodeTypes.TEXT end
-function utils.textWidth(t) return urutora.font:getWidth(t) end
-function utils.textHeight() return urutora.font:getHeight() end
+function utils.textWidth(node)
+  if not node.text then return 0 end
+  return node.font:getWidth(node.text)
+end
+function utils.textHeight(node)
+  if not node.text then return 0 end
+  return node.font:getHeight()
+end
 
 function utils.toRGB(hex)
   local hex = hex:gsub("#", "")
@@ -38,103 +44,7 @@ function utils.withOpacity(color, alpha)
   return newColor
 end
 
-function utils.needsBase(node)
-  return not (
-    utils.isToggle(node) or
-    utils.isPanel(node) or
-    utils.isLabel(node) or
-    utils.isTextField(node)
-  )
-end
-
-function p(text, x, y)
-  love.graphics.print(
-    text,
-    math.floor(x),
-    math.floor(y)
-  )
-end
-
-function utils.getMouse()
-  return love.mouse.getX() / urutora.sx, love.mouse.getY() / urutora.sy
-end
-
-function utils.getLayerColors(node)
-  if not node.enabled then
-    return colors.GRAY, colors.DARK_GRAY
-  elseif node.pointed then
-    return urutora.style.hoverBgColor, urutora.style.hoverFgColor
-  end
-
-  return urutora.style.bgColor, urutora.style.fgColor
-end
-
-
-function utils.drawBaseRectangle(node)
-  local bgc, _ = utils.getLayerColors(node)
-  love.graphics.setColor(node.bgColor or bgc)
-
-  love.graphics.rectangle(node.baseMode or 'fill',
-    math.floor(node.x),
-    math.floor(node.y),
-    math.floor(node.w),
-    math.floor(node.h),
-    (urutora.style.cornerRadius),
-    (urutora.style.cornerRadius)
-  )
-end
-
-function utils.drawText(node, alternativeText)
-  local text = alternativeText or node.text
-
-  if (not text) or (#text == 0) then
-    return
-  end
-
-  local _, fgc = utils.getLayerColors(node)
-  local x = node.x + node.w / 2 - utils.textWidth(text) / 2
-  local y = node.y + node.h / 2 - utils.textHeight() / 2
-  
-  if node.textAlign == urutora.textAlignments.LEFT then
-    x = math.floor(node.px)
-  end
-
-  love.graphics.setColor(node.fgColor or fgc)
-  p(text, x, y)
-end
-
-function utils.setFocusedNode(node)
-  for _, node in ipairs(urutora.nodes) do
-    node.focused = false
-  end
-
-  if node then node.focused = true end
-end
-
-function utils.isPointInsideNode(x, y, node)
-  if not (x or y) then return end
-
-  x, y = x / urutora.sx, y / urutora.sy
-
-  return not (
-    x < node.x or
-    x > (node.x + node.w) or
-    y < node.y or
-    y > (node.y + node.h)
-  )
-end
-
-function utils.setBounds(node, x, y, w, h)
-  local f = urutora.font
-  node.padding = urutora.style.padding
-
-  node.x = x
-  node.y = y
-  node.w = w or f:getWidth(node.text) + node.padding * 2
-  node.h = h or f:getHeight() + node.padding * 2
-  node.px = node.x + node.padding
-  node.py = node.y + node.padding
-end
+--------------------------------------------------------------
 
 function utils.initNode(node, data)
   node.text = data.text
@@ -146,11 +56,14 @@ function utils.initNode(node, data)
     data.h
   )
 
+  node.bgColor, node.fgColor = urutora.style.bgColor, urutora.style.fgColor
+  node.font = urutora.font
+
   function node:setGroup(g)
     self.group = g
 
-    if self.childrenReferences then
-      for _, child in ipairs(self.childrenReferences) do
+    if self.children then
+      for _, child in ipairs(self.children) do
         child.group = g
       end
     end
@@ -158,13 +71,27 @@ function utils.initNode(node, data)
     return self
   end
 
+  function node:setStyle(style)
+    self.bgColor = style.bgColor or urutora.style.bgColor
+    self.fgColor = style.fgColor or urutora.style.fgColor
+    self.font = style.font or urutora.font
+
+    if self.children then
+      for _, child in ipairs(self.children) do
+        child:setStyle(style)
+      end
+    end
+
+    return self
+  end
+
   function node:setEnabled(value)
-    self.enabled = false
+    self.enabled = value
     return self
   end
 
   function node:setVisible(value)
-    self.visible = false
+    self.visible = value
     return self
   end
 
@@ -181,6 +108,118 @@ function utils.initNode(node, data)
 
   node.enabled = true
   node.visible = true
+end
+
+function utils.needsBase(node)
+  return not (
+    utils.isToggle(node) or
+    utils.isPanel(node) or
+    utils.isLabel(node) or
+    utils.isTextField(node)
+  )
+end
+
+function utils.p(text, x, y)
+  love.graphics.print(
+    text,
+    math.floor(x),
+    math.floor(y)
+  )
+end
+
+function utils.rect(mode, a, b, c, d)
+  love.graphics.rectangle(mode, math.floor(a), math.floor(b), math.floor(c), math.floor(d))
+end
+
+function utils.line(a, b, c, d)
+  love.graphics.line(math.floor(a), math.floor(b), math.floor(c), math.floor(d))
+end
+
+function utils.circ(mode, a, b, c)
+  love.graphics.circle(mode, math.floor(a), math.floor(b), math.floor(c))
+end
+
+function utils.getLayerColors(node)
+  if not node.enabled then
+    return utils.colors.GRAY, utils.colors.DARK_GRAY
+  else
+    if node.pointed then
+      return node.bgColor, node.fgColor
+    else
+      return node.bgColor, node.fgColor
+    end
+  end
+end
+
+function utils.drawBaseRectangle(node, color, ...)
+  local bgc, _ = utils.getLayerColors(node)
+  love.graphics.setColor(color or bgc)
+  local x, y, w, h = node.x, node.y, node.w, node.h
+
+  if ... then x, y, w, h = ... end
+  utils.rect('fill', x, y, w, h)
+end
+
+function utils.drawText(node, extra)
+  local text = node.text
+
+  if (not text) or (#text == 0) then
+    return
+  end
+
+  local _, fgc = utils.getLayerColors(node)
+  local x = node.centerX - utils.textWidth(node) / 2
+  local y = node.centerY - utils.textHeight(node) / 2
+  if node.type == urutora.nodeTypes.TEXT then
+    x = math.floor(node.x)
+  elseif node.textAlign == urutora.textAlignments.LEFT then
+    x = math.floor(node.px)
+  end
+
+  love.graphics.setFont(node.font)
+  love.graphics.setColor(node.fgColor or fgc)
+  utils.p(text, x, y)
+end
+
+function utils.setFocusedNode(node)
+  for _, node in ipairs(urutora.nodes) do
+    node.focused = false
+  end
+
+  if node then node.focused = true end
+end
+
+function utils.getMouse()
+  return love.mouse.getX() / urutora.sx, love.mouse.getY() / urutora.sy
+end
+
+function utils.isPointInsideNode(x, y, node)
+  if not (x or y) then return end
+
+  x, y = utils.getMouse()
+
+  return not (
+    x < node.x or
+    x > (node.x + node.w) or
+    y < node.y or
+    y > (node.y + node.h)
+  )
+end
+
+function utils.setBounds(node, x, y, w, h)
+  local f = urutora.font
+  node.p = urutora.style.p -- padding
+
+  node.x = x
+  node.y = y
+  node.w = w or f:getWidth(node.text) + node.p * 2
+  node.h = h or f:getHeight() + node.p * 2
+  node.px = node.x + node.p
+  node.py = node.y + node.p
+  node.centerX = node.x + node.w / 2
+  node.centerY = node.y + node.h / 2
+  node.npw = node.w - node.p * 2
+  node.nph = node.h - node.p * 2
 end
 
 return function(u)
