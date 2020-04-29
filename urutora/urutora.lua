@@ -1,6 +1,5 @@
 local urutora = {
   nodes = {},
-  stateStack = {},
   sx = love.graphics.getWidth(),
   sy = love.graphics.getHeight(),
   font = love.graphics.newFont(14),
@@ -42,14 +41,10 @@ urutora.style = {
 ---------------------------------------------------------------------------
 
 function urutora.label(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
+  local node, data = utils.getCommons(urutora.nodeTypes.LABEL, data)
+
   function node:update() end
   function node:draw() end
-
-  node.type = urutora.nodeTypes.LABEL
-  node.callback = urutora.defaults.cb
   
   table.insert(urutora.nodes, node)
   return node
@@ -59,14 +54,10 @@ end
 ---------------------------------------------------------------------------
 
 function urutora.button(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
+  local node, data = utils.getCommons(urutora.nodeTypes.BUTTON, data)
+
   function node:update() end
   function node:draw() end
-
-  node.type = urutora.nodeTypes.BUTTON
-  node.callback = urutora.defaults.cb
   
   table.insert(urutora.nodes, node)
   return node
@@ -76,12 +67,8 @@ end
 ---------------------------------------------------------------------------
 
 function urutora.slider(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
-  node.callback = urutora.defaults.cb
-  node.type = urutora.nodeTypes.SLIDER
-  
+  local node, data = utils.getCommons(urutora.nodeTypes.SLIDER, data)
+
   function node:draw()
     local _, fgc = utils.getLayerColors(self)
     love.graphics.setColor(fgc)
@@ -116,11 +103,7 @@ end
 ---------------------------------------------------------------------------
 
 function urutora.toggle(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
-  node.callback = urutora.defaults.cb
-  node.type = urutora.nodeTypes.TOGGLE
+  local node, data = utils.getCommons(urutora.nodeTypes.TOGGLE, data)
 
   function node:update() end
   function node:draw()
@@ -145,11 +128,7 @@ end
 ---------------------------------------------------------------------------
 
 function urutora.multi(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
-  node.callback = urutora.defaults.cb
-  node.type = urutora.nodeTypes.MULTI
+  local node, data = utils.getCommons(urutora.nodeTypes.MULTI, data)
 
   function node:update() end
   function node:draw()
@@ -185,11 +164,7 @@ end
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 function urutora.text(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
-  node.callback = urutora.defaults.cb
-  node.type = urutora.nodeTypes.TEXT
+  local node, data = utils.getCommons(urutora.nodeTypes.TEXT, data)
 
   function node:update() end
   function node:draw()
@@ -225,11 +200,7 @@ end
 ---------------------------------------------------------------------------
 
 function urutora.panel(data)
-  data = data or {}
-  local node = {}
-  utils.initNode(node, data)
-  node.callback = urutora.defaults.cb
-  node.type = urutora.nodeTypes.PANEL
+  local node, data = utils.getCommons(urutora.nodeTypes.PANEL, data)
   
   function node:update() end
   function node:draw() end

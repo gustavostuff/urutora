@@ -46,7 +46,12 @@ end
 
 --------------------------------------------------------------
 
-function utils.initNode(node, data)
+function utils.getCommons(nodeType, data)
+  data = data or {}
+  local node = {}
+  node.callback = urutora.defaults.cb
+  node.type = nodeType
+
   node.text = data.text
   utils.setBounds(
     node,
@@ -122,6 +127,8 @@ function utils.initNode(node, data)
 
   node.enabled = true
   node.visible = true
+
+  return node, data
 end
 
 function utils.needsBase(node)

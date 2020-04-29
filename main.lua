@@ -14,18 +14,12 @@ function love.load()
   local panelA = u.panel({ rows = 7, cols = 3, w = 384, h = 216 })
   panelA
     :addAt(1, 1, u.label({ text = 'A label' }))
-    :addAt(1, 2, u.button({ text = 'Button' }):action(function (e)
-      e.target.text = 'Clicked!'
-    end))
+    :addAt(1, 2, u.button({ text = 'Button' }):action(function (e) e.target.text = 'Clicked!' end))
     :addAt(1, 3, u.slider({ value = 0.3 }):disable())
     :addAt(2, 3, u.toggle({ value = false, text = 'Boolean' }))
-    :addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):setStyle({
-      bgColor = { 0.6, 0.2, 0.2 }
-    }))
+    :addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):setStyle({ bgColor = { 0.6, 0.2, 0.2 } }))
     :addAt(2, 2, u.text({ text = 'aaa' }))
-    :addAt(3, 1, u.button({ text = 'Enable slider' }):action(function (e)
-      panelA.children[3]:enable() -- 3rd addAt call
-    end))
+    :addAt(3, 1, u.button({ text = 'Enable slider' }):action(function (e) panelA.children[3]:enable() end))
     :addAt(4, 2, u.button({ text = 'Change to B' }):action(function(e)
       u.activateGroup('B').deactivateGroup('A')
       bgColor = { 1, 1, 1 }
@@ -33,9 +27,7 @@ function love.load()
   :setGroup('A')
 
   u.panel({ rows = 7, cols = 3, w = 384, h = 216 })
-    :addAt(1, 1, u.button({ text = 'Button' }):action(function (e)
-      e.target.text = 'Clicked!'
-    end))
+    :addAt(1, 1, u.button({ text = 'Button' }):action(function (e) e.target.text = 'Clicked!' end))
     :addAt(1, 2, u.label({ text = 'Panel B' }))
     :addAt(1, 3, u.slider({ value = 0.3 }):disable())
     :addAt(2, 3, u.toggle({ text = 'off', value = false }):action(function (e)
