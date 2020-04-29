@@ -1,7 +1,7 @@
 local urutora = {
   nodes = {},
-  sx = love.graphics.getWidth(),
-  sy = love.graphics.getHeight(),
+  sx = 1,
+  sy = 1,
   font = love.graphics.newFont(14),
   defaults = {
     cb = function() end,
