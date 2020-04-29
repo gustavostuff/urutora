@@ -8,7 +8,7 @@ function love.load()
   local font2 = love.graphics.newFont('fonts/press-start/PressStart2P-vaV7.ttf', 8)
   
   u.font = font
-  u.setResolution(canvas)
+  u.setResolution(canvas:getWidth(), canvas:getHeight())
 
   print(tostring(u))
   local panelA = u.panel({ rows = 7, cols = 3, w = 384, h = 216 })

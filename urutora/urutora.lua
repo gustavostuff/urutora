@@ -29,7 +29,8 @@ local urutora = {
   }
 }
 
-local utils = require('urutora-utils')(urutora)
+local path = ( ... ):match("(.+)%.[^%.]+$") or ( ... )
+local utils = require(path .. '-utils')(urutora)
 
 urutora.style = {
   p = urutora.font:getHeight() / 2, -- padding
@@ -162,6 +163,16 @@ function urutora.multi(data)
     if self.index > #self.items then self.index = 1 end
     self.text = self.items[self.index]
   end
+  function node:setValue(text)
+    local index = 1
+    for i = 1, #self.items do
+      index = i
+      if self.items[i] == text then break end
+    end
+
+    self.index = index
+    self.text = self.items[self.index]
+  end
 
   node.items = data.items or {}
   node.index = 1
@@ -246,11 +257,9 @@ end
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 
-function urutora.setResolution(canvas)
-  urutora.canvas = canvas
-  urutora.w, urutora.h = canvas:getWidth(), canvas:getHeight()
-  urutora.sx = love.graphics.getWidth() / urutora.w
-  urutora.sy = love.graphics.getHeight() / urutora.h
+function urutora.setResolution(w, h)
+  urutora.sx = love.graphics.getWidth() / w
+  urutora.sy = love.graphics.getHeight() / h
 end
 
 function urutora.setGroupEnabled(g, value)
@@ -380,11 +389,13 @@ function urutora.performAction(data)
   if not node.enabled then return end
 
   if node.type == urutora.nodeTypes.BUTTON then
+    print('data.x, data.y:', data.x, data.y)
+    print('node.x, node.y', node.x, node.y)
     if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
       node.callback({ target = node })
     end
   elseif node.type == urutora.nodeTypes.TOGGLE then
-    if utils.isPointInsideNode(data.x, data.y, node) then
+    if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
       node:change()
       node.callback({ target = node, value = node.value })
     end
@@ -396,8 +407,9 @@ function urutora.performAction(data)
       end
     end
   elseif node.type == urutora.nodeTypes.MULTI then
-    if utils.isPointInsideNode(data.x, data.y, node) then
+    if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
       node:change()
+      node.callback({ target = node, value = node.text })
     end
   end
 

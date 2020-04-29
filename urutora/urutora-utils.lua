@@ -87,11 +87,25 @@ function utils.initNode(node, data)
 
   function node:setEnabled(value)
     self.enabled = value
+
+    if self.children then
+      for _, child in ipairs(self.children) do
+        child.enabled = value
+      end
+    end
+
     return self
   end
 
   function node:setVisible(value)
     self.visible = value
+
+    if self.children then
+      for _, child in ipairs(self.children) do
+        child.visible = value
+      end
+    end
+
     return self
   end
 
