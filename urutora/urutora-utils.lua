@@ -44,6 +44,16 @@ function utils.withOpacity(color, alpha)
   return newColor
 end
 
+function utils.brighter(color, amount)
+  amount = amount or 0.2
+  local r, g, b = color[1], color[2], color[3]
+  r = r + ((1 - r) * amount)
+  g = g + ((1 - g) * amount)
+  b = b + ((1 - b) * amount)
+
+  return { r, g, b, color[4] }
+end
+
 --------------------------------------------------------------
 
 function utils.getCommons(nodeType, data)
@@ -165,7 +175,7 @@ function utils.getLayerColors(node)
     return utils.colors.GRAY, utils.colors.DARK_GRAY
   else
     if node.pointed then
-      return node.bgColor, node.fgColor
+      return utils.brighter(node.bgColor), node.fgColor
     else
       return node.bgColor, node.fgColor
     end
@@ -189,8 +199,8 @@ function utils.drawText(node, extra)
   end
 
   local _, fgc = utils.getLayerColors(node)
-  local x = node.centerX - utils.textWidth(node) / 2
-  local y = node.centerY - utils.textHeight(node) / 2
+  local x = node:centerX() - utils.textWidth(node) / 2
+  local y = node:centerY() - utils.textHeight(node) / 2
   if node.type == urutora.nodeTypes.TEXT then
     x = math.floor(node.x)
   elseif node.textAlign == urutora.textAlignments.LEFT then
@@ -216,7 +226,6 @@ end
 
 function utils.isPointInsideNode(x, y, node)
   if not (x or y) then return end
-
   x, y = utils.getMouse()
 
   return not (
@@ -237,8 +246,8 @@ function utils.setBounds(node, x, y, w, h)
   node.h = h or f:getHeight() + node.p * 2
   node.px = node.x + node.p
   node.py = node.y + node.p
-  node.centerX = node.x + node.w / 2
-  node.centerY = node.y + node.h / 2
+  function node:centerX() return self.x + self.w / 2 end
+  function node:centerY() return self.y + self.h / 2 end
   node.npw = node.w - node.p * 2
   node.nph = node.h - node.p * 2
 end

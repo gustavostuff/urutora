@@ -15,7 +15,8 @@ local urutora = {
     TOGGLE = 4,
     TEXT = 5,
     MULTI = 6,
-    PANEL = 7
+    PANEL = 7,
+    JOY = 8
   },
   scanCodes = {
     BACKSPACE = 'backspace'
@@ -42,10 +43,7 @@ urutora.style = {
 
 function urutora.label(data)
   local node, data = utils.getCommons(urutora.nodeTypes.LABEL, data)
-
-  function node:update() end
-  function node:draw() end
-  
+  node.textAlign = data.textAlign
   table.insert(urutora.nodes, node)
   return node
 end
@@ -55,10 +53,8 @@ end
 
 function urutora.button(data)
   local node, data = utils.getCommons(urutora.nodeTypes.BUTTON, data)
-
-  function node:update() end
+  node.textAlign = data.textAlign
   function node:draw() end
-  
   table.insert(urutora.nodes, node)
   return node
 end
@@ -72,17 +68,9 @@ function urutora.slider(data)
   function node:draw()
     local _, fgc = utils.getLayerColors(self)
     love.graphics.setColor(fgc)
-    local x = self.px + (self.w - self.p * 2) * self.value
-    local y = self.y + self.h / 2
-
-    utils.rect('fill',
-      x - self.p / 2,
-      y - self.p,
-      self.p,
-      self.p * 2
-    )
+    local x = self.x + (self.w - self.h / 2) * self.value
+    utils.rect('fill', x, self.y, self.h / 2, self.h)
   end
-  
   function node:update(dt)
     local x, y = utils.getMouse()
 
@@ -94,7 +82,6 @@ function urutora.slider(data)
   end
 
   node.value = data.value or urutora.defaults.sliderValue
-  
   table.insert(urutora.nodes, node)
   return node
 end
@@ -105,7 +92,6 @@ end
 function urutora.toggle(data)
   local node, data = utils.getCommons(urutora.nodeTypes.TOGGLE, data)
 
-  function node:update() end
   function node:draw()
     if self.value then
       utils.drawBaseRectangle(self)
@@ -119,7 +105,7 @@ function urutora.toggle(data)
 
   node.value = data.value
   node.text = data.text
-  
+  node.textAlign = data.textAlign
   table.insert(urutora.nodes, node)
   return node
 end
@@ -130,7 +116,6 @@ end
 function urutora.multi(data)
   local node, data = utils.getCommons(urutora.nodeTypes.MULTI, data)
 
-  function node:update() end
   function node:draw()
     local text = self.items[self.index]
     local _, fgc = utils.getLayerColors(node)
@@ -153,6 +138,7 @@ function urutora.multi(data)
     self.text = self.items[self.index]
   end
 
+  node.textAlign = data.textAlign
   node.items = data.items or {}
   node.index = 1
   node.text = node.items[node.index]
@@ -166,18 +152,15 @@ end
 function urutora.text(data)
   local node, data = utils.getCommons(urutora.nodeTypes.TEXT, data)
 
-  function node:update() end
   function node:draw()
     local _, fgc = utils.getLayerColors(self)
+    local y = self.y + self.h
+    local textY = self:centerY() - utils.textHeight(self) / 2
     love.graphics.setColor(fgc)
-    local y = self.centerY + self.p
     love.graphics.line(self.x, y, self.x + self.w, y)
 
     if self.focused then
-      utils.p('_',
-        self.x + utils.textWidth(self),
-        self.centerY - utils.textHeight(self) / 2
-      )
+      utils.p('_', self.x + utils.textWidth(self), textY)
     end
   end
   function node:textInput(text, scancode)
@@ -198,27 +181,76 @@ end
 
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
+function urutora.joy(data)
+  local node, data = utils.getCommons(urutora.nodeTypes.JOY, data)
+
+  function node:limitMovement()
+    if self.joyX >=  self:stickRadius() then self.joyX =  self:stickRadius() end
+    if self.joyX <= -self:stickRadius() then self.joyX = -self:stickRadius() end
+    if self.joyY >=  self:stickRadius() then self.joyY =  self:stickRadius() end
+    if self.joyY <= -self:stickRadius() then self.joyY = -self:stickRadius() end
+  end
+
+  function node:getX() return self.joyX / self:stickRadius() end
+  function node:getY() return self.joyY / self:stickRadius() end
+
+  function node:draw()
+    local _, fgc = utils.getLayerColors(self)
+    love.graphics.setColor(fgc)
+    utils.circ('fill',
+      self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
+  end
+
+  node.joyX, node.joyY = 0, 0
+  node.h = node.w
+  function node:stickRadius() return self.h / 2 end
+  table.insert(urutora.nodes, node)
+  return node
+end
+
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 function urutora.panel(data)
   local node, data = utils.getCommons(urutora.nodeTypes.PANEL, data)
   
-  function node:update() end
-  function node:draw() end
   function node:addAt(row, col, newNode)
     local w, h = (self.w / self.cols), (self.h / self.rows)
     local x, y = self.x + w * (col - 1), self.y + h * (row - 1)
     local s = self.spacing / 2
+    local rs = (self.rowspans[col] or {})[row] or 1
+    local cs = (self.colspans[col] or {})[row] or 1
     x, y = x + s, y + s
-    w, h = w - s * 2, h - s * 2
+    w, h = ((w * cs) - s * 2), ((h * rs) - s * 2)
 
     utils.setBounds(newNode, x, y, w, h)
     table.insert(self.children, newNode)
     return self
   end
 
+  function node:rowspanAt(row, col, size)
+    if not self.rowspans[col] then
+      self.rowspans[col] = {}
+    end
+
+    self.rowspans[col][row] = size
+    return self
+  end
+
+  function node:colspanAt(row, col, size)
+    if not self.colspans[col] then
+      self.colspans[col] = {}
+    end
+
+    self.colspans[col][row] = size
+    return self
+  end
+
   node.children = {}
   node.rows = data.rows or 1
   node.cols = data.cols or 1
+  node.rowspans = {}
+  node.colspans = {}
   node.spacing = data.spacing or 4
   
   table.insert(urutora.nodes, node)
@@ -273,7 +305,7 @@ function urutora.update(dt)
     if not node.enabled then goto continue end
 
     node.pointed = utils.isPointInsideNode(x, y, node) and not utils.isLabel(node)
-    node:update(dt)
+    if node.update then node:update(dt) end
 
     ::continue::
   end
@@ -289,17 +321,13 @@ function urutora.draw()
   
   for _, node in ipairs(urutora.nodes) do
     if not node.visible then goto continue end
-
-    if utils.needsBase(node) then
-      utils.drawBaseRectangle(node)
-    end
-
-    node:draw()
+    if utils.needsBase(node) then utils.drawBaseRectangle(node)end
+    if node.draw then node:draw() end
     utils.drawText(node)
 
     ::continue::
   end
-  
+
   love.graphics.pop()
 end
 
@@ -323,11 +351,19 @@ function urutora.pressed(x, y)
   end
 end
 
-function urutora.moved(x, y) end
+function urutora.moved(x, y, dx, dy)
+  for _, node in ipairs(urutora.nodes) do
+    urutora.performMovedAction({
+      node = node,
+      x = x, y = y,
+      dx = dx, dy = dy
+    })
+  end
+end
 
 function urutora.released(x, y)
   for _, node in ipairs(urutora.nodes) do
-    urutora.performAction({
+    urutora.performReleaseAction({
       node = node,
       x = x,
       y = y
@@ -337,7 +373,7 @@ end
 
 function urutora.textinput(text)
   for _, node in ipairs(urutora.nodes) do
-    urutora.performAction({
+    urutora.performKeyboardAction({
       node = node,
       text = text
     })
@@ -346,7 +382,7 @@ end
 
 function urutora.keypressed(k, scancode, isrepeat)
   for _, node in ipairs(urutora.nodes) do
-    urutora.performAction({
+    urutora.performKeyboardAction({
       node = node,
       scancode = scancode,
       isrepeat = isrepeat
@@ -354,33 +390,63 @@ function urutora.keypressed(k, scancode, isrepeat)
   end
 end
 
-function urutora.performAction(data)
+function urutora.performKeyboardAction(data)
   local node = data.node -- "mandatory" field in data
 
+  if node.type == urutora.nodeTypes.TEXT then
+    if node.focused then
+      local previousText = data.text
+      node:textInput(data.text, data.scancode)
+      node.callback({ target = node, value = {
+        previousText = previousText,
+        newText = node.text,
+        scancode = data.scancode,
+        textAdded = data.text
+      }})
+    end
+  end
+end
+
+function urutora.performMovedAction(data)
+  local node = data.node
   if not node.enabled then return end
 
-  if node.type == urutora.nodeTypes.BUTTON then
-    print('data.x, data.y:', data.x, data.y)
-    print('node.x, node.y', node.x, node.y)
-    if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
-      node.callback({ target = node })
-    end
-  elseif node.type == urutora.nodeTypes.TOGGLE then
-    if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
-      node:change()
+  if node.type == urutora.nodeTypes.SLIDER then
+    if node.focused then
       node.callback({ target = node, value = node.value })
     end
-  elseif node.type == urutora.nodeTypes.TEXT then
-    if node.focused then
-      node:textInput(data.text, data.scancode)
-      if data.isrepeat then
-        love.event.quit()
-      end
+  elseif node.type == urutora.nodeTypes.JOY then
+    if node.pressed then
+      node.joyX = node.joyX + data.dx / urutora.sx
+      node.joyY = node.joyY + data.dy / urutora.sx
+      node:limitMovement()
     end
-  elseif node.type == urutora.nodeTypes.MULTI then
-    if node.pressed and utils.isPointInsideNode(data.x, data.y, node) then
-      node:change()
-      node.callback({ target = node, value = node.text })
+  end
+end
+
+function urutora.performReleaseAction(data)
+  local node = data.node
+  if not node.enabled then return end
+
+  if node.pressed then
+    if utils.isPointInsideNode(data.x, data.y, node) then
+      if node.type == urutora.nodeTypes.BUTTON then
+        node.callback({ target = node })
+      elseif node.type == urutora.nodeTypes.TOGGLE then
+        node:change()
+        node.callback({ target = node, value = node.value })
+      elseif node.type == urutora.nodeTypes.MULTI then
+        node:change()
+        node.callback({ target = node, value = node.text })
+      end    
+    end
+
+    if node.type == urutora.nodeTypes.JOY then
+      node.callback({ target = node, value = {
+        lastX = node.joyX,
+        lastY = node.joyY
+      }})
+      node.joyX, node.joyY = 0, 0
     end
   end
 

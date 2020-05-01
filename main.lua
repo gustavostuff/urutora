@@ -1,8 +1,10 @@
 local u = require('urutora')
 
 function love.load()
+  local function w() return 384 or love.graphics.getWidth() end
+  local function h() return 216 or love.graphics.getHeight() end
   bgColor = { 0, 0, 0 }
-  canvas = love.graphics.newCanvas(384, 216)
+  canvas = love.graphics.newCanvas(w(), h())
   canvas:setFilter('nearest', 'nearest')
   local font = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
   local font2 = love.graphics.newFont('fonts/press-start/PressStart2P-vaV7.ttf', 8)
@@ -10,8 +12,7 @@ function love.load()
   u.font = font
   u.setResolution(canvas:getWidth(), canvas:getHeight())
 
-  print(tostring(u))
-  local panelA = u.panel({ rows = 7, cols = 3, w = 384, h = 216 })
+  local panelA = u.panel({ rows = 7, cols = 3, w = w(), h = h() })
   panelA
     :addAt(1, 1, u.label({ text = 'A label' }))
     :addAt(1, 2, u.button({ text = 'Button' }):action(function (e) e.target.text = 'Clicked!' end))
@@ -26,7 +27,9 @@ function love.load()
     end))
   :setGroup('A')
 
-  u.panel({ rows = 7, cols = 3, w = 384, h = 216 })
+  panelB = u.panel({ rows = 7, cols = 3, w = w(), h = h() })
+    :rowspanAt(3, 1, 2)
+    :colspanAt(4, 2, 2)
     :addAt(1, 1, u.button({ text = 'Button' }):action(function (e) e.target.text = 'Clicked!' end))
     :addAt(1, 2, u.label({ text = 'Panel B' }))
     :addAt(1, 3, u.slider({ value = 0.3 }):disable())
@@ -35,18 +38,18 @@ function love.load()
     end))
     :addAt(2, 1, u.text({ text = 'aaa' }))
     :addAt(2, 2, u.multi({ items = { 'One', 'Two', 'Three' } }))
+    :addAt(3, 1, u.joy({}))
     :addAt(4, 2, u.button({ text = 'Change to A' }):action(function(e)
       u.activateGroup('A').deactivateGroup('B')
       bgColor = { 0, 0, 0 }
     end))
   :setGroup('B'):setStyle({
-    bgColor = { 1, 0.5, 0.2 },
+    bgColor = { 1, 0.5, 0 },
     fgColor = { 0, 0, 0 },
     font = font2
   })
 
-  u.disableGroup('B')
-  u.hideGroup('B')
+  u.deactivateGroup('B')
 end
 
 function love.update(dt)
@@ -66,7 +69,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button) u.pressed(x, y) end
-function love.mousemoved(x, y, dx, dy) u.moved(x, y) end
+function love.mousemoved(x, y, dx, dy) u.moved(x, y, dx, dy) end
 function love.mousereleased(x, y, button) u.released(x, y) end
 function love.textinput(text) u.textinput(text) end
 
