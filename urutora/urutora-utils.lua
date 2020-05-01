@@ -6,6 +6,7 @@ function utils.isPanel(node) return node.type == urutora.nodeTypes.PANEL end
 function utils.isMulti(node) return node.type == urutora.nodeTypes.MULTI_OPTION end
 function utils.isButton(node) return node.type == urutora.nodeTypes.BUTTON end
 function utils.isTextField(node) return node.type == urutora.nodeTypes.TEXT end
+function utils.isJoy(node) return node.type == urutora.nodeTypes.JOY end
 function utils.textWidth(node)
   if not node.text then return 0 end
   return node.font:getWidth(node.text)
@@ -146,7 +147,8 @@ function utils.needsBase(node)
     utils.isToggle(node) or
     utils.isPanel(node) or
     utils.isLabel(node) or
-    utils.isTextField(node)
+    utils.isTextField(node) or
+    utils.isJoy(node)
   )
 end
 

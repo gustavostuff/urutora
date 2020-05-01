@@ -9,7 +9,7 @@ GUI Library for LÖVE
 
 ![](https://i.postimg.cc/4Nh1RSKB/Screen-Shot-2020-05-01-at-1-48-55-PM.png)
 
-![](https://i.postimg.cc/mZ1dTDJY/Screen-Shot-2020-05-01-at-1-49-20-PM.png)
+![](https://i.postimg.cc/T3B32gVj/Screen-Shot-2020-05-01-at-2-55-14-PM.png)
 
 ## Instructions
 
