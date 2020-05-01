@@ -11,8 +11,6 @@ GUI Library for LÖVE
 
 ![](https://i.postimg.cc/mZ1dTDJY/Screen-Shot-2020-05-01-at-1-49-20-PM.png)
 
-See code examples in ```main.lua```
-
 ## Instructions
 
 Import the urutora folder in your project and do:
