@@ -5,7 +5,7 @@ GUI Library for LÖVE
 :information_source: This library aims to replace [GOOi](https://github.com/tavuntu/gooi), which won't be maintained anymore.
 
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
-[![Version](http://img.shields.io/:version-0.0.8-green.svg)](https://github.com/tavuntu/urutora)
+[![Version](http://img.shields.io/:version-0.0.9-green.svg)](https://github.com/tavuntu/urutora)
 
 ![](https://i.postimg.cc/4Nh1RSKB/Screen-Shot-2020-05-01-at-1-48-55-PM.png)
 

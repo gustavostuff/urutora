@@ -25,7 +25,9 @@ local urutora = {
     LEFT = 1
   },
   textAlignments = {
-    LEFT = 'left'
+    LEFT = 'left',
+    CENTER = 'center',
+    RIGHT = 'right'
   }
 }
 
@@ -43,7 +45,6 @@ urutora.style = {
 
 function urutora.label(data)
   local node, data = utils.getCommons(urutora.nodeTypes.LABEL, data)
-  node.textAlign = data.textAlign
   table.insert(urutora.nodes, node)
   return node
 end
@@ -53,7 +54,6 @@ end
 
 function urutora.button(data)
   local node, data = utils.getCommons(urutora.nodeTypes.BUTTON, data)
-  node.textAlign = data.textAlign
   function node:draw() end
   table.insert(urutora.nodes, node)
   return node
@@ -105,7 +105,6 @@ function urutora.toggle(data)
 
   node.value = data.value
   node.text = data.text
-  node.textAlign = data.textAlign
   table.insert(urutora.nodes, node)
   return node
 end
@@ -138,7 +137,6 @@ function urutora.multi(data)
     self.text = self.items[self.index]
   end
 
-  node.textAlign = data.textAlign
   node.items = data.items or {}
   node.index = 1
   node.text = node.items[node.index]

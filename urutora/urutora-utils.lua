@@ -62,6 +62,7 @@ function utils.getCommons(nodeType, data)
   local node = {}
   node.callback = urutora.defaults.cb
   node.type = nodeType
+  node.textAlign = data.textAlign or urutora.textAlignments.CENTER
 
   node.text = data.text
   utils.setBounds(
@@ -136,6 +137,10 @@ function utils.getCommons(nodeType, data)
     return self
   end
 
+  function node:left() self.textAlign = urutora.textAlignments.LEFT; return self end
+  function node:center() self.textAlign = urutora.textAlignments.CENTER; return self end
+  function node:right() self.textAlign = urutora.textAlignments.RIGHT; return self end
+
   node.enabled = true
   node.visible = true
 
@@ -207,6 +212,8 @@ function utils.drawText(node, extra)
     x = math.floor(node.x)
   elseif node.textAlign == urutora.textAlignments.LEFT then
     x = math.floor(node.px)
+  elseif node.textAlign == urutora.textAlignments.RIGHT then
+    x = math.floor(node.px + node.npw - utils.textWidth(node))
   end
 
   love.graphics.setFont(node.font)
