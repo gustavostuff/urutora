@@ -34,7 +34,7 @@ urutora.button({ text, x, y, w, h })
 ```
 
 ```lua
--- returns slider with a given value (0.5 by default)
+-- returns a slider with a given value (0.5 by default)
 urutora.slider({ value, x, y, w, h })
 ```
 
@@ -49,7 +49,7 @@ urutora.multi({ items, x, y, w, h })
 ```
 
 ```lua
--- returns a multi option selector
+-- returns a text field component
 urutora.text({ text, x, y, w, h })
 ```
 
