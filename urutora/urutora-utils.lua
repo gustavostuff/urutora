@@ -217,7 +217,7 @@ function utils.drawText(node, extra)
   end
 
   love.graphics.setFont(node.font)
-  love.graphics.setColor(node.fgColor or fgc)
+  love.graphics.setColor(fgc)
   utils.p(text, x, y)
 end
 
