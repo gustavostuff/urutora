@@ -27,14 +27,15 @@ function love.load()
     end))
   :setGroup('A')
 
-  panelB = u.panel({ rows = 7, cols = 3, w = w(), h = h() })
+  local panelB = u.panel({ rows = 7, cols = 3, w = w(), h = h() })
     :rowspanAt(3, 1, 2)
     :colspanAt(4, 2, 2)
     :addAt(1, 1, u.button({ text = 'Button' }):action(function (e) e.target.text = 'Clicked!' end))
     :addAt(1, 2, u.label({ text = 'Panel B' }))
     :addAt(1, 3, u.slider({ value = 0.3 }):disable())
     :addAt(2, 3, u.toggle({ text = 'off', value = false }):action(function (e)
-      if e.target.value then e.target.text = 'on' else e.target.text = 'off' end
+      e.target.text = 'off' 
+      if e.target.value then e.target.text = 'on' end
     end))
     :addAt(2, 1, u.text({ text = 'aaa' }))
     :addAt(2, 2, u.multi({ items = { 'One', 'Two', 'Three' } }))

@@ -339,6 +339,11 @@ function urutora.pressed(x, y)
       node.pressed = true
       pressedOnNode = true
       utils.setFocusedNode(node)
+      
+      -- special cases
+      if node.type == urutora.nodeTypes.SLIDER then
+        node:update()
+      end
     end
 
     ::continue::
