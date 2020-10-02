@@ -45,6 +45,16 @@ function utils.withOpacity(color, alpha)
   return newColor
 end
 
+function utils.darker(color, amount)
+  amount = 1 - (amount or 0.2)
+  local r, g, b = color[1], color[2], color[3]
+  r = r * amount
+  g = g * amount
+  b = b * amount
+
+  return { r, g, b, color[4] }
+end
+
 function utils.brighter(color, amount)
   amount = amount or 0.2
   local r, g, b = color[1], color[2], color[3]
@@ -181,7 +191,9 @@ function utils.getLayerColors(node)
   if not node.enabled then
     return utils.colors.GRAY, utils.colors.DARK_GRAY
   else
-    if node.pointed then
+    if node.pressed then
+      return utils.darker(node.bgColor), node.fgColor
+    elseif node.pointed then
       return utils.brighter(node.bgColor), node.fgColor
     else
       return node.bgColor, node.fgColor
