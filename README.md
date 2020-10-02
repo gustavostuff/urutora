@@ -103,4 +103,4 @@ urutora.joy({ x, y, w, h })
 
 :information_source: This version does not support multitouch yet and haven't been tested in mobile
 
-:information_source: See ```main.lua``` for more details
+:information_source: See ```main.lua``` for a more complete example
