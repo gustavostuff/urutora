@@ -1,3 +1,2 @@
-local path = ( ... ):match("(.+)%.[^%.]+$") or ( ... )
-local u = require(path .. '/urutora')
-return u
+local modules = (...) and (...):gsub('%.init$', '') .. "." or ""
+return require(modules .. 'urutora')

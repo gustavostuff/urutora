@@ -5,9 +5,7 @@ GUI Library for LÖVE
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
 [![Version](http://img.shields.io/:beta-0.1.0-green.svg)](https://github.com/tavuntu/urutora)
 
-![](https://i.postimg.cc/YSn4vZRF/Screen-Shot-2020-05-14-at-9-55-09-PM.png)
-
-![](https://i.postimg.cc/9F5DwGdL/Screen-Shot-2020-05-14-at-9-55-17-PM.png)
+![](https://i.postimg.cc/tJv2wDmp/1.png)
 
 ## Instructions
 
@@ -15,53 +13,22 @@ Import the urutora folder in your project and do:
 
 ```lua
 urutora = require 'urutora'
-```
 
-You will also need to pass love's events to urutora:
+local u = urutora:new()
 
-```lua
-function love.mousepressed(x, y, button) urutora.pressed(x, y) end
-function love.mousemoved(x, y, dx, dy) urutora.moved(x, y, dx, dy) end
-function love.mousereleased(x, y, button) urutora.released(x, y) end
-function love.textinput(text) urutora.textinput(text) end
-function love.keypressed(k, scancode, isrepeat) urutora.keypressed(k, scancode, isrepeat) end
-```
-
-In your update and draw functions, call urutora's respective functions:
-
-```lua
-function love.update(dt)
-  urutora.update(dt)
+function love.update(dt) 
+    u:update(dt)
+end
+function love.draw() 
+    u:draw()
 end
 
-function love.draw()
-  urutora.draw()
-end
 ```
-
-Then, to set up your UI, call any of the component functions with its parameters during initialization.
-
-```lua
-function love.load()
-  local clickMe = urutora.button({
-    text = 'Click me!',
-    x = 10, y = 10,
-    w = 200,
-  })
-
-  local num = 0
-  clickMe:action(function(e)
-    num = num + 1
-    e.target.text = 'You clicked me ' .. num .. ' times!'
-  end)
-end
-```
-
 ## Components
 
 ```lua
 -- returns a panel with a Rows x Cols grid
-urutora.panel({ text, x, y, w, h, rows, cols })
+urutora.panel(u, { text, x, y, w, h, rows, cols }, nameid)
 ```
 
 ```lua
@@ -75,8 +42,13 @@ urutora.button({ text, x, y, w, h })
 ```
 
 ```lua
+-- returns a image component
+urutora.image({ image, x, y, w, h, keep_aspect_ratio })
+```
+
+```lua
 -- returns a slider with a given value (0.5 by default)
-urutora.slider({ value, x, y, w, h })
+urutora.slider({ value, x, y, w, h, minValue, maxValue })
 ```
 
 ```lua
