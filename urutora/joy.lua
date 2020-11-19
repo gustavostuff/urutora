@@ -10,7 +10,6 @@ function joy:constructor()
 	joy.super.constructor(self)
 	self.joyX = 0
 	self.joyY = 0
-	self.h = self.w
 end
 
 function joy:limitMovement()
@@ -29,6 +28,6 @@ function joy:draw()
 	utils.circ('fill', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
 end
 
-function joy:stickRadius() return self.h / 2 end
+function joy:stickRadius() return math.min(self.w, self.h) * 0.25 end
 
 return joy

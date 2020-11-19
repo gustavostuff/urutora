@@ -75,26 +75,24 @@ function panel:findFromTag(tag)
 	end
 end
 
-function panel:activate()
-	self:setEnabled(true)
-	self:setVisible(true)
-	return self
-end
-
-function panel:deactivate()
-	self:setEnabled(false)
-	self:setVisible(false)
-	return self
-end
-
 function panel:setScrollX(value)
+	value = math.max(0, math.min(value, 1))
 	local dx = self.ow - self.w
 	if dx > 0 then self.ox = dx * value end
 end
 
 function panel:setScrollY(value)
+	value = math.max(0, math.min(value, 1))
 	local dy = self.oh - self.h
 	if dy > 0 then self.oy = dy * value end
+end
+
+function panel:getScrollX()
+	return self.ox / (self.ow - self.w)
+end
+
+function panel:getScrollY()
+	return self.oy / (self.oh - self.h)
 end
 
 function panel:rowspanAt(row, col, size)
@@ -110,8 +108,8 @@ function panel:colspanAt(row, col, size)
 end
 
 function panel:moveTo(x, y)
-	self.x = x
-	self.y = y
+	self.x = math.floor(x)
+	self.y = math.floor(y)
 	self:_update_nodes_position()
 end
 
@@ -138,15 +136,18 @@ end
 function panel:draw()
 	if not self.visible then return end
 
+	local scx, scy, scsx, scsy = love.graphics.getScissor()
+
 	local x = self.x
 	local y = self.y
+	local s = self.spacing
 	local ox, oy = 0, 0
 	if self.parent then
 		ox, oy = self.parent:_get_scissor_offset()
 	end
 	lovg.push()
 	lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
-	lovg.setScissor(x - ox, y - oy, self.w, self.h)
+	lovg.intersectScissor(x - ox, y - oy, self.w - s, self.h - s)
 
 	for _, node in pairs(self.children) do
 		if node.visible then
@@ -156,12 +157,12 @@ function panel:draw()
 		end
 	end
 
-	lovg.setScissor()
+	lovg.setScissor(scx, scy, scsx, scsy)
 	lovg.pop()
 
 	if self.outline then
 		lovg.setColor(self.style.outlineColor)
-		utils.rect('line', x, y, self.w, self.h)
+		utils.rect('line', x + s, y + s, self.w - s * 2, self.h - s * 2)
 	end
 end
 
@@ -170,11 +171,10 @@ function panel:update(dt)
 
 	local x, y = utils.getMouse()
 
-	local focused = false
-	if self:pointInsideNode(x, y) then focused = true end
+	self.pointed = self:pointInsideNode(x, y)
 	for _, node in pairs(self.children) do
 		if node.enabled then
-			node.pointed = focused and node:pointInsideNode(x, y) and not utils.isLabel(node)
+			node.pointed = self.pointed and node:pointInsideNode(x, y) and not utils.isLabel(node)
 			if node.update then node:update(dt) end
 		end
 	end
@@ -191,12 +191,14 @@ function panel:pointInsideNode(x, y)
 end
 
 function panel:disable()
+	self:setEnabled(false)
 	for k, v in pairs(self.children) do
 		v:setEnabled(false)
 	end
 	return self
 end
 function panel:enable()
+	self:setEnabled(true)
 	for k, v in pairs(self.children) do
 		v:setEnabled(true)
 	end
@@ -204,12 +206,14 @@ function panel:enable()
 end
 
 function panel:hide()
+	self:setVisible(false)
 	for k, v in pairs(self.children) do
 		v:setVisible(false)
 	end
 	return self
 end
 function panel:show()
+	self:setVisible(true)
 	for k, v in pairs(self.children) do
 		v:setVisible(true)
 	end
@@ -219,6 +223,7 @@ end
 function panel:forEach(callback)
 	for _, node in pairs(self.children) do
 		if utils.isPanel(node) then
+		 	callback(node)
 			node:forEach(callback)
 		else
 			callback(node)

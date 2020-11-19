@@ -30,13 +30,10 @@ function urutora:constructor()
 	self.focused_node = nil
 end
 
-function urutora.panel(u, data, nameid)
+function urutora.panel(data, nameid)
 	local node = panel:new_from(data)
 	node.type = utils.nodeTypes.PANEL
 	node.nameid = nameid
-	if u then
-		u.nodes[nameid] = node
-	end
 	return node
 end
 
@@ -91,38 +88,54 @@ end
 -------------------------------------------------------------
 -------------------------------------------------------------
 
-function urutora:activatePanels()
-	for k, v in pairs(self.nodes) do
-		v:activate()
+function urutora:add(component)
+	table.insert(self.nodes, component)
+end
+
+function urutora:remove(component)
+	for i, v in ipairs(self.nodes) do
+		if component == v then
+			table.remove(self.nodes, i)
+			break
+		end
+	end
+end
+
+function urutora:activateByTag(tag)
+	for _, v in ipairs(self.nodes) do
+		if v.tag and v.tag == tag then
+			v:activate()
+		end
+		if utils.isPanel(v) then
+			v:forEach(function (node)
+				if node.tag and node.tag == tag then
+					node:activate()
+				end
+			end)
+		end
 	end
 	return self
 end
 
-function urutora:deactivatePanels()
-	for k, v in pairs(self.nodes) do
-		v:deactivate()
-	end
-	return self
-end
-
-function urutora:activatePanel(...)
-	for i, v in ipairs({...}) do
-		local node = self.nodes[v]
-		node:activate()
-	end
-	return self
-end
-
-function urutora:deactivatePanel(...)
-	for i, v in ipairs({...}) do
-		local node = self.nodes[v]
-		node:deactivate()
+function urutora:deactivateByTag(tag)
+	for _, v in ipairs(self.nodes) do
+		if v.tag and v.tag == tag then
+			v:deactivate()
+		end
+		if utils.isPanel(v) then
+			v:forEach(function (node)
+				if node.tag and node.tag == tag then
+					print(node)
+					node:deactivate()
+				end
+			end)
+		end
 	end
 	return self
 end
 
 function urutora:setFocusedNode(node)
-	for _, v in pairs(self.nodes) do
+	for _, v in ipairs(self.nodes) do
 		v:forEach(function (_node)
 			_node.focused = false
 		end)
@@ -137,7 +150,7 @@ function urutora:draw()
 	lovg.setLineStyle('rough')
 	lovg.setFont(utils.default_font)
 
-	for _, p in pairs(self.nodes) do
+	for _, p in ipairs(self.nodes) do
 		p:draw()
 	end
 
@@ -145,25 +158,22 @@ function urutora:draw()
 end
 
 function urutora:update(dt)
-	for _, p in pairs(self.nodes) do
+	for _, p in ipairs(self.nodes) do
 		p:update()
 	end
 end
 
 local function performPressedAction(node, data)
-	local x = data.x
-	local y = data.y
 	local urutora = data.urutora
 	if node.enabled then
-		if utils.isPanel(node) then
-			performPressedAction(node, data)
-		elseif node.pointed then
+		if node.pointed then
 			node.pressed = true
 			urutora.focused_node = node
 
 			-- special cases
 			if utils.isSlider(node) then
 				node:update()
+				node.callback({ target = node, value = node.value })
 			end
 		end
 	end
@@ -194,7 +204,7 @@ local function performMovedAction(node, data)
 	elseif node.type == utils.nodeTypes.JOY then
 		if node.pressed then
 			node.joyX = node.joyX + data.dx / utils.sx
-			node.joyY = node.joyY + data.dy / utils.sx
+			node.joyY = node.joyY + data.dy / utils.sy
 			node:limitMovement()
 		end
 	end
@@ -228,70 +238,110 @@ local function performReleaseAction(node, data)
 	node.pressed = false
 end
 
-function urutora:pressed()
-	return function(x, y)
-		self.focused_node = nil
-		for _, v in pairs(self.nodes) do
-			if v.enabled then
-				v:forEach(function (node)
-					performPressedAction(node, { x = x, y = y, urutora = self })
-				end)
+local function performMouseWheelAction(node, data)
+	if not node.enabled then return end
+
+	if node.pointed then
+		if node.type == utils.nodeTypes.PANEL then
+			local v = node:getScrollY()
+			node:setScrollY(v + (-data.y) * utils.scroll_speed)
+		elseif node.type == utils.nodeTypes.SLIDER then
+			node:setValue(node.value + (-data.y) * utils.scroll_speed)
+			node.callback({ target = node, value = node.value })
+		end
+	end
+end
+
+function urutora:pressed(x, y)
+	self.focused_node = nil
+	for _, v in ipairs(self.nodes) do
+		if v.enabled then
+			v:forEach(function (node)
+				performPressedAction(node, { x = x, y = y, urutora = self })
+			end)
+		end
+	end
+	self:setFocusedNode(self.focused_node)
+end
+
+function urutora:moved(x, y, dx, dy)
+	for _, v in ipairs(self.nodes) do
+		v:forEach(function (node)
+			performMovedAction(node, {
+				x = x,
+				y = y,
+				dx = dx,
+				dy = dy
+			})
+		end)
+	end
+end
+
+function urutora:released(x, y)
+	for _, v in ipairs(self.nodes) do
+		v:forEach(function (node)
+			performReleaseAction(node, {
+				x = x,
+				y = y
+			})
+		end)
+	end
+end
+
+function urutora:textinput(text)
+	for _, v in ipairs(self.nodes) do
+		v:forEach(function (node)
+			performKeyboardAction(node, {
+				text = text
+			})
+		end)
+	end
+end
+
+function urutora:keypressed(k, scancode, isrepeat)
+	for _, v in ipairs(self.nodes) do
+		v:forEach(function (node)
+			performKeyboardAction(node, {
+				scancode = scancode,
+				isrepeat = isrepeat
+			})
+		end)
+	end
+end
+
+local function find_nested_pointed(node)
+	local pp, pe
+	if node.pointed then
+		if utils.isPanel(node) then
+			pp = node
+			for _, v in pairs(node.children) do
+				local pp_temp, pe_temp = find_nested_pointed(v)
+				if pp_temp then pp = pp_temp end
+				if pe_temp then pe = pe_temp end
 			end
-		end
-		self:setFocusedNode(self.focused_node)
-	end
-end
-
-function urutora:moved()
-	return function(x, y, dx, dy)
-		for _, v in pairs(self.nodes) do
-			v:forEach(function (node)
-				performMovedAction(node, {
-					x = x,
-					y = y,
-					dx = dx,
-					dy = dy
-				})
-			end)
+		else
+			pe = node
 		end
 	end
+	return pp, pe
 end
 
-function urutora:released()
-	return function(x, y)
-		for _, v in pairs(self.nodes) do
-			v:forEach(function (node)
-				performReleaseAction(node, {
-					x = x,
-					y = y
-				})
-			end)
-		end
+function urutora:wheelmoved(x, y)
+	local pointed_panel, pointed_element
+	for _, v in ipairs(self.nodes) do
+		pointed_panel, pointed_element = find_nested_pointed(v)
 	end
-end
-
-function urutora:textinput()
-	return function(text)
-		for _, v in pairs(self.nodes) do
-			v:forEach(function (node)
-				performKeyboardAction(node, {
-					text = text
-				})
-			end)
-		end
+	if pointed_panel then
+		performMouseWheelAction(pointed_panel, {
+			x = x,
+			y = y,
+		})
 	end
-end
-
-function urutora:keypressed()
-	return function(k, scancode, isrepeat)
-		for _, v in pairs(self.nodes) do
-			v:forEach(function (node)
-				performKeyboardAction(node, {
-					scancode = scancode,
-					isrepeat = isrepeat
-				})
-			end)
-		end
+	if pointed_element then
+		performMouseWheelAction(pointed_element, {
+			x = x,
+			y = y,
+		})
 	end
 end
 

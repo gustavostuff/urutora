@@ -19,16 +19,20 @@ function slider:draw()
 	lovg.setColor(fgc)
 
 	if self.axis == 'x' then
-		local w = math.min(self.w, self.h) / math.max(self.w, self.h) * self.w
+		local w = 24
 		local x = self.x + (self.w - w) * self.value
-		if w < 1 then w = 1 end
 		utils.rect('fill', x, self.y, w, self.h)
 	else
-		local h = math.min(self.w, self.h) / math.max(self.w, self.h) * self.h
+		local h = 24
 		local y = self.y + (self.h - h) * self.value
-		if h < 1 then h = 1 end
 		utils.rect('fill', self.x, y, self.w, h)
 	end
+end
+
+function slider:setValue(value)
+	self.value = value
+	if self.value > self.maxValue then self.value = self.maxValue end
+	if self.value < self.minValue then self.value = self.minValue end
 end
 
 function slider:update(dt)
@@ -36,12 +40,10 @@ function slider:update(dt)
 
 	if self.pressed then
 		if self.axis == 'x' then
-			self.value = (x - (self.px)) / (self.w - self.padding * 2)
+			self:setValue((x - (self.px)) / (self.w - self.padding * 2))
 		else
-			self.value = (y - (self.py)) / (self.h - self.padding * 2)
+			self:setValue((y - (self.py)) / (self.h - self.padding * 2))
 		end
-		if self.value > self.maxValue then self.value = self.maxValue end
-		if self.value < self.minValue then self.value = self.minValue end
 	end
 end
 

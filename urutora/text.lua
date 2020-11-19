@@ -10,7 +10,7 @@ local text = base_node:extend('text')
 function text:constructor()
 	text.super.constructor(self)
 	self.textAlign = utils.textAlignments.LEFT
-	self.text =  self.text or ''
+	self.text = self.text or ''
 end
 
 function text:draw()

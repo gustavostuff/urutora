@@ -73,6 +73,18 @@ function base_node:setVisible(value)
 	return self
 end
 
+function base_node:activate()
+	self:setEnabled(true)
+	self:setVisible(true)
+	return self
+end
+
+function base_node:deactivate()
+	self:setEnabled(false)
+	self:setVisible(false)
+	return self
+end
+
 function base_node:disable()
 	self:setEnabled(false)
 	return self
