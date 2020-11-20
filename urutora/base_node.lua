@@ -187,4 +187,93 @@ function base_node:drawText(extra)
 	utils.print(text, x, y)
 end
 
+function base_node:performPressedAction(data)
+	if not self.enabled then return end
+
+	local urutora = data.urutora
+	if self.pointed then
+		self.pressed = true
+		urutora.focused_node = self
+
+		-- special cases
+		if utils.isSlider(self) then
+			self:update()
+			self.callback({ target = self, value = self.value })
+		end
+	end
+end
+
+function base_node:performKeyboardAction(data)
+	if self.type == utils.nodeTypes.TEXT then
+		if self.focused then
+			local previousText = data.text
+			self:textInput(data.text, data.scancode)
+			self.callback({ target = self, value = {
+				previousText = previousText,
+				newText = self.text,
+				scancode = data.scancode,
+				textAdded = data.text
+			}})
+		end
+	end
+end
+
+function base_node:performMovedAction(data)
+	if not self.enabled then return end
+
+	if self.type == utils.nodeTypes.SLIDER then
+		if self.focused then
+			self.callback({ target = self, value = self.value })
+		end
+	elseif self.type == utils.nodeTypes.JOY then
+		if self.pressed then
+			self.joyX = self.joyX + data.dx / utils.sx
+			self.joyY = self.joyY + data.dy / utils.sy
+			self:limitMovement()
+		end
+	end
+end
+
+function base_node:performReleaseAction(data)
+	if not self.enabled then return end
+
+	if self.pressed then
+		if self.pointed then
+			if self.type == utils.nodeTypes.BUTTON then
+				self.callback({ target = self })
+			elseif self.type == utils.nodeTypes.TOGGLE then
+				self:change()
+				self.callback({ target = self, value = self.value })
+			elseif self.type == utils.nodeTypes.MULTI then
+				self:change()
+				self.callback({ target = self, value = self.text })
+			end
+		end
+
+		if self.type == utils.nodeTypes.JOY then
+			self.callback({ target = self, value = {
+				lastX = self.joyX,
+				lastY = self.joyY
+			}})
+			self.joyX, self.joyY = 0, 0
+		end
+	end
+
+	self.pressed = false
+end
+
+function base_node:performMouseWheelAction(data)
+	if not self.enabled then return end
+
+	if self.pointed then
+		if self.type == utils.nodeTypes.PANEL then
+			local v = self:getScrollY()
+			self:setScrollY(v + (-data.y) * utils.scroll_speed)
+		elseif self.type == utils.nodeTypes.SLIDER then
+			self:setValue(self.value + (-data.y) * utils.scroll_speed)
+			self.callback({ target = self, value = self.value })
+		end
+	end
+end
+
 return base_node

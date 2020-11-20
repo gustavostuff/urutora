@@ -13,22 +13,57 @@ Import the urutora folder in your project and do:
 
 ```lua
 urutora = require 'urutora'
-
 local u = urutora:new()
 
+```
+
+You will also need to pass love's events to urutora:
+
+```lua
+function love.mousepressed(x, y, button) u:pressed(x, y) end
+function love.mousemoved(x, y, dx, dy) u:moved(x, y, dx, dy) end
+function love.mousereleased(x, y, button) u:released(x, y) end
+function love.textinput(text) u:textinput(text) end
+function love.keypressed(k, scancode, isrepeat) u:keypressed(k, scancode, isrepeat) end
+function love.wheelmoved(x, y) u:wheelmoved(x, y) end
+```
+
+In your update and draw functions, call urutora's respective functions:
+
+```lua
 function love.update(dt) 
     u:update(dt)
 end
 function love.draw() 
     u:draw()
 end
-
 ```
+
+Then, to set up your UI, call any of the component functions with its parameters during initialization.
+
+```lua
+function love.load()
+  local clickMe = urutora.button({
+    text = 'Click me!',
+    x = 10, y = 10,
+    w = 200,
+  })
+
+  local num = 0
+  clickMe:action(function(e)
+    num = num + 1
+    e.target.text = 'You clicked me ' .. num .. ' times!'
+  end)
+
+  u:add(clickMe)
+end
+```
+
 ## Components
 
 ```lua
 -- returns a panel with a Rows x Cols grid
-urutora.panel(u, { text, x, y, w, h, rows, cols }, nameid)
+urutora.panel({ text, x, y, w, h, rows, cols })
 ```
 
 ```lua

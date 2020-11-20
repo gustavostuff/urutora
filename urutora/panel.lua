@@ -134,8 +134,6 @@ function panel:_get_scissor_offset()
 end
 
 function panel:draw()
-	if not self.visible then return end
-
 	local scx, scy, scsx, scsy = love.graphics.getScissor()
 
 	local x = self.x
@@ -167,11 +165,8 @@ function panel:draw()
 end
 
 function panel:update(dt)
-	if not self.enabled then return end
-
 	local x, y = utils.getMouse()
 
-	self.pointed = self:pointInsideNode(x, y)
 	for _, node in pairs(self.children) do
 		if node.enabled then
 			node.pointed = self.pointed and node:pointInsideNode(x, y) and not utils.isLabel(node)
@@ -228,6 +223,38 @@ function panel:forEach(callback)
 		else
 			callback(node)
 		end
+	end
+end
+
+function panel:performPressedAction(data)
+	if self.enabled then
+		self:forEach(function (node)
+			node:performPressedAction(data)
+		end)
+	end
+end
+
+function panel:performKeyboardAction(data)
+	if self.enabled then
+		self:forEach(function (node)
+			node:performKeyboardAction(data)
+		end)
+	end
+end
+
+function panel:performMovedAction(data)
+	if self.enabled then
+		self:forEach(function (node)
+			node:performMovedAction(data)
+		end)
+	end
+end
+
+function panel:performReleaseAction(data)
+	if self.enabled then
+		self:forEach(function (node)
+			node:performReleaseAction(data)
+		end)
 	end
 end
 

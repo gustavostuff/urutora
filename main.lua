@@ -67,7 +67,7 @@ function love.load()
 		:rowspanAt(3, 1, 2)
 		:addAt(1, 1, u.button({ text = '1' }))
 		:addAt(1, 2, u.button({ text = '2' }))
-		:addAt(2, 1, u.button({ text = 'Button' }))
+		:addAt(2, 1, u.slider())
 		:addAt(3, 1, u.image({ image = love.graphics.newImage('img/unnamed.png'), keep_aspect_ratio = true }))
 
 	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', oh = 200 })
@@ -101,7 +101,7 @@ function love.load()
 		:addAt(3, 2, panelC)
 		:addAt(3, 4, panelD)
 
-	panelA = u.panel({ rows = 6, cols = 4, x = 10, y = 10, w = w - 20, h = h - 20, tag = 'PanelA' })
+	panelA = u.panel({ rows = 6, cols = 4, x = 10, y = 20, w = w - 20, h = h - 20, tag = 'PanelA' })
 	--panelA.outline = true
 	panelA
 		:rowspanAt(1, 4, 2)
@@ -133,6 +133,21 @@ function love.load()
 		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left():setStyle({ bgColor = { 0.6, 0.7, 0.8 } }))
 
 	u:add(panelA)
+
+	local clickMe = urutora.button({
+		text = 'Click me!',
+		x = 2, y = 2,
+		w = 200,
+	})
+
+	local num = 0
+	clickMe:action(function(e)
+		num = num + 1
+		e.target.text = 'You clicked me ' .. num .. ' times!'
+	end)
+
+	u:add(clickMe)
+
 	--activation and deactivation elements by tag
 	--u:deactivateByTag('PanelD')
 end
