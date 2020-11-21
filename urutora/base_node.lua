@@ -44,11 +44,6 @@ function base_node:setBounds(x, y, w, h)
 	self.py  = self.y + self.padding
 	self.npw = self.w - self.padding * 2
 	self.nph = self.h - self.padding * 2
-
-	if utils.isPanel(self) then
-		if self.ow < self.w then self.ow = self.w end
-		if self.oh < self.h then self.oh = self.h end
-	end
 end
 
 function base_node:setStyle(style, lock)

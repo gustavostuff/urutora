@@ -16,8 +16,11 @@ function panel:constructor()
 	self.spacing = self.spacing or 1
 	self.ox = self.ox or 0
 	self.oy = self.oy or 0
-	self.ow = self.ow or self.w
-	self.oh = self.oh or self.h
+	self.csx = self.csx
+	self.csy = self.csy
+
+	self._maxx = self.rows * (self.csx or 0)
+	self._maxy = self.cols * (self.csy or 0)
 end
 
 function panel:setStyle(style)
@@ -34,16 +37,27 @@ function panel:clear()
 	self.colspans = {}
 	self.ox = 0
 	self.oy = 0
+	self._maxx = 0
+	self._maxy = 0
 end
 
 function panel:calculateRect(row, col)
-	local w, h = (self.ow / self.cols), (self.oh / self.rows)
-	local x, y = self.x + w * (col - 1), self.y + h * (row - 1)
+	local w, h = self.csx or (self.w / self.cols), self.csy or (self.h / self.rows)
+	local x, y = w * (col - 1), h * (row - 1)
 	local s = self.spacing / 2
 	local rs = (self.rowspans[col] or {})[row] or 1
 	local cs = (self.colspans[col] or {})[row] or 1
-	x, y = x + s, y + s
-	w, h = ((w * cs) - s * 2), ((h * rs) - s * 2)
+
+	local wcs = (w * cs)
+	local hrs = (h * rs)
+
+	local mx = x + wcs
+	local my = y + hrs
+	if self._maxx < mx then self._maxx = mx end
+	if self._maxy < my then self._maxy = my end
+
+	x, y = self.x + x + s, self.y + y + s
+	w, h = (wcs - s * 2), (hrs - s * 2)
 	return x, y, w, h
 end
 
@@ -54,13 +68,10 @@ function panel:addAt(row, col, newNode)
 	newNode._row = row
 	newNode._col = col
 	self.children[row * self.cols + col] = newNode
+
 	--recalculate panel nodes position
 	if utils.isPanel(newNode) then newNode:_update_nodes_position() end
 	return self
-end
-
-function panel:remove(row, col)
-	self.children[row * self.cols + col] = nil
 end
 
 function panel:getChildren(row, col)
@@ -68,31 +79,47 @@ function panel:getChildren(row, col)
 end
 
 function panel:findFromTag(tag)
-	for k, v in pairs(self.children) do
+	for _, v in pairs(self.children) do
 		if v.tag and v.tag == tag then
 			return v
 		end
 	end
 end
 
+function panel:getActualSizeX()
+	if self.csx then
+		return self._maxx
+	else
+		return self.w
+	end
+end
+
+function panel:getActualSizeY()
+	if self.csy then
+		return self._maxy
+	else
+		return self.h
+	end
+end
+
 function panel:setScrollX(value)
 	value = math.max(0, math.min(value, 1))
-	local dx = self.ow - self.w
+	local dx = self:getActualSizeX() - self.w
 	if dx > 0 then self.ox = dx * value end
 end
 
 function panel:setScrollY(value)
 	value = math.max(0, math.min(value, 1))
-	local dy = self.oh - self.h
+	local dy = self:getActualSizeY() - self.h
 	if dy > 0 then self.oy = dy * value end
 end
 
 function panel:getScrollX()
-	return self.ox / (self.ow - self.w)
+	return self.ox / (self:getActualSizeX() - self.w)
 end
 
 function panel:getScrollY()
-	return self.oy / (self.oh - self.h)
+	return self.oy / (self:getActualSizeY() - self.h)
 end
 
 function panel:rowspanAt(row, col, size)
@@ -138,7 +165,6 @@ function panel:draw()
 
 	local x = self.x
 	local y = self.y
-	local s = self.spacing / 2
 	local ox, oy = 0, 0
 	if self.parent then
 		ox, oy = self.parent:_get_scissor_offset()

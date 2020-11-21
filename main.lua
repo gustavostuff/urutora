@@ -44,7 +44,7 @@ function love.load()
 	u.setDefaultFont(font1)
 	u.setResolution(canvas:getWidth(), canvas:getHeight())
 
-	panelC = u.panel({ rows = 20, cols = 6, oh = 20 * 18, tag = 'PanelC'})
+	panelC = u.panel({ rows = 20, cols = 6, csy = 18, tag = 'PanelC'})
 	panelC.outline = true
 	panelC
 		:colspanAt(1, 1, 6)
@@ -71,7 +71,7 @@ function love.load()
 		:addAt(2, 1, u.slider())
 		:addAt(3, 1, u.image({ image = love.graphics.newImage('img/unnamed.png'), keep_aspect_ratio = true }))
 
-	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', oh = 200, spacing = 5 })
+	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', csy = 32, spacing = 5 })
 	panelB.outline = true
 	panelB
 		:colspanAt(1, 1, 4)

@@ -11,14 +11,17 @@ function text:constructor()
 	text.super.constructor(self)
 	self.textAlign = utils.textAlignments.LEFT
 	self.text = self.text or ''
+	self.outline = true
 end
 
 function text:draw()
 	local _, fgc = self:getLayerColors()
 	local y = self.y + self.h - 2
 	local textY = self:centerY() - utils.textHeight(self) / 2
-	lovg.setColor(self.style.fgColor)
-	lovg.line(self.x, y, self.x + self.w, y)
+	lovg.setColor(self.style.outlineColor)
+	if self.outline then
+		utils.line(self.x, y, self.x + self.w, y)
+	end
 
 	if self.focused then
 		utils.print('_', self.x + utils.textWidth(self), textY)

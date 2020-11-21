@@ -231,7 +231,7 @@ local function find_nested_pointed(node)
 	if node.pointed then
 		if utils.isPanel(node) then
 			-- check panel overflow
-			if node.oh > node.h then
+			if node:getActualSizeY() > node.h then
 				t = node
 			end
 			for _, v in pairs(node.children) do
