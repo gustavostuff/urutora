@@ -104,8 +104,7 @@ function utils.needsBase(node)
 		utils.isLabel(node) or
 		utils.isTextField(node) or
 		utils.isJoy(node) or
-		utils.isImage(node) or
-		utils.isToggle(node)
+		utils.isImage(node)
 	)
 end
 

@@ -166,7 +166,7 @@ function base_node:drawBaseRectangle(color, ...)
 	utils.rect('fill', x, y, w, h)
 end
 
-function base_node:drawText(extra)
+function base_node:drawText(color)
 	local text = self.text
 
 	if (not text) or (#text == 0) then
@@ -185,7 +185,7 @@ function base_node:drawText(extra)
 	end
 
 	lovg.setFont(self.style.font or utils.default_font)
-	lovg.setColor(fgc)
+	lovg.setColor(color or fgc)
 	utils.print(text, x, y)
 end
 

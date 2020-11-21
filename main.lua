@@ -6,10 +6,11 @@ local style = {
 	bgColor = urutora.utils.toRGB('#efefef'),
 	hoverbgColor = urutora.utils.toRGB('#e3e3ef'),
 	hoverfgColor = urutora.utils.toRGB('#148ee3'),
-	disablefgColor = urutora.utils.toRGB('#586069'),
-	disablebgColor = urutora.utils.toRGB('#afafaf'),
+	disablefgColor = urutora.utils.toRGB('#ffffff'),
+	disablebgColor = urutora.utils.toRGB('#cccccc'),
 	outlineColor = urutora.utils.toRGB('#aaaaaa'),
 }
+
 local bgColor = {0.98,0.98,0.98}
 local canvas
 local panelA, panelB, panelC, panelD
@@ -129,10 +130,12 @@ function love.load()
 		:addAt(2, 2, u.text({ text = 'привет мир!' }):setStyle({ font = font2 }))
 		:addAt(3, 2, panelB)
 		:addAt(1, 4, u.joy())
-		panelA:setStyle(style)
-		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left():setStyle({ bgColor = { 0.6, 0.7, 0.8 } }))
+
+		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left()
+			:setStyle({ bgColor = { 0.6, 0.7, 0.8 } }, true))
 
 	u:add(panelA)
+	panelA:setStyle(style)
 
 	local clickMe = urutora.button({
 		text = 'Click me!',

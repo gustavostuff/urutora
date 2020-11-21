@@ -3,11 +3,22 @@ local base_node = require(modules .. 'base_node')
 
 local toggle = base_node:extend('toggle')
 
-function toggle:draw()
+local base_drawText = toggle.super.drawText
+local base_drawBaseRectangle = toggle.super.drawBaseRectangle
+
+function toggle:drawBaseRectangle()
 	if self.value then
-	  	self:drawBaseRectangle()
+		base_drawBaseRectangle(self)
 	else
-	  	self:drawBaseRectangle(self.style.disablebgColor)
+		base_drawBaseRectangle(self, self.style.disablebgColor)
+	end
+end
+
+function toggle:drawText()
+	if self.value or self.pointed then
+		base_drawText(self)
+	else
+		base_drawText(self, self.style.disablefgColor)
 	end
 end
 
