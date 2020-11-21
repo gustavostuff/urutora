@@ -51,8 +51,10 @@ function base_node:setBounds(x, y, w, h)
 	end
 end
 
-function base_node:setStyle(style)
-	local t = {}
+function base_node:setStyle(style, lock)
+	if self.style.lock and not lock then return end
+
+	local t = { lock = lock }
 	for k, v in pairs(self.style) do
 		t[k] = v
 	end

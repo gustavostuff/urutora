@@ -70,7 +70,7 @@ function love.load()
 		:addAt(2, 1, u.slider())
 		:addAt(3, 1, u.image({ image = love.graphics.newImage('img/unnamed.png'), keep_aspect_ratio = true }))
 
-	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', oh = 200 })
+	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', oh = 200, spacing = 5 })
 	panelB.outline = true
 	panelB
 		:colspanAt(1, 1, 4)

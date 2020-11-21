@@ -228,33 +228,33 @@ end
 
 function panel:performPressedAction(data)
 	if self.enabled then
-		self:forEach(function (node)
+		for _, node in pairs(self.children) do
 			node:performPressedAction(data)
-		end)
+		end
 	end
 end
 
 function panel:performKeyboardAction(data)
 	if self.enabled then
-		self:forEach(function (node)
+		for _, node in pairs(self.children) do
 			node:performKeyboardAction(data)
-		end)
+		end
 	end
 end
 
 function panel:performMovedAction(data)
 	if self.enabled then
-		self:forEach(function (node)
+		for _, node in pairs(self.children) do
 			node:performMovedAction(data)
-		end)
+		end
 	end
 end
 
 function panel:performReleaseAction(data)
 	if self.enabled then
-		self:forEach(function (node)
+		for _, node in pairs(self.children) do
 			node:performReleaseAction(data)
-		end)
+		end
 	end
 end
 
