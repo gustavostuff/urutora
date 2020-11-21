@@ -15,7 +15,7 @@ end
 
 function text:draw()
 	local _, fgc = self:getLayerColors()
-	local y = self.y + self.h - self.parent.spacing
+	local y = self.y + self.h - 2
 	local textY = self:centerY() - utils.textHeight(self) / 2
 	lovg.setColor(self.style.fgColor)
 	lovg.line(self.x, y, self.x + self.w, y)

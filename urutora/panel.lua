@@ -36,7 +36,7 @@ function panel:clear()
 	self.oy = 0
 end
 
-function panel:_calculate_rect(row, col)
+function panel:calculateRect(row, col)
 	local w, h = (self.ow / self.cols), (self.oh / self.rows)
 	local x, y = self.x + w * (col - 1), self.y + h * (row - 1)
 	local s = self.spacing / 2
@@ -48,7 +48,7 @@ function panel:_calculate_rect(row, col)
 end
 
 function panel:addAt(row, col, newNode)
-	local x, y, w, h = self:_calculate_rect(row, col)
+	local x, y, w, h = self:calculateRect(row, col)
 	newNode:setBounds(x, y, w, h)
 	newNode.parent = self
 	newNode._row = row
@@ -115,7 +115,7 @@ end
 
 function panel:_update_nodes_position()
 	for _, node in pairs(self.children) do
-		local x, y, w, h = self:_calculate_rect(node._row, node._col)
+		local x, y, w, h = self:calculateRect(node._row, node._col)
 		node:setBounds(x, y, w, h)
 		if utils.isPanel(node) then
 			node:_update_nodes_position()
@@ -138,14 +138,14 @@ function panel:draw()
 
 	local x = self.x
 	local y = self.y
-	local s = self.spacing
+	local s = self.spacing / 2
 	local ox, oy = 0, 0
 	if self.parent then
 		ox, oy = self.parent:_get_scissor_offset()
 	end
 	lovg.push()
 	lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
-	lovg.intersectScissor(x - ox, y - oy, self.w - s, self.h - s)
+	lovg.intersectScissor(x - ox, y - oy, self.w, self.h)
 
 	for _, node in pairs(self.children) do
 		if node.visible then
@@ -160,7 +160,7 @@ function panel:draw()
 
 	if self.outline then
 		lovg.setColor(self.style.outlineColor)
-		utils.rect('line', x + s, y + s, self.w - s * 2, self.h - s * 2)
+		utils.rect('line', x, y, self.w, self.h)
 	end
 end
 
