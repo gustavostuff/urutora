@@ -21,8 +21,6 @@ function base_node:constructor()
 
 	self.enabled = true
 	self.visible = true
-
-	self.outline = false
 end
 
 function base_node:centerX()

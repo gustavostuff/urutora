@@ -16,11 +16,9 @@ function panel:constructor()
 	self.spacing = self.spacing or 1
 	self.ox = self.ox or 0
 	self.oy = self.oy or 0
-	self.csx = self.csx
-	self.csy = self.csy
 
-	self._maxx = self.rows * (self.csx or 0)
-	self._maxy = self.cols * (self.csy or 0)
+	self._maxx = (self.cols - 1) * (self.csx or 0)
+	self._maxy = (self.rows - 1) * (self.csy or 0)
 end
 
 function panel:setStyle(style)
