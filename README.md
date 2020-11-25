@@ -5,9 +5,7 @@ GUI Library for LÖVE
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
 [![Version](http://img.shields.io/:beta-0.1.0-green.svg)](https://github.com/tavuntu/urutora)
 
-![](https://i.postimg.cc/YSn4vZRF/Screen-Shot-2020-05-14-at-9-55-09-PM.png)
-
-![](https://i.postimg.cc/9F5DwGdL/Screen-Shot-2020-05-14-at-9-55-17-PM.png)
+![](https://i.postimg.cc/bJjMkXWV/1.png)
 
 ## Instructions
 
@@ -15,27 +13,29 @@ Import the urutora folder in your project and do:
 
 ```lua
 urutora = require 'urutora'
+local u = urutora:new()
+
 ```
 
 You will also need to pass love's events to urutora:
 
 ```lua
-function love.mousepressed(x, y, button) urutora.pressed(x, y) end
-function love.mousemoved(x, y, dx, dy) urutora.moved(x, y, dx, dy) end
-function love.mousereleased(x, y, button) urutora.released(x, y) end
-function love.textinput(text) urutora.textinput(text) end
-function love.keypressed(k, scancode, isrepeat) urutora.keypressed(k, scancode, isrepeat) end
+function love.mousepressed(x, y, button) u:pressed(x, y) end
+function love.mousemoved(x, y, dx, dy) u:moved(x, y, dx, dy) end
+function love.mousereleased(x, y, button) u:released(x, y) end
+function love.textinput(text) u:textinput(text) end
+function love.keypressed(k, scancode, isrepeat) u:keypressed(k, scancode, isrepeat) end
+function love.wheelmoved(x, y) u:wheelmoved(x, y) end
 ```
 
 In your update and draw functions, call urutora's respective functions:
 
 ```lua
-function love.update(dt)
-  urutora.update(dt)
+function love.update(dt) 
+    u:update(dt)
 end
-
-function love.draw()
-  urutora.draw()
+function love.draw() 
+    u:draw()
 end
 ```
 
@@ -54,6 +54,8 @@ function love.load()
     num = num + 1
     e.target.text = 'You clicked me ' .. num .. ' times!'
   end)
+
+  u:add(clickMe)
 end
 ```
 
@@ -75,8 +77,13 @@ urutora.button({ text, x, y, w, h })
 ```
 
 ```lua
+-- returns a image component
+urutora.image({ image, x, y, w, h, keep_aspect_ratio })
+```
+
+```lua
 -- returns a slider with a given value (0.5 by default)
-urutora.slider({ value, x, y, w, h })
+urutora.slider({ value, x, y, w, h, minValue, maxValue })
 ```
 
 ```lua
