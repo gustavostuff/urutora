@@ -1,9 +1,11 @@
-local urutora = require('urutora')
+local urutora = require('lib/urutora')
 local u
 
 local bgColor = { 0.1, 0.1, 0.1 }
 local canvas
 local panelA, panelB, panelC, panelD
+local kitana = love.graphics.newImage('img/clickbait_kitana.png')
+local unnamed = love.graphics.newImage('img/unnamed.png')
 
 function love.load()
 	local w, h = love.window.getMode()
@@ -35,7 +37,6 @@ function love.load()
 	u.setResolution(canvas:getWidth(), canvas:getHeight())
 
 	panelC = u.panel({ rows = 20, cols = 6, csy = 18, tag = 'PanelC'})
-	panelC.outline = true
 	panelC
 		:colspanAt(1, 1, 6)
 	for i = 1, 20 do
@@ -43,14 +44,10 @@ function love.load()
 			:colspanAt(i, 1, 3)
 			:colspanAt(i, 4, 3)
 			:addAt(i, 1, u.label({ text = tostring(i) }))
-			:addAt(i, 4, u.button({ text = 'Button' }):action(function (e)
-				e.target.text = tostring(i) .. ' clicked!'
-			end))
+			:addAt(i, 4, u.button({ text = 'Button' }))
 	end
 
 	panelD = u.panel({ rows = 4, cols = 2, tag = 'PanelD' })
-	panelD.outline = true
-	panelD:setStyle({outlineColor = {1, 1, 1}})
 	panelD
 		:colspanAt(2, 1, 2)
 		:colspanAt(3, 1, 2)
@@ -58,23 +55,33 @@ function love.load()
 		:addAt(1, 1, u.button({ text = '1' }))
 		:addAt(1, 2, u.button({ text = '2' }))
 		:addAt(2, 1, u.slider())
-		:addAt(3, 1, u.image({ image = love.graphics.newImage('img/unnamed.png'), keep_aspect_ratio = true }))
+		:addAt(3, 1, u.image({ image = unnamed }):action(function (e)
+      e.target.keepAspectRatio = not e.target.keepAspectRatio
+    end))
 
-	panelB = u.panel({ rows = 4, cols = 4, tag = 'PanelB', csy = 32, spacing = 5 })
-	panelB.outline = true
+	panelB = u.panel({ rows = 5, cols = 2, tag = 'PanelB', csy = 32, spacing = 5 })
 	panelB
-		:colspanAt(1, 1, 4)
-		:colspanAt(3, 2, 2)
-		:rowspanAt(3, 2, 2)
-		:rowspanAt(3, 4, 2)
-		:addAt(1, 1, u.label({ text = 'B Panel - Use mouse wheel to scroll' }))
-    :addAt(2, 2, u.label({ text = 'C panel'}):center())
-		:addAt(2, 4, u.label({ text = 'D panel'}))
-		:addAt(3, 2, panelC)
-		:addAt(3, 4, panelD)
+    :rowspanAt(5, 1, 3)
+    :rowspanAt(5, 2, 3)
+    :rowspanAt(1, 2, 3)
+		:addAt(1, 1, u.label({ text = 'B Panel (scroll)' }))
+  :addAt(1, 2, u.animation({
+    image = kitana,
+    frames = 21,
+    frameWidth = 80,
+    frameHeight = 75,
+    frameDelay = 0.2,
+    keepOriginalSize = true
+  }):action(function (e)
+    e.target.keepOriginalSize = not e.target.keepOriginalSize
+  end))
+    :addAt(4, 1, u.label({ text = 'C panel (scroll)'}):center())
+		:addAt(4, 2, u.label({ text = 'D panel'}))
+    :addAt(2, 1, u.label({ text = 'click ->' }))
+		:addAt(5, 1, panelC)
+		:addAt(5, 2, panelD)
 
-	panelA = u.panel({ rows = 7, cols = 4, x = 10, y = 40, w = 300, h = 120, tag = 'PanelA' })
-	--panelA.outline = true
+	panelA = u.panel({ rows = 7, cols = 4, x = 0, y = 0, w = 300, h = 140, tag = 'PanelA' })
 	panelA
 		:rowspanAt(1, 4, 2)
 		:rowspanAt(5, 1, 2)
@@ -125,22 +132,10 @@ function love.load()
 
 	u:add(panelA)
 
-	local clickMe = urutora.button({
-		text = 'Click me!',
-		x = 2, y = 2,
-		w = 200,
-	})
-
-	local num = 0
-	clickMe:action(function(e)
-		num = num + 1
-		e.target.text = 'You clicked me ' .. num .. ' times!'
-	end)
-
-	u:add(clickMe)
-
 	--activation and deactivation elements by tag
 	--u:deactivateByTag('PanelD')
+
+  kitanaAnim = katsudo.new('img/clickbait_kitana.png', 80, 75, 21, 0.2)
 end
 
 local x = 0
@@ -148,7 +143,6 @@ local y = 0
 
 function love.update(dt)
 	u:update(dt)
-
 	--panelA:moveTo(x, y)
 	--x = x + 0.1
 	--y = y + 0.1

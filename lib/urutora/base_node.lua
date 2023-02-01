@@ -236,7 +236,9 @@ function base_node:performReleaseAction(data)
 
   if self.pressed then
     if self.pointed then
-      if self.type == utils.nodeTypes.BUTTON then
+      if self.type == utils.nodeTypes.BUTTON or
+      self.type == utils.nodeTypes.IMAGE or
+      self.type == utils.nodeTypes.ANIMATION then
         self.callback({ target = self })
       elseif self.type == utils.nodeTypes.TOGGLE then
         self:change()

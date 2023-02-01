@@ -8,7 +8,7 @@ local image = base_node:extend('image')
 function image:constructor()
   image.super.constructor(self)
   self.image_w, self.image_h = self.image:getDimensions()
-  self.keep_aspect_ratio = true
+  self.keepAspectRatio = true
 end
 
 function image:draw()
@@ -21,7 +21,7 @@ function image:draw()
     sx = (self.w - 1) / self.image_w
     sy = (self.h - 1) / self.image_h
 
-    if self.keep_aspect_ratio then
+    if self.keepAspectRatio then
       sx = math.min(sx, sy)
       sy = sx
 

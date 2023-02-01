@@ -4,14 +4,17 @@ local class = require(modules .. 'class')
 
 local lovg = love.graphics
 
-local panel 	= require(modules .. 'panel')
-local image 	= require(modules .. 'image')
+local panel 	  = require(modules .. 'panel')
+local image 	  = require(modules .. 'image')
+local animation = require(modules .. 'animation')
 local base_node = require(modules .. 'base_node')
-local text 		= require(modules .. 'text')
-local multi 	= require(modules .. 'multi')
-local slider 	= require(modules .. 'slider')
-local toggle 	= require(modules .. 'toggle')
-local joy 		= require(modules .. 'joy')
+local text 		  = require(modules .. 'text')
+local multi 	  = require(modules .. 'multi')
+local slider 	  = require(modules .. 'slider')
+local toggle 	  = require(modules .. 'toggle')
+local joy 		  = require(modules .. 'joy')
+
+local katsudo = require(modules .. 'katsudo') 
 
 local urutora = class('urutora')
 urutora.utils = utils
@@ -40,6 +43,12 @@ end
 function urutora.image(data)
   local node = image:new_from(data)
   node.type = utils.nodeTypes.IMAGE
+  return node
+end
+
+function urutora.animation(data)
+  local node = animation:new_from(data)
+  node.type = utils.nodeTypes.ANIMATION
   return node
 end
 
@@ -177,6 +186,7 @@ function urutora:update(dt)
       if v.update then v:update(dt) end
     end
   end
+  katsudo.update(dt)
 end
 
 function urutora:pressed(x, y)

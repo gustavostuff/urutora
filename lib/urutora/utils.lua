@@ -5,11 +5,12 @@ local utils = {
     BUTTON 	= 2,
     SLIDER 	= 3,
     TOGGLE 	= 4,
-    TEXT 	= 5,
+    TEXT 	  = 5,
     MULTI 	= 6,
     PANEL 	= 7,
-    JOY 	= 8,
-    IMAGE   = 9
+    JOY 	  = 8,
+    IMAGE   = 9,
+    ANIMATION = 10
   },
   textAlignments = {
     LEFT	= 'left',
@@ -18,13 +19,14 @@ local utils = {
   },
   sx = 1,
   sy = 1,
-  scroll_speed = 0.05,
+  scroll_speed = 0.1,
 }
 
 function utils.isLabel(node) return node.type == utils.nodeTypes.LABEL end
 function utils.isPanel(node) return node.type == utils.nodeTypes.PANEL end
 function utils.isMulti(node) return node.type == utils.nodeTypes.MULTI_OPTION end
 function utils.isImage(node) return node.type == utils.nodeTypes.IMAGE end
+function utils.isAnimation(node) return node.type == utils.nodeTypes.ANIMATION end
 function utils.isToggle(node) return node.type == utils.nodeTypes.TOGGLE end
 function utils.isSlider(node) return node.type == utils.nodeTypes.SLIDER end
 function utils.isButton(node) return node.type == utils.nodeTypes.BUTTON end
@@ -79,7 +81,6 @@ utils.style = {
   fgColor = utils.colors.WHITE,
   disablebgColor = utils.colors.GRAY,
   disablefgColor = utils.colors.DARK_GRAY,
-  outlineColor = utils.colors.LOVE_BLUE_LIGHT,
 }
 
 function utils.withOpacity(color, alpha)
@@ -91,6 +92,7 @@ end
 
 function utils.needsBase(node)
   return not (
+    utils.isAnimation(node) or
     utils.isPanel(node) or
     utils.isLabel(node) or
     utils.isTextField(node) or

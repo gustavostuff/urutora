@@ -181,11 +181,6 @@ function panel:draw()
 
   lovg.setScissor(scx, scy, scsx, scsy)
   lovg.pop()
-
-  if self.outline then
-    lovg.setColor(self.style.outlineColor)
-    utils.rect('line', x, y, self.w, self.h)
-  end
 end
 
 function panel:update(dt)

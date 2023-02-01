@@ -78,7 +78,7 @@ urutora.button({ text, x, y, w, h })
 
 ```lua
 -- returns a image component
-urutora.image({ image, x, y, w, h, keep_aspect_ratio })
+urutora.image({ image, x, y, w, h, keepAspectRatio })
 ```
 
 ```lua
