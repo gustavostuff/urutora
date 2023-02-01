@@ -3,9 +3,9 @@
 GUI Library for LÖVE
 
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
-[![Version](http://img.shields.io/:beta-0.1.0-green.svg)](https://github.com/tavuntu/urutora)
+[![Version](http://img.shields.io/:beta-0.2.0-green.svg)](https://github.com/tavuntu/urutora)
 
-![](https://i.postimg.cc/bJjMkXWV/1.png)
+[![vokoscreen-NG-2023-02-01-08-43-48.gif](https://i.postimg.cc/sXZS0NYc/vokoscreen-NG-2023-02-01-08-43-48.gif)](https://postimg.cc/hzcfXM3z)
 
 ## Instructions
 

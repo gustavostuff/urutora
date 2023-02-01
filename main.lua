@@ -1,17 +1,7 @@
 local urutora = require('urutora')
 local u
 
-local style = { 
-	fgColor = urutora.utils.toRGB('#788089'),
-	bgColor = urutora.utils.toRGB('#efefef'),
-	hoverbgColor = urutora.utils.toRGB('#e3e3ef'),
-	hoverfgColor = urutora.utils.toRGB('#148ee3'),
-	disablefgColor = urutora.utils.toRGB('#ffffff'),
-	disablebgColor = urutora.utils.toRGB('#cccccc'),
-	outlineColor = urutora.utils.toRGB('#aaaaaa'),
-}
-
-local bgColor = {0.98,0.98,0.98}
+local bgColor = { 0.1, 0.1, 0.1 }
 local canvas
 local panelA, panelB, panelC, panelD
 
@@ -48,7 +38,6 @@ function love.load()
 	panelC.outline = true
 	panelC
 		:colspanAt(1, 1, 6)
-		:addAt(1, 1, u.label({ text = 'C in B' }))
 	for i = 1, 20 do
 		panelC
 			:colspanAt(i, 1, 3)
@@ -78,41 +67,24 @@ function love.load()
 		:colspanAt(3, 2, 2)
 		:rowspanAt(3, 2, 2)
 		:rowspanAt(3, 4, 2)
-		:addAt(1, 1, u.label({ text = 'Use mouse wheel to scroll' }))
-		:addAt(2, 1, u.label({ text = 'B in A' }))
-		:addAt(2, 2, u.toggle({ text = 'D enabled', value = true }):action(function (e)
-			if e.target.value then
-				e.target.text = 'D enabled'
-				panelD:enable()
-			else
-				e.target.text = 'D disabled'
-				panelD:disable()
-			end
-		end))
-		:addAt(2, 3, u.toggle({ text = 'D visible', value = true }):action(function (e)
-			if e.target.value then
-				e.target.text = 'D visible'
-				panelD:show()
-			else
-				e.target.text = 'D unvisible'
-				panelD:hide()
-			end
-		end))
+		:addAt(1, 1, u.label({ text = 'B Panel - Use mouse wheel to scroll' }))
+    :addAt(2, 2, u.label({ text = 'C panel'}):center())
 		:addAt(2, 4, u.label({ text = 'D panel'}))
 		:addAt(3, 2, panelC)
 		:addAt(3, 4, panelD)
 
-	panelA = u.panel({ rows = 6, cols = 4, x = 10, y = 20, w = w - 20, h = h - 20, tag = 'PanelA' })
+	panelA = u.panel({ rows = 7, cols = 4, x = 10, y = 40, w = 300, h = 120, tag = 'PanelA' })
 	--panelA.outline = true
 	panelA
 		:rowspanAt(1, 4, 2)
 		:rowspanAt(5, 1, 2)
 		:colspanAt(5, 1, 3)
 		:rowspanAt(3, 2, 3)
-		:colspanAt(3, 2, 3)
-		:rowspanAt(3, 1, 3)
+		:colspanAt(3, 1, 3)
+    :rowspanAt(3, 4, 4)
+		:rowspanAt(3, 1, 4)
 		:addAt(1, 1, u.label({ text = 'A panel' }))
-		:addAt(1, 2, u.toggle({ text = 'Slider Toggle' }):action(function (e)
+		:addAt(1, 2, u.toggle({ text = 'Slider ->' }):action(function (e)
 			local slider = panelA:getChildren(1, 3)
 			if e.target.value then
 				slider:enable()
@@ -123,19 +95,35 @@ function love.load()
 		:addAt(1, 3, u.slider({ value = 0.3, tag = 'slider', axis = 'x'  }):disable():action(function(e)
 			panelC:setScrollY(e.target.value)
 		end))
-		:addAt(3, 1, u.slider({ value = 0.3, tag = 'slider', axis = 'y' }):action(function(e)
-			panelC:setScrollY(e.target.value)
+		:addAt(3, 4, u.slider({ value = 0.3, tag = 'slider', axis = 'y' }):action(function(e)
+			panelB:setScrollY(e.target.value)
 		end))
 		:addAt(2, 3, u.toggle({ value = false, text = 'Boolean' }):right())
 		:addAt(2, 2, u.text({ text = 'привет мир!' }):setStyle({ font = font2 }))
-		:addAt(3, 2, panelB)
+		:addAt(3, 1, panelB)
 		:addAt(1, 4, u.joy())
-
+    :addAt(7, 1, u.toggle({ text = 'D enabled', value = true }):action(function (e)
+			if e.target.value then
+				e.target.text = 'D enabled'
+				panelD:enable()
+			else
+				e.target.text = 'D disabled'
+				panelD:disable()
+			end
+		end))
+		:addAt(7, 2, u.toggle({ text = 'D visible', value = true }):action(function (e)
+			if e.target.value then
+				e.target.text = 'D visible'
+				panelD:show()
+			else
+				e.target.text = 'D hidden'
+				panelD:hide()
+			end
+		end))
 		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left()
 			:setStyle({ bgColor = { 0.6, 0.7, 0.8 } }, true))
 
 	u:add(panelA)
-	panelA:setStyle(style)
 
 	local clickMe = urutora.button({
 		text = 'Click me!',
