@@ -43,7 +43,7 @@ Then, to set up your UI, call any of the component functions with its parameters
 
 ```lua
 function love.load()
-  local clickMe = urutora.button({
+  local clickMe = u.button({
     text = 'Click me!',
     x = 10, y = 10,
     w = 200,
@@ -63,47 +63,60 @@ end
 
 ```lua
 -- returns a panel with a Rows x Cols grid
-urutora.panel({ text, x, y, w, h, rows, cols })
+u.panel({ text, x, y, w, h, rows, cols })
 ```
 
 ```lua
 -- returns a label with centered text
-urutora.label({ text, x, y, w, h })
+u.label({ text, x, y, w, h })
 ```
 
 ```lua
 -- returns a button with centered text
-urutora.button({ text, x, y, w, h })
+u.button({ text, x, y, w, h })
 ```
 
 ```lua
--- returns a image component
-urutora.image({ image, x, y, w, h, keepAspectRatio })
+-- returns an image component
+u.image({ image, x, y, w, h, keepAspectRatio })
+```
+
+```lua
+-- returns an animation component
+u.animation({
+  image,
+  frames,
+  frameWidth,
+  frameHeight,
+  frameDelay,
+  keepAspectRatio
+  keepOriginalSize
+})
 ```
 
 ```lua
 -- returns a slider with a given value (0.5 by default)
-urutora.slider({ value, x, y, w, h, minValue, maxValue })
+u.slider({ value, x, y, w, h, minValue, maxValue })
 ```
 
 ```lua
 -- returns a toggle button, turned off by default
-urutora.toggle({ text, value, x, y, w, h })
+u.toggle({ text, value, x, y, w, h })
 ```
 
 ```lua
 -- returns a multi option selector
-urutora.multi({ items, x, y, w, h })
+u.multi({ items, x, y, w, h })
 ```
 
 ```lua
 -- returns a text field component
-urutora.text({ text, x, y, w, h })
+u.text({ text, x, y, w, h })
 ```
 
 ```lua
 -- returns a joystick component
-urutora.joy({ x, y, w, h })
+u.joy({ x, y, w, h })
 ```
 
 ## Notes
