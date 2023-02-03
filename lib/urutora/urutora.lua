@@ -236,7 +236,7 @@ function urutora:keypressed(k, scancode, isrepeat)
   end
 end
 
-local function find_nested_pointed(node)
+local function findNestedPointed(node)
   local t
   if node.pointed then
     if utils.isPanel(node) then
@@ -245,7 +245,7 @@ local function find_nested_pointed(node)
         t = node
       end
       for _, v in pairs(node.children) do
-        local ret = find_nested_pointed(v)
+        local ret = findNestedPointed(v)
         if ret then
           t = ret
           break
@@ -261,7 +261,7 @@ end
 function urutora:wheelmoved(x, y)
   local element
   for _, v in ipairs(self.nodes) do
-    element = find_nested_pointed(v) or element
+    element = findNestedPointed(v) or element
   end
   if element then
     element:performMouseWheelAction({

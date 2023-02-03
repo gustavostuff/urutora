@@ -29,6 +29,14 @@ function image:draw()
       y = y + (self.h - (self.image_h * sy)) / 2
     end
 
+    if self.disabled then
+      lovg.setColor(1, 0, 0)
+    end
+    if self.keepOriginalSize then
+      x = self.x + self.w / 2 - self.image_w / 2
+      y = self.y + self.h / 2 - self.image_h / 2
+      sx, sy = 1, 1
+    end
     lovg.draw(self.image, x, y, 0, sx, sy)
   end
 end

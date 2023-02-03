@@ -1,17 +1,21 @@
 local urutora = require('lib/urutora')
 local u
 
-local bgColor = { 0.1, 0.1, 0.1 }
+-- todos:
+
+-- fix padding for panels
+-- add scroll indicators
+-- make gray images and animations when disabled
+-- maps sliders to panel's scrolling
+-- digital joystick
+
+local bgColor = { 0.2, 0.1, 0.3 }
 local canvas
 local panelA, panelB, panelC, panelD
 local kitana = love.graphics.newImage('img/clickbait_kitana.png')
 local unnamed = love.graphics.newImage('img/unnamed.png')
 
 function love.load()
-	local w, h = love.window.getMode()
-	w = w / 2
-	h = h / 2
-
 	u = urutora:new()
 
 	function love.mousepressed(x, y, button) u:pressed(x, y) end
@@ -28,7 +32,7 @@ function love.load()
 		end
 	end
 
-	canvas = love.graphics.newCanvas(w, h)
+	canvas = love.graphics.newCanvas(320, 180)
 	canvas:setFilter('nearest', 'nearest')
 	local font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
 	local font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
@@ -36,7 +40,17 @@ function love.load()
 	u.setDefaultFont(font1)
 	u.setResolution(canvas:getWidth(), canvas:getHeight())
 
-	panelC = u.panel({ rows = 20, cols = 6, csy = 18, tag = 'PanelC'})
+  kitanaAnimation = u.animation({
+    image = kitana,
+    frames = 21,
+    frameWidth = 80,
+    frameHeight = 60,
+    frameDelay = 0.2,
+    keepAspectRatio = true,
+    keepOriginalSize = true
+  })
+
+	panelC = u.panel({ bgColor = {1, 0, 0, 0.3}, rows = 20, cols = 6, csy = 18, tag = 'PanelC'})
 	panelC
 		:colspanAt(1, 1, 6)
 	for i = 1, 20 do
@@ -44,53 +58,45 @@ function love.load()
 			:colspanAt(i, 1, 3)
 			:colspanAt(i, 4, 3)
 			:addAt(i, 1, u.label({ text = tostring(i) }))
-			:addAt(i, 4, u.button({ text = 'Button' }))
+			:addAt(i, 4, u.button({ text = 'Btn' }))
 	end
 
-	panelD = u.panel({ rows = 4, cols = 2, tag = 'PanelD' })
+	panelD = u.panel({ bgColor = {0, 1, 0.2, 0.2}, rows = 4, cols = 2, tag = 'PanelD' })
 	panelD
-		:colspanAt(2, 1, 2)
 		:colspanAt(3, 1, 2)
 		:rowspanAt(3, 1, 2)
 		:addAt(1, 1, u.button({ text = '1' }))
 		:addAt(1, 2, u.button({ text = '2' }))
 		:addAt(2, 1, u.slider())
-		:addAt(3, 1, u.image({ image = unnamed }):action(function (e)
+		:addAt(3, 1, u.image({
+      image = unnamed
+    }):action(function (e)
       e.target.keepAspectRatio = not e.target.keepAspectRatio
     end))
 
-	panelB = u.panel({ rows = 5, cols = 2, tag = 'PanelB', csy = 32, spacing = 5 })
+	panelB = u.panel({
+    bgColor = {0, 0.2, 0.2, 0.6}, rows = 5, cols = 2,
+    tag = 'PanelB', csy = 28
+  })
 	panelB
     :rowspanAt(5, 1, 3)
     :rowspanAt(5, 2, 3)
     :rowspanAt(1, 2, 3)
-		:addAt(1, 1, u.label({ text = 'B Panel (scroll)' }))
-  :addAt(1, 2, u.animation({
-    image = kitana,
-    frames = 21,
-    frameWidth = 80,
-    frameHeight = 75,
-    frameDelay = 0.2,
-    keepOriginalSize = true
-  }):action(function (e)
-    e.target.keepOriginalSize = not e.target.keepOriginalSize
-  end))
-    :addAt(4, 1, u.label({ text = 'C panel (scroll)'}):center())
-		:addAt(4, 2, u.label({ text = 'D panel'}))
+		:addAt(1, 1, u.label({ text = 'Panel B' }))
+    :addAt(1, 2, kitanaAnimation)
+    :addAt(4, 1, u.label({ text = 'Panel C'}):center())
+		:addAt(4, 2, u.label({ text = 'Panel D'}))
     :addAt(2, 1, u.label({ text = 'click ->' }))
 		:addAt(5, 1, panelC)
 		:addAt(5, 2, panelD)
 
-	panelA = u.panel({ rows = 7, cols = 4, x = 0, y = 0, w = 300, h = 140, tag = 'PanelA' })
-	panelA
-		:rowspanAt(1, 4, 2)
-		:rowspanAt(5, 1, 2)
-		:colspanAt(5, 1, 3)
-		:rowspanAt(3, 2, 3)
-		:colspanAt(3, 1, 3)
-    :rowspanAt(3, 4, 4)
-		:rowspanAt(3, 1, 4)
-		:addAt(1, 1, u.label({ text = 'A panel' }))
+	panelA = u.panel({
+    bgColor = {0, 0.5, 1, 0.3}, rows = 8, cols = 4, x = 0, y = 0, w = 320, h = 180, tag = 'PanelA'
+  }):rowspanAt(2, 4, 7) -- giant slider
+		:colspanAt(3, 1, 3) -- panel B
+		:rowspanAt(3, 1, 4) -- panel B
+    :rowspanAt(7, 3, 2) -- joystick
+		:addAt(1, 1, u.label({ text = 'Panel A' }))
 		:addAt(1, 2, u.toggle({ text = 'Slider ->' }):action(function (e)
 			local slider = panelA:getChildren(1, 3)
 			if e.target.value then
@@ -99,16 +105,11 @@ function love.load()
 				slider:disable()
 			end
 		end))
-		:addAt(1, 3, u.slider({ value = 0.3, tag = 'slider', axis = 'x'  }):disable():action(function(e)
-			panelC:setScrollY(e.target.value)
-		end))
-		:addAt(3, 4, u.slider({ value = 0.3, tag = 'slider', axis = 'y' }):action(function(e)
-			panelB:setScrollY(e.target.value)
-		end))
-		:addAt(2, 3, u.toggle({ value = false, text = 'Boolean' }):right())
-		:addAt(2, 2, u.text({ text = 'привет мир!' }):setStyle({ font = font2 }))
+    :addAt(1, 4, u.button({ text = 'button g' }))
+		:addAt(1, 3, u.slider({ value = 0.3, tag = 'slider', axis = 'x'  }):disable())
+		:addAt(2, 3, u.toggle({ value = false, text = 'Boolean' }))
+		:addAt(2, 2, u.text({ text = 'привт' }):setStyle({ font = font2 }))
 		:addAt(3, 1, panelB)
-		:addAt(1, 4, u.joy())
     :addAt(7, 1, u.toggle({ text = 'D enabled', value = true }):action(function (e)
 			if e.target.value then
 				e.target.text = 'D enabled'
@@ -127,15 +128,25 @@ function love.load()
 				panelD:hide()
 			end
 		end))
-		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left()
-			:setStyle({ bgColor = { 0.6, 0.7, 0.8 } }, true))
+    :addAt(8, 2, u.button({ text = 'K.O.S' }):action(function()
+      kitanaAnimation.keepOriginalSize = not kitanaAnimation.keepOriginalSize
+    end))
+		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left())
+    :addAt(2, 4, u.slider({
+      x = 310,
+      y = 20,
+      w = 2,
+      h = 78,
+      value = 0.3,
+      tag = 'slider',
+      axis = 'y'
+    }))
+    :addAt(7, 3, u.joy({ image = love.graphics.newImage('img/ball.png') }))
 
 	u:add(panelA)
 
 	--activation and deactivation elements by tag
 	--u:deactivateByTag('PanelD')
-
-  kitanaAnim = katsudo.new('img/clickbait_kitana.png', 80, 75, 21, 0.2)
 end
 
 local x = 0
@@ -151,11 +162,13 @@ end
 function love.draw()
 	love.graphics.setCanvas(canvas)
 	love.graphics.clear(bgColor)
+  love.graphics.setColor(1, 1, 1)
 	u:draw()
 	love.graphics.setCanvas()
 
 	love.graphics.draw(canvas, 0, 0, 0,
 		love.graphics.getWidth() / canvas:getWidth(),
-		love.graphics.getHeight() / canvas:getHeight()
+	  love.graphics.getHeight() / canvas:getHeight()
 	)
+  love.graphics.print('FPS: ' .. love.timer.getFPS())
 end

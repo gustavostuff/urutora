@@ -3,6 +3,7 @@ katsudo.__index = katsudo
 katsudo.anims = {}
 
 function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
+  print(quadWidth, quadHeight, numberOfQuads, millis)
   local newAnim = {}
   
   if not img then
@@ -25,8 +26,7 @@ function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
   local imgH = newAnim.img:getHeight()
 
   local automaticNumberOfQuads = math.floor(imgW / quadWidth) * math.floor(imgH / quadHeight)
-
-  if numberOfQuads and numberOfQuads > automaticNumberOfQuads then
+  if numberOfQuads and (numberOfQuads > automaticNumberOfQuads) then
     error("Error in katsudo.new(), the max number of frames is "..automaticNumberOfQuads)
   end
 

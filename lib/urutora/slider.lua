@@ -12,6 +12,7 @@ function slider:constructor()
   self.minValue = self.minValue or 0
   self.value = self.value or 0.5
   self.axis = self.axis or 'x'
+  self.padding = 0
 end
 
 function slider:draw()
@@ -19,11 +20,11 @@ function slider:draw()
   lovg.setColor(fgc)
 
   if self.axis == 'x' then
-    local w = 24
+    local w = 12
     local x = self.x + (self.w - w) * self.value
     utils.rect('fill', x, self.y, w, self.h)
   else
-    local h = 24
+    local h = 12
     local y = self.y + (self.h - h) * self.value
     utils.rect('fill', self.x, y, self.w, h)
   end

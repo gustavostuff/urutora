@@ -13,7 +13,7 @@ function panel:constructor()
   self.cols = self.cols or 1
   self.rowspans = {}
   self.colspans = {}
-  self.spacing = self.spacing or 1
+  self.spacing = self.spacing or 2
   self.ox = self.ox or 0
   self.oy = self.oy or 0
 
@@ -68,7 +68,7 @@ function panel:addAt(row, col, newNode)
   self.children[row * self.cols + col] = newNode
 
   --recalculate panel nodes position
-  if utils.isPanel(newNode) then newNode:_update_nodes_position() end
+  if utils.isPanel(newNode) then newNode:updateNodesPosition() end
   return self
 end
 
@@ -109,7 +109,7 @@ end
 function panel:setScrollY(value)
   value = math.max(0, math.min(value, 1))
   local dy = self:getActualSizeY() - self.h
-  if dy > 0 then self.oy = dy * value end
+  if dy > 0 then self.oy = math.floor(dy * value) end
 end
 
 function panel:getScrollX()
@@ -135,15 +135,15 @@ end
 function panel:moveTo(x, y)
   self.x = math.floor(x)
   self.y = math.floor(y)
-  self:_update_nodes_position()
+  self:updateNodesPosition()
 end
 
-function panel:_update_nodes_position()
+function panel:updateNodesPosition()
   for _, node in pairs(self.children) do
     local x, y, w, h = self:calculateRect(node._row, node._col)
     node:setBounds(x, y, w, h)
     if utils.isPanel(node) then
-      node:_update_nodes_position()
+      node:updateNodesPosition()
     end
   end
 end
@@ -158,6 +158,19 @@ function panel:_get_scissor_offset()
   end
 end
 
+local function _drawBg(panel)
+  local colorBkp = {love.graphics.getColor()}
+  if panel.bgColor then
+    love.graphics.setColor(panel.bgColor)
+    if not panel.enabled then
+      local avg = (panel.bgColor[1] + panel.bgColor[2] + panel.bgColor[3]) / 3
+      love.graphics.setColor(avg, avg, avg, panel.bgColor[4])
+    end
+    love.graphics.rectangle('fill', panel.x, panel.y, panel.w, panel:getActualSizeY())
+  end
+  love.graphics.setColor(colorBkp)
+end
+
 function panel:draw()
   local scx, scy, scsx, scsy = love.graphics.getScissor()
 
@@ -170,6 +183,7 @@ function panel:draw()
   lovg.push()
   lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
   lovg.intersectScissor(x - ox, y - oy, self.w, self.h)
+  _drawBg(self)
 
   for _, node in pairs(self.children) do
     if node.visible then
@@ -237,7 +251,7 @@ end
 function panel:forEach(callback)
   for _, node in pairs(self.children) do
     if utils.isPanel(node) then
-       callback(node)
+      callback(node)
       node:forEach(callback)
     else
       callback(node)

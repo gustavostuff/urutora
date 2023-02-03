@@ -11,12 +11,12 @@ function base_node:constructor()
   self.textAlign = self.textAlign or utils.textAlignments.CENTER
 
   local f = utils.default_font
-  local p = utils.style.padding
+  local p = self.padding or utils.style.padding
   self:setBounds(
     self.x or 1,
     self.y or 1,
-    (self.w or (self.text and f:getWidth(self.text)) or 16) + p,
-    (self.h or (self.text and f:getHeight()) or 16) + p
+    (self.w or (self.text and f:getWidth(self.text)) or 20),
+    (self.h or (self.text and f:getHeight()) or 20)
   )
 
   self.style = utils.style
