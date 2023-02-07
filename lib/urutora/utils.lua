@@ -17,6 +17,10 @@ local utils = {
     CENTER 	= 'center',
     RIGHT 	= 'right'
   },
+  mouseButtons = {
+    LEFT = 1,
+    RIGHT = 2
+  },
   sx = 1,
   sy = 1,
   scroll_speed = 0.1,
@@ -105,16 +109,29 @@ function utils.print(text, x, y)
   love.graphics.print(text, math.floor(x), math.floor(y))
 end
 
-function utils.rect(mode, a, b, c, d)
-  love.graphics.rectangle(mode, math.floor(a), math.floor(b), math.floor(c), math.floor(d))
+function utils.prettyPrint(text, x, y, data)
+  love.graphics.setColor(data.bgColor or {0, 0, 0})
+  love.graphics.print(text, math.floor(x - 1), math.floor(y + 1))
+  love.graphics.setColor(data.fgColor or {1, 1, 1})
+  love.graphics.print(text, math.floor(x), math.floor(y))
+end
+
+function utils.rect(mode, x, y, w, h, rx, ry, segments)
+  love.graphics.rectangle(mode,
+    math.floor(x),
+    math.floor(y),
+    math.floor(w),
+    math.floor(h),
+    rx, ry, segments
+  )
 end
 
 function utils.line(a, b, c, d)
   love.graphics.line(math.floor(a), math.floor(b), math.floor(c), math.floor(d))
 end
 
-function utils.circ(mode, a, b, c)
-  love.graphics.circle(mode, math.floor(a), math.floor(b), math.floor(c))
+function utils.circ(mode, x, y, getY)
+  love.graphics.circle(mode, math.floor(x), math.floor(y), math.floor(r))
 end
 
 function utils.getMouse()
@@ -129,5 +146,16 @@ function utils.pointInsideRect(px, py, x, y, w, h)
     py > (y + h)
   )
 end
+
+utils.disabledImgShader = love.graphics.newShader([[
+  vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+    vec4 pixel = Texel(texture, texture_coords);
+    number average = (pixel.r + pixel.b + pixel.g) / 3.0;
+    pixel.r = average * 0.5;
+    pixel.g = average * 0.5;
+    pixel.b = average * 0.5;
+    return pixel;
+  }
+]])
 
 return utils

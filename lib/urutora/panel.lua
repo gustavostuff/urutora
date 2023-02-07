@@ -1,10 +1,10 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 
 local lovg = love.graphics
 
-local panel = base_node:extend('panel')
+local panel = baseNode:extend('panel')
 
 function panel:constructor()
   panel.super.constructor(self)
@@ -13,12 +13,23 @@ function panel:constructor()
   self.cols = self.cols or 1
   self.rowspans = {}
   self.colspans = {}
-  self.spacing = self.spacing or 2
+  self.spacing = self.spacing or 4
   self.ox = self.ox or 0
   self.oy = self.oy or 0
 
   self._maxx = (self.cols - 1) * (self.csx or 0)
   self._maxy = (self.rows - 1) * (self.csy or 0)
+
+  self.debugGrid = {}
+  for y = 1, self.rows do
+    for x = 1, self.cols do
+      table.insert(self.debugGrid, {
+        x = x,
+        y = y,
+        color = ((x + y) % 2 == 0) and {.2, .2, .2, 0.5} or {.8, .8, .8, 0.5}
+      })
+    end
+  end
 end
 
 function panel:setStyle(style)
@@ -42,20 +53,26 @@ end
 function panel:calculateRect(row, col)
   local w, h = self.csx or (self.w / self.cols), self.csy or (self.h / self.rows)
   local x, y = w * (col - 1), h * (row - 1)
-  local s = self.spacing / 2
+  local s = self.spacing
   local rs = (self.rowspans[col] or {})[row] or 1
   local cs = (self.colspans[col] or {})[row] or 1
 
-  local wcs = (w * cs)
-  local hrs = (h * rs)
+  local widthColspan = (w * cs)
+  local heightRowspan = (h * rs)
 
-  local mx = x + wcs
-  local my = y + hrs
+  local mx = x + widthColspan
+  local my = y + heightRowspan
   if self._maxx < mx then self._maxx = mx end
   if self._maxy < my then self._maxy = my end
 
-  x, y = self.x + x + s, self.y + y + s
-  w, h = (wcs - s * 2), (hrs - s * 2)
+  -- if self.tag == 'PanelA' then
+  --   local realItemW = (self.w - (self.cols + 1) * s) / self.cols
+  --   local realItemH = (self.h - (self.rows + 1) * s) / self.rows
+  --   print('w:', realItemW, 'h:', realItemH)
+  -- end
+
+  x, y = self.x + x + s / 2, self.y + y + s / 2
+  w, h = widthColspan - s, heightRowspan - s
   return x, y, w, h
 end
 
@@ -163,12 +180,40 @@ local function _drawBg(panel)
   if panel.bgColor then
     love.graphics.setColor(panel.bgColor)
     if not panel.enabled then
-      local avg = (panel.bgColor[1] + panel.bgColor[2] + panel.bgColor[3]) / 3
-      love.graphics.setColor(avg, avg, avg, panel.bgColor[4])
+      love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
     end
     love.graphics.rectangle('fill', panel.x, panel.y, panel.w, panel:getActualSizeY())
   end
   love.graphics.setColor(colorBkp)
+end
+
+local function _drawScrollIndicator(panel, offsetX, offsetY)
+  if not panel.csy then return end
+  local _, fgColor = panel:getLayerColors()
+  local sliderW = panel.spacing / 2
+  lovg.setColor(fgColor)
+
+  lovg.rectangle('fill',
+    panel.x + panel.w - sliderW,
+    panel.y,
+    sliderW,
+    10
+  )
+end
+
+local function _drawDebug(panel)
+  if not panel.debug then return end
+  local cellW = (panel.w / panel.cols)
+  local cellH = (panel:getActualSizeY() / panel.rows)
+  for _, cell in ipairs(panel.debugGrid) do
+    love.graphics.setColor(cell.color)
+    love.graphics.rectangle('fill',
+      panel.x + (cell.x - 1) * cellW,
+      panel.y + (cell.y - 1) * cellH,
+      cellW,
+      cellH
+    )
+  end
 end
 
 function panel:draw()
@@ -184,13 +229,18 @@ function panel:draw()
   lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
   lovg.intersectScissor(x - ox, y - oy, self.w, self.h)
   _drawBg(self)
-
   for _, node in pairs(self.children) do
     if node.visible then
       if utils.needsBase(node) then node:drawBaseRectangle() end
       if node.draw then node:draw() end
       node:drawText()
     end
+  end
+  _drawScrollIndicator(self, x - ox, y - oy)
+  _drawDebug(self)
+
+  if self.dragX then
+    lovg.circle('fill', self.dragX, self.dragY, 10)
   end
 
   lovg.setScissor(scx, scy, scsx, scsy)
@@ -219,17 +269,32 @@ function panel:pointInsideNode(x, y)
 end
 
 function panel:disable()
-  self:setEnabled(false)
-  for k, v in pairs(self.children) do
-    v:setEnabled(false)
+  if not self.enabled then return end
+  local function recursiveDisable(panel)
+    panel:setEnabled(false)
+    for k, v in pairs(panel.children) do
+      v:setEnabled(false)
+      if utils.isPanel(v) then
+        recursiveDisable(v)
+      end
+    end
   end
+  recursiveDisable(self)
   return self
 end
+
 function panel:enable()
-  self:setEnabled(true)
-  for k, v in pairs(self.children) do
-    v:setEnabled(true)
+  if self.enabled then return end
+  local function recursiveEnable(panel)
+    panel:setEnabled(true)
+    for k, v in pairs(panel.children) do
+      v:setEnabled(true)
+      if utils.isPanel(v) then
+        recursiveEnable(v)
+      end
+    end
   end
+  recursiveEnable(self)
   return self
 end
 

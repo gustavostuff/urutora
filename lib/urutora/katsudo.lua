@@ -3,7 +3,6 @@ katsudo.__index = katsudo
 katsudo.anims = {}
 
 function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
-  print(quadWidth, quadHeight, numberOfQuads, millis)
   local newAnim = {}
   
   if not img then
@@ -16,10 +15,7 @@ function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
   if type(img) == "string" then
     img = love.graphics.newImage(img)
   end
-
-  if style and style == "rough" then
-    img:setFilter("nearest", "nearest")
-  end
+  img:setFilter('nearest', 'nearest')
 
   newAnim.img = img
   local imgW = newAnim.img:getWidth()
@@ -215,12 +211,14 @@ function katsudo:setDelay(millis, index, theRestAlso)
 end
 
 function katsudo:draw(...)
+  love.graphics.push('all')
   if self.animType == 'frames' then
     local q = self.items[self.index].quad
     love.graphics.draw(self.img, q, ...)
   elseif self.animType == 'rotation' then
     love.graphics.draw(self.img, ...)
   end
+  love.graphics.pop()
 end
 
 return katsudo

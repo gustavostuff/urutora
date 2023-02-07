@@ -1,10 +1,10 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 
 local lovg = love.graphics
 
-local slider = base_node:extend('slider')
+local slider = baseNode:extend('slider')
 
 function slider:constructor()
   slider.super.constructor(self)

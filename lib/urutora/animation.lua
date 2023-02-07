@@ -1,10 +1,11 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 local katsudo = require(modules .. 'katsudo')
+local utils = require(modules .. 'utils')
 
 local lovg = love.graphics
 
-local animation = base_node:extend('animation')
+local animation = baseNode:extend('animation')
 
 function animation:constructor()
   animation.super.constructor(self)
@@ -42,6 +43,9 @@ function animation:draw()
       sx, sy = 1, 1
     end
 
+    if not self.enabled then
+      lovg.setShader(utils.disabledImgShader)
+    end
     self.anim:draw(
       math.floor(x),
       math.floor(y),
@@ -49,6 +53,9 @@ function animation:draw()
       sx,
       sy
     )
+    if not self.enabled then
+      lovg.setShader()
+    end
   end
 end
 

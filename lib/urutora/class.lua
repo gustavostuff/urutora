@@ -42,7 +42,7 @@ new_class = function(name, base_class)
     extend 		= extend,
     implement 	= implement,
     super 		= base_class,
-    class_name 	= name or 'unnamed class'
+    class_name 	= name or 'kitana class'
   }
   t.__index = t
   t.__tostring = function(self)

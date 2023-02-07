@@ -1,7 +1,7 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 
-local multi = base_node:extend('multi')
+local multi = baseNode:extend('multi')
 
 function multi:constructor()
   multi.super.constructor(self)

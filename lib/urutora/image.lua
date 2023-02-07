@@ -1,9 +1,10 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
+local utils = require(modules .. 'utils')
 
 local lovg = love.graphics
 
-local image = base_node:extend('image')
+local image = baseNode:extend('image')
 
 function image:constructor()
   image.super.constructor(self)
@@ -29,15 +30,18 @@ function image:draw()
       y = y + (self.h - (self.image_h * sy)) / 2
     end
 
-    if self.disabled then
-      lovg.setColor(1, 0, 0)
-    end
     if self.keepOriginalSize then
       x = self.x + self.w / 2 - self.image_w / 2
       y = self.y + self.h / 2 - self.image_h / 2
       sx, sy = 1, 1
     end
-    lovg.draw(self.image, x, y, 0, sx, sy)
+    if not self.enabled then
+      lovg.setShader(utils.disabledImgShader)
+    end
+    lovg.draw(self.image, math.floor(x), math.floor(y), 0, sx, sy)
+    if not self.enabled then
+      lovg.setShader()
+    end
   end
 end
 

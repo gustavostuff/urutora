@@ -4,9 +4,9 @@ local utils = require(modules .. 'utils')
 
 local lovg = love.graphics
 
-local base_node = class('base_node')
+local baseNode = class('baseNode')
 
-function base_node:constructor()
+function baseNode:constructor()
   self.callback = function () end
   self.textAlign = self.textAlign or utils.textAlignments.CENTER
 
@@ -25,14 +25,14 @@ function base_node:constructor()
   self.visible = true
 end
 
-function base_node:centerX()
+function baseNode:centerX()
   return self.x + self.w / 2
 end
-function base_node:centerY()
+function baseNode:centerY()
   return self.y + self.h / 2
 end
 
-function base_node:setBounds(x, y, w, h)
+function baseNode:setBounds(x, y, w, h)
   local f = utils.default_font
   self.padding = utils.style.padding
 
@@ -46,7 +46,7 @@ function base_node:setBounds(x, y, w, h)
   self.nph = self.h - self.padding * 2
 end
 
-function base_node:setStyle(style, lock)
+function baseNode:setStyle(style, lock)
   if self.style.lock and not lock then return end
 
   local t = { lock = lock }
@@ -60,69 +60,69 @@ function base_node:setStyle(style, lock)
   return self
 end
 
-function base_node:setEnabled(value)
+function baseNode:setEnabled(value)
   self.enabled = value
   return self
 end
 
-function base_node:setVisible(value)
+function baseNode:setVisible(value)
   self.visible = value
   return self
 end
 
-function base_node:activate()
+function baseNode:activate()
   self:setEnabled(true)
   self:setVisible(true)
   return self
 end
 
-function base_node:deactivate()
+function baseNode:deactivate()
   self:setEnabled(false)
   self:setVisible(false)
   return self
 end
 
-function base_node:disable()
+function baseNode:disable()
   self:setEnabled(false)
   return self
 end
-function base_node:enable()
+function baseNode:enable()
   self:setEnabled(true)
   return self
 end
 
-function base_node:hide()
+function baseNode:hide()
   self:setVisible(false)
   return self
 end
-function base_node:show()
+function baseNode:show()
   self:setVisible(true)
   return self
 end
 
-function base_node:action(f)
+function baseNode:action(f)
   if type(f) == 'function' then
     self.callback = f
   end
   return self
 end
 
-function base_node:left()
+function baseNode:left()
   self.textAlign = utils.textAlignments.LEFT
   return self
 end
 
-function base_node:center()
+function baseNode:center()
   self.textAlign = utils.textAlignments.CENTER
   return self
 end
 
-function base_node:right()
+function baseNode:right()
   self.textAlign = utils.textAlignments.RIGHT
   return self
 end
 
-function base_node:pointInsideNode(x, y)
+function baseNode:pointInsideNode(x, y)
   local parent = self.parent
   local ox, oy = 0, 0
   if parent then
@@ -132,7 +132,7 @@ function base_node:pointInsideNode(x, y)
   return utils.pointInsideRect(x, y, self.x - ox, self.y - oy, self.w, self.h)
 end
 
-function base_node:getLayerColors()
+function baseNode:getLayerColors()
   local bgColor, fgColor
   if not self.enabled then
     bgColor = self.style.disablebgColor
@@ -152,16 +152,28 @@ function base_node:getLayerColors()
   return bgColor, fgColor
 end
 
-function base_node:drawBaseRectangle(color, ...)
+function baseNode:drawBaseRectangle(color, ...)
   local bgc, _ = self:getLayerColors()
   lovg.setColor(color or bgc)
   local x, y, w, h = self.x, self.y, self.w, self.h
 
   if ... then x, y, w, h = ... end
-  utils.rect('fill', x, y, w, h)
+  
+  local r = math.min(self.w, self.h) / 2
+  if false or self.style.outlined then
+    love.graphics.setLineStyle('smooth')
+    love.graphics.setLineWidth(2)
+
+    utils.rect('line', x, y, w, h, r, r, 100)
+
+    love.graphics.setLineStyle('rough')
+    love.graphics.setLineWidth(1)
+  else
+    utils.rect('fill', x, y, w, h)
+  end
 end
 
-function base_node:drawText(color)
+function baseNode:drawText(color)
   local text = self.text
 
   if (not text) or (#text == 0) then
@@ -184,14 +196,13 @@ function base_node:drawText(color)
   utils.print(text, x, y)
 end
 
-function base_node:performPressedAction(data)
+function baseNode:performPressedAction(data)
   if not self.enabled then return end
 
   local urutora = data.urutora
   if self.pointed then
     self.pressed = true
     urutora.focused_node = self
-
     -- special cases
     if utils.isSlider(self) then
       self:update()
@@ -200,7 +211,7 @@ function base_node:performPressedAction(data)
   end
 end
 
-function base_node:performKeyboardAction(data)
+function baseNode:performKeyboardAction(data)
   if self.type == utils.nodeTypes.TEXT then
     if self.focused then
       local previousText = data.text
@@ -215,7 +226,7 @@ function base_node:performKeyboardAction(data)
   end
 end
 
-function base_node:performMovedAction(data)
+function baseNode:performMovedAction(data)
   if not self.enabled then return end
 
   if self.type == utils.nodeTypes.SLIDER then
@@ -228,10 +239,14 @@ function base_node:performMovedAction(data)
       self.joyY = self.joyY + data.dy / utils.sy
       self:limitMovement()
     end
+  elseif self.type == utils.nodeTypes.PANEL then
+    if love.mouse.isDown(utils.mouseButtons.RIGHT) then
+
+    end
   end
 end
 
-function base_node:performReleaseAction(data)
+function baseNode:performReleaseAction(data)
   if not self.enabled then return end
 
   if self.pressed then
@@ -261,7 +276,7 @@ function base_node:performReleaseAction(data)
   self.pressed = false
 end
 
-function base_node:performMouseWheelAction(data)
+function baseNode:performMouseWheelAction(data)
   if not self.enabled then return end
 
   if self.pointed then
@@ -275,4 +290,4 @@ function base_node:performMouseWheelAction(data)
   end
 end
 
-return base_node
+return baseNode

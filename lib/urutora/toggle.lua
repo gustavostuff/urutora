@@ -1,7 +1,7 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 
-local toggle = base_node:extend('toggle')
+local toggle = baseNode:extend('toggle')
 
 local base_drawText = toggle.super.drawText
 local base_drawBaseRectangle = toggle.super.drawBaseRectangle

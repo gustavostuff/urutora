@@ -1,11 +1,11 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 local utf8 = require('utf8')
 
 local lovg = love.graphics
 
-local text = base_node:extend('text')
+local text = baseNode:extend('text')
 
 function text:constructor()
   text.super.constructor(self)

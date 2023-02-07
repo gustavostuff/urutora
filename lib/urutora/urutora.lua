@@ -7,7 +7,7 @@ local lovg = love.graphics
 local panel 	  = require(modules .. 'panel')
 local image 	  = require(modules .. 'image')
 local animation = require(modules .. 'animation')
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 local text 		  = require(modules .. 'text')
 local multi 	  = require(modules .. 'multi')
 local slider 	  = require(modules .. 'slider')
@@ -53,7 +53,7 @@ function urutora.animation(data)
 end
 
 function urutora.label(data)
-  local node = base_node:new_from(data)
+  local node = baseNode:new_from(data)
   node.type = utils.nodeTypes.LABEL
   return node
 end
@@ -71,7 +71,7 @@ function urutora.multi(data)
 end
 
 function urutora.button(data)
-  local node = base_node:new_from(data)
+  local node = baseNode:new_from(data)
   node.type = utils.nodeTypes.BUTTON
   return node
 end
@@ -134,7 +134,6 @@ function urutora:deactivateByTag(tag)
     if utils.isPanel(v) then
       v:forEach(function (node)
         if node.tag and node.tag == tag then
-          print(node)
           node:deactivate()
         end
       end)
@@ -189,11 +188,12 @@ function urutora:update(dt)
   katsudo.update(dt)
 end
 
-function urutora:pressed(x, y)
+function urutora:pressed(x, y, button)
+  if not (button == utils.mouseButtons.LEFT) then return end
   self.focused_node = nil
   for _, v in ipairs(self.nodes) do
     if v.enabled then
-      v:performPressedAction({ x = x, y = y, urutora = self })
+      v:performPressedAction({ x = x, y = y, urutora = self, button = button })
     end
   end
   self:setFocusedNode(self.focused_node)

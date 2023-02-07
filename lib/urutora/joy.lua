@@ -1,10 +1,10 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
-local base_node = require(modules .. 'base_node')
+local baseNode = require(modules .. 'baseNode')
 
 local lovg = love.graphics
 
-local joy = base_node:extend('joy')
+local joy = baseNode:extend('joy')
 
 function joy:constructor()
   joy.super.constructor(self)
@@ -23,15 +23,22 @@ function joy:getX() return self.joyX / self:stickRadius() end
 function joy:getY() return self.joyY / self:stickRadius() end
 
 function joy:draw()
-  local _, fgc = self:getLayerColors()
-  lovg.setColor(fgc)
   if self.image then
+    love.graphics.setColor(1, 1, 1)
+    if not self.enabled then
+      lovg.setShader(utils.disabledImgShader)
+    end
     lovg.draw(self.image,
     math.floor(self:centerX() + self.joyX), math.floor(self:centerY() + self.joyY),
     0, 1, 1,
     math.floor(self.image:getWidth() / 2),
     math.floor(self.image:getHeight() / 2))
+    if not self.enabled then
+      lovg.setShader()
+    end
   else
+    local _, fgc = self:getLayerColors()
+    lovg.setColor(fgc)
     utils.circ('fill', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
   end
 end
