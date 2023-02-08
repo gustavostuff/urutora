@@ -160,7 +160,7 @@ function baseNode:drawBaseRectangle(color, ...)
   if ... then x, y, w, h = ... end
   
   local r = math.min(self.w, self.h) / 2
-  if false or self.style.outlined then
+  if true or self.style.outlined then
     love.graphics.setLineStyle('smooth')
     love.graphics.setLineWidth(2)
 

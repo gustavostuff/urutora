@@ -45,7 +45,7 @@ local function initPanelB()
     csy = 20
   })
   :colspanAt(1, 1, 2)
-  :addAt(1, 1, u.label({ text = 'Panel B - scroll' }))
+  :addAt(1, 1, u.label({ text = 'Panel B (scroll)' }))
   :addAt(2, 1, u.multi({ items = { 'Style 1', 'Style 2', 'Style 3' } }))
   :addAt(2, 2, u.button({ text = 'Button' }))
 end
@@ -67,7 +67,7 @@ local function initPanelA(anotherPanel)
   :colspanAt(5, 3, 2) -- panel B
   :rowspanAt(5, 3, 5) -- panel B
   :addAt(1, 1, u.label({ text = 'Label:' }):right())
-  :addAt(1, 2, u.label({ text = 'Panel B' }))
+  :addAt(1, 2, u.label({ text = 'Panel A' }))
   :addAt(2, 1, u.label({ text = 'Button:' }):right())
   :addAt(2, 2, u.button({ text = 'Exit' })
     :setStyle({ bgColor = {0.7, 0.2, 0.2} })
