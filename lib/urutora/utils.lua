@@ -23,7 +23,7 @@ local utils = {
   },
   sx = 1,
   sy = 1,
-  scroll_speed = 0.05,
+  scroll_speed = 0.1,
 }
 
 function utils.isLabel(node) return node.type == utils.nodeTypes.LABEL end
