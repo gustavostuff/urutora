@@ -12,7 +12,7 @@ local utils = {
     IMAGE   = 9,
     ANIMATION = 10
   },
-  textAlignments = {
+  alignments = {
     LEFT	= 'left',
     CENTER 	= 'center',
     RIGHT 	= 'right'
@@ -130,7 +130,7 @@ function utils.line(a, b, c, d)
   love.graphics.line(math.floor(a), math.floor(b), math.floor(c), math.floor(d))
 end
 
-function utils.circ(mode, x, y, getY)
+function utils.circ(mode, x, y, r)
   love.graphics.circle(mode, math.floor(x), math.floor(y), math.floor(r))
 end
 

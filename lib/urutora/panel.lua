@@ -9,6 +9,7 @@ local panel = baseNode:extend('panel')
 function panel:constructor()
   panel.super.constructor(self)
   self.children = {}
+  self.customSpacings = {}
   self.rows = self.rows or 1
   self.cols = self.cols or 1
   self.rowspans = {}
@@ -17,16 +18,19 @@ function panel:constructor()
   self.ox = self.ox or 0
   self.oy = self.oy or 0
 
-  self._maxx = (self.cols - 1) * (self.csx or 0)
-  self._maxy = (self.rows - 1) * (self.csy or 0)
+  self._maxx = (self.cols) * (self.csx or 0)
+  self._maxy = (self.rows) * (self.csy or 0)
 
   self.debugGrid = {}
+  local contrastRatio = 0.4
   for y = 1, self.rows do
     for x = 1, self.cols do
       table.insert(self.debugGrid, {
         x = x,
         y = y,
-        color = ((x + y) % 2 == 0) and {.2, .2, .2, 0.5} or {.8, .8, .8, 0.5}
+        color = ((x + y) % 2 == 0) and
+          {contrastRatio, contrastRatio, contrastRatio, 0.3} or
+          {1 - contrastRatio, 1 - contrastRatio, 1 - contrastRatio, 0.3}
       })
     end
   end
@@ -53,7 +57,7 @@ end
 function panel:calculateRect(row, col)
   local w, h = self.csx or (self.w / self.cols), self.csy or (self.h / self.rows)
   local x, y = w * (col - 1), h * (row - 1)
-  local s = self.spacing
+  local s = self.customSpacings[row .. ',' .. col] or self.spacing
   local rs = (self.rowspans[col] or {})[row] or 1
   local cs = (self.colspans[col] or {})[row] or 1
 
@@ -65,20 +69,28 @@ function panel:calculateRect(row, col)
   if self._maxx < mx then self._maxx = mx end
   if self._maxy < my then self._maxy = my end
 
-  -- if self.tag == 'PanelA' then
-  --   local realItemW = (self.w - (self.cols + 1) * s) / self.cols
-  --   local realItemH = (self.h - (self.rows + 1) * s) / self.rows
-  --   print('w:', realItemW, 'h:', realItemH)
-  -- end
-
   x, y = self.x + x + s / 2, self.y + y + s / 2
   w, h = widthColspan - s, heightRowspan - s
   return x, y, w, h
 end
 
+local function _checkForToggle(node)
+  -- toggles have always the same aspect ratio (2:1)
+  if node.type == utils.nodeTypes.TOGGLE then
+    node.originalW = node.w
+    node.w = node.h * 2
+    if node.align == utils.alignments.RIGHT then
+      node.x = node.x + node.originalW - node.w
+    elseif node.align == utils.alignments.CENTER then
+      node.x = node.x + node.originalW / 2 - node.w / 2
+    end
+  end
+end
+
 function panel:addAt(row, col, newNode)
   local x, y, w, h = self:calculateRect(row, col)
   newNode:setBounds(x, y, w, h)
+  _checkForToggle(newNode)
   newNode.parent = self
   newNode._row = row
   newNode._col = col
@@ -137,6 +149,11 @@ function panel:getScrollY()
   return self.oy / (self:getActualSizeY() - self.h)
 end
 
+function panel:spacingAt(row, col, size)
+  self.customSpacings[row .. ',' .. col] = size
+  return self
+end
+
 function panel:rowspanAt(row, col, size)
   self.rowspans[col] = self.rowspans[col] or {}
   self.rowspans[col][row] = size
@@ -165,10 +182,10 @@ function panel:updateNodesPosition()
   end
 end
 
-function panel:_get_scissor_offset()
+function panel:getScissorOffset()
   local parent = self.parent
   if parent then
-    local ox, oy = parent:_get_scissor_offset()
+    local ox, oy = parent:getScissorOffset()
     return self.ox + ox, self.oy + oy
   else
     return self.ox, self.oy
@@ -195,7 +212,7 @@ local function _drawScrollIndicator(panel, offsetX, offsetY)
 
   lovg.rectangle('fill',
     panel.x + panel.w - sliderW,
-    panel.y,
+    panel:getScrollY(),
     sliderW,
     10
   )
@@ -217,13 +234,13 @@ local function _drawDebug(panel)
 end
 
 function panel:draw()
-  local scx, scy, scsx, scsy = love.graphics.getScissor()
+  local scx, scy, csx, csy = love.graphics.getScissor()
 
   local x = self.x
   local y = self.y
   local ox, oy = 0, 0
   if self.parent then
-    ox, oy = self.parent:_get_scissor_offset()
+    ox, oy = self.parent:getScissorOffset()
   end
   lovg.push()
   lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
@@ -236,14 +253,10 @@ function panel:draw()
       node:drawText()
     end
   end
-  _drawScrollIndicator(self, x - ox, y - oy)
+  _drawScrollIndicator(self, ox, oy)
   _drawDebug(self)
 
-  if self.dragX then
-    lovg.circle('fill', self.dragX, self.dragY, 10)
-  end
-
-  lovg.setScissor(scx, scy, scsx, scsy)
+  lovg.setScissor(scx, scy, csx, csy)
   lovg.pop()
 end
 
@@ -262,7 +275,7 @@ function panel:pointInsideNode(x, y)
   local parent = self.parent
   local ox, oy = 0, 0
   if parent then
-    ox, oy = parent:_get_scissor_offset()
+    ox, oy = parent:getScissorOffset()
   end
 
   return utils.pointInsideRect(x, y, self.x - ox, self.y - oy, self.w, self.h)

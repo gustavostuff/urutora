@@ -9,7 +9,7 @@ local text = baseNode:extend('text')
 
 function text:constructor()
   text.super.constructor(self)
-  self.textAlign = utils.textAlignments.LEFT
+  self.align = utils.alignments.LEFT
   self.text = self.text or ''
   if self.outline == nil then self.outline = true end
 end

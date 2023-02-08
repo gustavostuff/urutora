@@ -8,13 +8,13 @@ local baseNode = class('baseNode')
 
 function baseNode:constructor()
   self.callback = function () end
-  self.textAlign = self.textAlign or utils.textAlignments.CENTER
+  self.align = self.align or utils.alignments.CENTER
 
   local f = utils.default_font
   local p = self.padding or utils.style.padding
   self:setBounds(
-    self.x or 1,
-    self.y or 1,
+    self.x or 0,
+    self.y or 0,
     (self.w or (self.text and f:getWidth(self.text)) or 20),
     (self.h or (self.text and f:getHeight()) or 20)
   )
@@ -108,17 +108,17 @@ function baseNode:action(f)
 end
 
 function baseNode:left()
-  self.textAlign = utils.textAlignments.LEFT
+  self.align = utils.alignments.LEFT
   return self
 end
 
 function baseNode:center()
-  self.textAlign = utils.textAlignments.CENTER
+  self.align = utils.alignments.CENTER
   return self
 end
 
 function baseNode:right()
-  self.textAlign = utils.textAlignments.RIGHT
+  self.align = utils.alignments.RIGHT
   return self
 end
 
@@ -126,7 +126,7 @@ function baseNode:pointInsideNode(x, y)
   local parent = self.parent
   local ox, oy = 0, 0
   if parent then
-    ox, oy = parent:_get_scissor_offset()
+    ox, oy = parent:getScissorOffset()
   end
 
   return utils.pointInsideRect(x, y, self.x - ox, self.y - oy, self.w, self.h)
@@ -185,9 +185,9 @@ function baseNode:drawText(color)
   local y = self:centerY() - utils.textHeight(self) / 2
   if self.type == utils.nodeTypes.TEXT then
     x = math.floor(self.x)
-  elseif self.textAlign == utils.textAlignments.LEFT then
+  elseif self.align == utils.alignments.LEFT then
     x = math.floor(self.px)
-  elseif self.textAlign == utils.textAlignments.RIGHT then
+  elseif self.align == utils.alignments.RIGHT then
     x = math.floor(self.px + self.npw - utils.textWidth(self))
   end
 

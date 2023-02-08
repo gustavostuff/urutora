@@ -18,184 +18,119 @@ local u
 
 local bgColor = { 0.2, 0.1, 0.3 }
 local canvas
-local panelA, panelB, panelC, panelD
 local marco = love.graphics.newImage('img/marco.png')
-local kitana = love.graphics.newImage('img/unnamed.png')
+local unnamed = love.graphics.newImage('img/unnamed.png')
 local arrow = love.graphics.newImage('img/arrow.png')
+local kitana = love.graphics.newImage('img/clickbait_kitana.png')
 
 local function initStuff()
   u = urutora:new()
-	canvas = love.graphics.newCanvas(320, 180)
-	canvas:setFilter('nearest', 'nearest')
+  canvas = love.graphics.newCanvas(320, 180)
+  canvas:setFilter('nearest', 'nearest')
   sx = love.graphics.getWidth() / canvas:getWidth()
-	sy = love.graphics.getHeight() / canvas:getHeight()
-	local font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
-	font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
+  sy = love.graphics.getHeight() / canvas:getHeight()
+  local font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
+  font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
 
-	u.setDefaultFont(font1)
-	u.setResolution(canvas:getWidth(), canvas:getHeight())
-
-  marcoAnimation = u.animation({
-    image = marco,
-    frames = 6,
-    frameWidth = 39,
-    frameHeight = 39,
-    frameDelay = 0.04,
-    keepOriginalSize = true
-  })
-end
-
-local function initPanelC()
-  panelC = u.panel({ bgColor = {1, 0, 0, 0.3}, rows = 20, cols = 6, csy = 18, tag = 'PanelC'})
-	panelC
-		:colspanAt(1, 1, 6)
-	for i = 1, 20 do
-		panelC
-			:colspanAt(i, 1, 3)
-			:colspanAt(i, 4, 3)
-			:addAt(i, 1, u.label({ text = tostring(i) }))
-			:addAt(i, 4, u.button({ text = 'Btn' }))
-	end
-end
-
-local function initPanelD()
-  kitanaImage = u.image({
-    image = kitana,
-    keepOriginalSize = true,
-    keepAspectRatio = true
-  })
-  panelD = u.panel({ bgColor = {0, 1, 0, 0.3}, rows = 4, cols = 2, tag = 'PanelD' })
-	panelD
-		:colspanAt(3, 1, 2)
-		:rowspanAt(3, 1, 2)
-		:addAt(1, 1, u.toggle({ text = 'K.A.R.', value = true }):action(function()
-      kitanaImage.keepAspectRatio = not kitanaImage.keepAspectRatio
-    end))
-		:addAt(1, 2, u.toggle({ text = 'K.O.S.', value = true }):action(function()
-      kitanaImage.keepOriginalSize = not kitanaImage.keepOriginalSize
-    end))
-		:addAt(2, 1, u.slider())
-		:addAt(3, 1, kitanaImage):action(function (e)
-      e.target.keepAspectRatio = not e.target.keepAspectRatio
-    end)
+  love.mouse.setRelativeMode(true)
+  u.setDefaultFont(font1)
+  u.setResolution(canvas:getWidth(), canvas:getHeight())
 end
 
 local function initPanelB()
-  panelB = u.panel({
-    -- debug = true,
-    bgColor = {1, 0.6, 0.8, 0.4}, rows = 5, cols = 2,
-    tag = 'PanelB', csy = 28
+  return u.panel({
+    debug = true,
+    rows = 10, cols = 2,
+    tag = 'panelb',
+    csy = 20
   })
-	panelB
-    :rowspanAt(5, 1, 3)
-    :rowspanAt(5, 2, 3)
-    :rowspanAt(1, 2, 3)
-		:addAt(1, 1, u.label({ text = 'Panel B' }))
-    :addAt(1, 2, marcoAnimation)
-    :addAt(4, 1, u.label({ text = 'Panel C'}):center())
-		:addAt(4, 2, u.label({ text = 'Panel D'}))
-    :addAt(2, 1, u.label({ text = 'click ->' }))
-		:addAt(5, 1, panelC)
-		:addAt(5, 2, panelD)
+  :colspanAt(1, 1, 2)
+  :addAt(1, 1, u.label({ text = 'Panel B - scroll' }))
+  :addAt(2, 1, u.multi({ items = { 'Style 1', 'Style 2', 'Style 3' } }))
+  :addAt(2, 2, u.button({ text = 'Button' }))
 end
 
-local function initPanelA()
-  enableAToggle = u.toggle({ text = 'A enabled', value = true }):action(function (e)
-    if e.target.value then
-      e.target.text = 'A enabled'
-      panelA:enable()
-    else
-      e.target.text = 'Hit space'
-      panelA:disable()
-    end
-  end)
-
-  panelA = u.panel({
+local function initPanelA(anotherPanel)
+  -- rowspanAt(row, col) 1-base indexed
+  -- addAt(row, col) 1-base indexed
+  return u.panel({
     -- debug = true,
-    rows = 9, cols = 4, x = 0, y = 0, w = 320, h = 180, tag = 'PanelA'
-  }):rowspanAt(2, 4, 5) -- giant slider
-    :colspanAt(2, 4, 0.25) -- giant slider
-		:colspanAt(3, 1, 3) -- panel B
-		:rowspanAt(3, 1, 4) -- panel B
-    :rowspanAt(7, 3, 2) -- joystick
-		:addAt(1, 1, u.label({ text = 'Panel A' }))
-		:addAt(1, 2, u.toggle({ text = 'Slider ->' }):action(function (e)
-			local slider = panelA:getChildren(1, 3)
-			if e.target.value then
-				slider:enable()
-			else
-				slider:disable()
-			end
-		end))
-    :addAt(1, 4, u.button({ text = 'Next >' }))
-		:addAt(1, 3, u.slider({ value = 0.3, tag = 'slider', axis = 'x'  }):disable())
-		:addAt(2, 3, u.toggle({ value = false, text = 'Boolean' }))
-		:addAt(2, 2, u.text({ text = 'привт' }):setStyle({ font = font2 }))
-		:addAt(3, 1, panelB)
-    :addAt(7, 1, u.toggle({ text = 'D enabled', value = true }):action(function (e)
-			if e.target.value then
-				e.target.text = 'D enabled'
-				panelD:enable()
-			else
-				e.target.text = 'D disabled'
-				panelD:disable()
-			end
-		end))
-		:addAt(8, 1, u.toggle({ text = 'D visible', value = true }):action(function (e)
-			if e.target.value then
-				e.target.text = 'D visible'
-				panelD:show()
-			else
-				e.target.text = 'D hidden'
-				panelD:hide()
-			end
-		end))
-    :addAt(9, 1, u.button({ text = 'K.O.S' }):action(function()
-      marcoAnimation.keepOriginalSize = not marcoAnimation.keepOriginalSize
+    rows = 9, cols = 4,
+    w = 320, h = 180,
+    tag = 'panela'
+  })
+  :spacingAt(5, 3, 0)
+  :rowspanAt(8, 2, 2) -- 2 rows for the joystick
+  :rowspanAt(2, 3, 2) -- love2d logo
+  :rowspanAt(2, 4, 2) -- Kitana
+  :colspanAt(4, 3, 2) -- Click label
+  :colspanAt(5, 3, 2) -- panel B
+  :rowspanAt(5, 3, 5) -- panel B
+  :addAt(1, 1, u.label({ text = 'Label:' }):right())
+  :addAt(1, 2, u.label({ text = 'Panel B' }))
+  :addAt(2, 1, u.label({ text = 'Button:' }):right())
+  :addAt(2, 2, u.button({ text = 'Exit' })
+    :setStyle({ bgColor = {0.7, 0.2, 0.2} })
+    :action(function(evt)
+      love.event.quit()
     end))
-    :addAt(10, 1, u.button({ text = 'Exit' })
-      :setStyle({ bgColor = {0.6, 0.1, 0} })
-      :action(function()
-        love.event.quit()
-      end))
-		:addAt(2, 1, u.multi({ items = { 'One', 'Two', 'Three' } }):left())
-    :addAt(2, 4, u.slider({
-      x = 310,
-      y = 20,
-      w = 2,
-      h = 78,
-      value = 0.3,
-      tag = 'slider',
-      axis = 'y'
-    }))
-    :addAt(9, 2, enableAToggle)
-    :addAt(7, 3, u.joy({ image = love.graphics.newImage('img/ball.png') }))
+  :addAt(3, 1, u.label({ text = 'Slider:' }):right())
+  :addAt(3, 2, u.slider({ value = 0.2 }))
+  :addAt(4, 1, u.label({ text = 'Text field:' }):right())
+  :addAt(4, 2, u.text({ text = 'привт' })
+    :setStyle({ font = font2 }))
+  :addAt(5, 1, u.label({ text = 'Multi:' }):right())
+  :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' } }))
+  :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
+  :addAt(6, 2, u.toggle():right())
+  :addAt(7, 1, u.label({ text = 'Toggle:' }):right())
+  :addAt(7, 2, u.toggle({ value = true }))
+  :addAt(8, 1, u.label({ text = 'Joystick:' }):right())
+  :addAt(8, 2, u.joy({ image = love.graphics.newImage('img/ball.png') }))
+
+  :addAt(1, 3, u.label({ text = 'Image:' }))
+  :addAt(1, 4, u.label({ text = 'Animation:' }))
+  :addAt(2, 3, u.image({ image = unnamed })
+    :action(function(evt)
+      evt.target.keepAspectRatio = not evt.target.keepAspectRatio
+    end))
+  :addAt(2, 4, u.animation({
+      image = kitana,
+      frames = 21,
+      frameWidth = 80,
+      frameHeight = 60,
+      frameDelay = 0.2
+    })
+    :action(function(evt)
+      evt.target.keepOriginalSize = not evt.target.keepOriginalSize
+    end))
+  :addAt(4, 3, u.label({ text = 'Click on the images^' }))
+  :addAt(5, 3, anotherPanel)
 end
 
 function love.load()
-	initStuff()
-	initPanelC()
-  initPanelD()
-  initPanelB()
-  initPanelA()
-	u:add(panelA)
+  initStuff()
+  local panelB = initPanelB()
+  local panelA = initPanelA(panelB)
 
-	--activation and deactivation elements by tag
-	--u:deactivateByTag('PanelD')
+  u:add(panelA)
+
+  --activation and deactivation elements by tag
+  --u:deactivateByTag('panela')
 end
 
 local x = 0
 local y = 0
 
 function love.update(dt)
-	u:update(dt)
+  u:update(dt)
 end
 
 function love.draw()
-	love.graphics.setCanvas(canvas)
-	love.graphics.clear(bgColor)
+  love.graphics.setCanvas(canvas)
+  love.graphics.clear(bgColor)
   love.graphics.setColor(1, 1, 1)
-	u:draw()
+  u:draw()
   if love.mouse.isDown(1) then
     love.graphics.setColor(1, 0, 0)
   end
@@ -204,9 +139,9 @@ function love.draw()
     math.floor(love.mouse.getY() / sy)
   )
   love.graphics.setColor(1, 1, 1)
-	love.graphics.setCanvas()
+  love.graphics.setCanvas()
 
-	love.graphics.draw(canvas, 0, 0, 0, sx, sy)
+  love.graphics.draw(canvas, 0, 0, 0, sx, sy)
   love.graphics.print('FPS: ' .. love.timer.getFPS())
 end
 
