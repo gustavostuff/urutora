@@ -24,18 +24,19 @@ local utils = {
   sx = 1,
   sy = 1,
   scroll_speed = 0.1,
+  defaultCurveSegments = 100
 }
 
-function utils.isLabel(node) return node.type == utils.nodeTypes.LABEL end
-function utils.isPanel(node) return node.type == utils.nodeTypes.PANEL end
-function utils.isMulti(node) return node.type == utils.nodeTypes.MULTI_OPTION end
-function utils.isImage(node) return node.type == utils.nodeTypes.IMAGE end
+function utils.isLabel(node)     return node.type == utils.nodeTypes.LABEL end
+function utils.isPanel(node)     return node.type == utils.nodeTypes.PANEL end
+function utils.isMulti(node)     return node.type == utils.nodeTypes.MULTI_OPTION end
+function utils.isImage(node)     return node.type == utils.nodeTypes.IMAGE end
 function utils.isAnimation(node) return node.type == utils.nodeTypes.ANIMATION end
-function utils.isToggle(node) return node.type == utils.nodeTypes.TOGGLE end
-function utils.isSlider(node) return node.type == utils.nodeTypes.SLIDER end
-function utils.isButton(node) return node.type == utils.nodeTypes.BUTTON end
+function utils.isToggle(node)    return node.type == utils.nodeTypes.TOGGLE end
+function utils.isSlider(node)    return node.type == utils.nodeTypes.SLIDER end
+function utils.isButton(node)    return node.type == utils.nodeTypes.BUTTON end
 function utils.isTextField(node) return node.type == utils.nodeTypes.TEXT end
-function utils.isJoy(node) return node.type == utils.nodeTypes.JOY end
+function utils.isJoy(node)       return node.type == utils.nodeTypes.JOY end
 
 function utils.textWidth(node)
   if not node.text then return 0 end
@@ -83,8 +84,8 @@ utils.style = {
   padding = utils.default_font:getHeight() / 2,
   bgColor = utils.colors.LOVE_BLUE,
   fgColor = utils.colors.WHITE,
-  disablebgColor = utils.colors.GRAY,
-  disablefgColor = utils.colors.DARK_GRAY,
+  disableBgColor = {.5, .5, .5, .5},
+  disableFgColor = utils.colors.DARK_GRAY,
 }
 
 function utils.withOpacity(color, alpha)
@@ -145,6 +146,19 @@ function utils.pointInsideRect(px, py, x, y, w, h)
     py < (y) or
     py > (y + h)
   )
+end
+
+function utils.fixToggleBounds(node)
+  -- toggles have always the same aspect ratio (2:1)
+  if node.type == utils.nodeTypes.TOGGLE then
+    node.originalW = node.w
+    node.w = node.h * 2
+    if node.align == utils.alignments.RIGHT then
+      node.x = node.x + node.originalW - node.w
+    elseif node.align == utils.alignments.CENTER then
+      node.x = node.x + node.originalW / 2 - node.w / 2
+    end
+  end
 end
 
 utils.disabledImgShader = love.graphics.newShader([[

@@ -110,6 +110,23 @@ function urutora:remove(component)
   end
 end
 
+function urutora:getByTag(tag)
+  for _, v in ipairs(self.nodes) do
+    if v.tag and v.tag == tag then
+      return v
+    end
+    if utils.isPanel(v) then
+      local nested
+      v:forEach(function (node)
+        if node.tag and node.tag == tag then
+          nested = node
+        end
+      end)
+      return nested
+    end
+  end
+end
+
 function urutora:activateByTag(tag)
   for _, v in ipairs(self.nodes) do
     if v.tag and v.tag == tag then

@@ -18,15 +18,16 @@ end
 function slider:draw()
   local _, fgc = self:getLayerColors()
   lovg.setColor(fgc)
-
+  local mode = self.style.outline and 'line' or 'fill'
+  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   if self.axis == 'x' then
-    local w = 12
+    local w = math.floor(self.h / 2)
     local x = self.x + (self.w - w) * self.value
-    utils.rect('fill', x, self.y, w, self.h)
+    utils.rect(mode, x, self.y, w, self.h, r, r, utils.defaultCurveSegments)
   else
-    local h = 12
+    local h = math.floor(self.w / 2)
     local y = self.y + (self.h - h) * self.value
-    utils.rect('fill', self.x, y, self.w, h)
+    utils.rect(mode, self.x, y, self.w, h, r, r, utils.defaultCurveSegments)
   end
 end
 

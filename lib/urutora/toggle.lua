@@ -17,7 +17,7 @@ function toggle:drawBaseRectangle()
   if self.value then
     base_drawBaseRectangle(self)
   else
-    base_drawBaseRectangle(self, self.style.disablebgColor)
+    base_drawBaseRectangle(self, self.style.disableBgColor)
   end
 end
 
@@ -25,16 +25,23 @@ function toggle:draw()
   if self.value or self.pointed then
     base_drawText(self)
   else
-    base_drawText(self, self.style.disablefgColor)
+    base_drawText(self, self.style.disableFgColor)
   end
-  love.graphics.setColor(self.style.fgColor)
+  local c = self.value and self.style.fgColor or utils.style.disableFgColor
+  if not self.enabled then
+    c = utils.style.disableFgColor
+  end
+  love.graphics.setColor(c)
+  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+  local mode = self.style.outline and 'line' or 'fill'
   local x = self.x + self.switchPadding
   x = x + ((self.value and self.w / 2) or 0)
-  love.graphics.rectangle('fill',
+  love.graphics.rectangle(mode,
     x,
     self.y + self.switchPadding,
     self.w / 2 - self.switchPadding * 2,
-    self.h - self.switchPadding * 2
+    self.h - self.switchPadding * 2,
+    r, r, utils.defaultCurveSegments
   )
 end
 

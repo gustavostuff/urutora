@@ -22,7 +22,7 @@ function panel:constructor()
   self._maxy = (self.rows) * (self.csy or 0)
 
   self.debugGrid = {}
-  local contrastRatio = 0.4
+  local contrastRatio = 0.3
   for y = 1, self.rows do
     for x = 1, self.cols do
       table.insert(self.debugGrid, {
@@ -74,23 +74,10 @@ function panel:calculateRect(row, col)
   return x, y, w, h
 end
 
-local function _checkForToggle(node)
-  -- toggles have always the same aspect ratio (2:1)
-  if node.type == utils.nodeTypes.TOGGLE then
-    node.originalW = node.w
-    node.w = node.h * 2
-    if node.align == utils.alignments.RIGHT then
-      node.x = node.x + node.originalW - node.w
-    elseif node.align == utils.alignments.CENTER then
-      node.x = node.x + node.originalW / 2 - node.w / 2
-    end
-  end
-end
-
 function panel:addAt(row, col, newNode)
   local x, y, w, h = self:calculateRect(row, col)
   newNode:setBounds(x, y, w, h)
-  _checkForToggle(newNode)
+  utils.fixToggleBounds(newNode)
   newNode.parent = self
   newNode._row = row
   newNode._col = col
@@ -179,6 +166,7 @@ function panel:updateNodesPosition()
     if utils.isPanel(node) then
       node:updateNodesPosition()
     end
+    utils.fixToggleBounds(node)
   end
 end
 

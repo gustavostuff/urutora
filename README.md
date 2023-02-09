@@ -1,11 +1,17 @@
 # urutora
 
+## :warning: Currently unstable, working on stuff
+
 GUI Library for LÖVE
 
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
 [![Version](http://img.shields.io/:beta-0.3.0-green.svg)](https://github.com/tavuntu/urutora)
 
-[![added-animation.gif](https://i.postimg.cc/rpbsf2qn/added-animation.gif)](https://postimg.cc/sBY328Q7)
+![](https://i.postimg.cc/CLFLjckm/1.png)
+
+![](https://i.postimg.cc/DfQwJ9JS/2.png)
+
+![](https://i.postimg.cc/SsCNG5gt/3.png)
 
 ## Instructions
 

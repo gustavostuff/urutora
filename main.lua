@@ -3,7 +3,9 @@ local u
 
 -- todos:
 
+-- fix slider movement inside scrolled panels
 -- fix padding for panels
+-- add modals for messages and questions (yes/no)
 -- add scroll indicators (not sliders)
 -- make images and animations gray when disabled             - done
 -- link sliders to panel's scrolling
@@ -15,6 +17,7 @@ local u
 -- change naming of some methods (addAt, colspanAt, etc)
 -- custom images for buttons (background and label icons)
 -- custom images for sliders
+-- adjust scroll speed to the size of the panel
 
 local bgColor = { 0.2, 0.1, 0.3 }
 local canvas
@@ -22,6 +25,14 @@ local marco = love.graphics.newImage('img/marco.png')
 local unnamed = love.graphics.newImage('img/unnamed.png')
 local arrow = love.graphics.newImage('img/arrow.png')
 local kitana = love.graphics.newImage('img/clickbait_kitana.png')
+local bgs = {
+  love.graphics.newImage('img/bg1.png'),
+  love.graphics.newImage('img/bg2.png'),
+  love.graphics.newImage('img/bg3.png')
+}
+for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end 
+bgIndex = 1
+bgRotation = 0
 
 local function initStuff()
   u = urutora:new()
@@ -29,25 +40,81 @@ local function initStuff()
   canvas:setFilter('nearest', 'nearest')
   sx = love.graphics.getWidth() / canvas:getWidth()
   sy = love.graphics.getHeight() / canvas:getHeight()
-  local font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
+  font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
+  font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
 
-  love.mouse.setRelativeMode(true)
+  -- love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
   u.setResolution(canvas:getWidth(), canvas:getHeight())
 end
 
+local function handleStyleChanges(evt)
+  if evt.index == 1 then
+    evt.target.parent.parent:setStyle({
+      lineWidth = 1,
+      lineStyle = 'rough',
+      outline = false,
+      cornerRadius = 0, -- percent
+      bgColor = urutora.utils.colors.LOVE_BLUE,
+      fgColor = urutora.utils.colors.WHITE,
+      font = font1
+    })
+    u:getByTag('russian'):setStyle({ font = font2 })
+  end
+  if evt.index == 2 then
+    evt.target.parent.parent:setStyle({
+      outline = false,
+      cornerRadius = 0.2, -- percent
+      bgColor = {0, 0.2, 0.3, 0.5},
+      fgColor = urutora.utils.colors.DARK_GRAY,
+      disableFgColor = {.5, .5, .5},
+      font = font3
+    })
+  end
+  if evt.index == 3 then
+    evt.target.parent.parent:setStyle({
+      lineWidth = 2,
+      lineStyle = 'smooth',
+      cornerRadius = 0.5, -- percent
+      outline = true,
+      bgColor = {1, 0.6, 0},
+      fgColor = {1, 0.6, 0},
+      font = font3
+    })
+  end
+end
+
+local function initPanelC()
+
+end
+
 local function initPanelB()
   return u.panel({
-    debug = true,
+    -- debug = true,
     rows = 10, cols = 2,
     tag = 'panelb',
     csy = 20
   })
-  :colspanAt(1, 1, 2)
+  :colspanAt(1, 1, 2) -- panel label
+  :colspanAt(4, 1, 0.25) -- vertical slider
+  :rowspanAt(4, 1, 4) -- vertical slider
+  :addAt(2, 1, u.multi({ items = { 'Style 1', 'Style 2', 'Style 3' } }):action(function(evt)
+    bgIndex = bgIndex == 3 and 1 or bgIndex + 1
+    handleStyleChanges(evt)
+  end))
+  :addAt(2, 2, u.toggle()
+    :action(function (evt)
+      evt.target.parent.debug = evt.value
+    end))
+  :addAt(3, 1, u.toggle()
+    :action(function (evt)
+      evt.target.parent.parent.debug = evt.value
+    end))
+  :addAt(3, 2, u.toggle():center())
   :addAt(1, 1, u.label({ text = 'Panel B (scroll)' }))
-  :addAt(2, 1, u.multi({ items = { 'Style 1', 'Style 2', 'Style 3' } }))
-  :addAt(2, 2, u.button({ text = 'Button' }))
+  :addAt(4, 1, u.slider({ axis = 'y' }))
+  :addAt(4, 2, u.slider())
 end
 
 local function initPanelA(anotherPanel)
@@ -77,14 +144,21 @@ local function initPanelA(anotherPanel)
   :addAt(3, 1, u.label({ text = 'Slider:' }):right())
   :addAt(3, 2, u.slider({ value = 0.2 }))
   :addAt(4, 1, u.label({ text = 'Text field:' }):right())
-  :addAt(4, 2, u.text({ text = 'привт' })
+  :addAt(4, 2, u.text({ text = 'привт', tag = 'russian' })
     :setStyle({ font = font2 }))
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
   :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' } }))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
   :addAt(6, 2, u.toggle():right())
-  :addAt(7, 1, u.label({ text = 'Toggle:' }):right())
-  :addAt(7, 2, u.toggle({ value = true }))
+  :addAt(7, 1, u.label({ text = 'Diable B:' }):right())
+  :addAt(7, 2, u.toggle({ value = true })
+    :action(function(evt)
+      if evt.value then
+        anotherPanel:enable()
+      else
+        anotherPanel:disable()
+      end
+    end))
   :addAt(8, 1, u.label({ text = 'Joystick:' }):right())
   :addAt(8, 2, u.joy({ image = love.graphics.newImage('img/ball.png') }))
 
@@ -110,7 +184,8 @@ end
 
 function love.load()
   initStuff()
-  local panelB = initPanelB()
+  local panelC = initPanelC()
+  local panelB = initPanelB(panelC)
   local panelA = initPanelA(panelB)
 
   u:add(panelA)
@@ -124,13 +199,24 @@ local y = 0
 
 function love.update(dt)
   u:update(dt)
+  bgRotation = bgRotation + dt * 10
+  if bgRotation >= 360 then bgRotation = 0 end
 end
 
-function love.draw()
-  love.graphics.setCanvas(canvas)
-  love.graphics.clear(bgColor)
-  love.graphics.setColor(1, 1, 1)
-  u:draw()
+local function drawBg()
+  local bg = bgs[bgIndex]
+  love.graphics.draw(bg,
+    canvas:getWidth() / 2,
+    canvas:getHeight() / 2,
+    math.rad(bgRotation),
+    canvas:getWidth() / bg:getWidth() * 3,
+    canvas:getHeight() / bg:getHeight() * 3,
+    bg:getWidth() / 2,
+    bg:getHeight() / 2
+  )
+end
+
+function drawCursor()
   if love.mouse.isDown(1) then
     love.graphics.setColor(1, 0, 0)
   end
@@ -138,6 +224,15 @@ function love.draw()
     math.floor(love.mouse.getX() / sx),
     math.floor(love.mouse.getY() / sy)
   )
+end
+
+function love.draw()
+  love.graphics.setCanvas(canvas)
+  love.graphics.clear(bgColor)
+  love.graphics.setColor(1, 1, 1)
+  drawBg()
+  u:draw()
+  drawCursor()
   love.graphics.setColor(1, 1, 1)
   love.graphics.setCanvas()
 
@@ -156,11 +251,6 @@ function love.keypressed(k, scancode, isrepeat)
 
   if k == 'escape' then
     love.event.quit()
-  end
-  if k == 'space' then
-    panelA:enable()
-    enableAToggle:change()
-    enableAToggle.callback({ target = enableAToggle, value = enableAToggle.value })
   end
   if k == 'm' then
     love.mouse.setRelativeMode(not love.mouse.getRelativeMode())

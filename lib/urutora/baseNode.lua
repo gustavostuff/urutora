@@ -135,8 +135,8 @@ end
 function baseNode:getLayerColors()
   local bgColor, fgColor
   if not self.enabled then
-    bgColor = self.style.disablebgColor
-    fgColor = self.style.disablefgColor
+    bgColor = self.style.disableBgColor
+    fgColor = self.style.disableFgColor
   else
     if self.pressed then
       bgColor = self.style.pressedbgColor or utils.darker(self.style.bgColor)
@@ -159,18 +159,18 @@ function baseNode:drawBaseRectangle(color, ...)
 
   if ... then x, y, w, h = ... end
   
-  local r = math.min(self.w, self.h) / 2
-  if true or self.style.outlined then
-    love.graphics.setLineStyle('smooth')
-    love.graphics.setLineWidth(2)
-
-    utils.rect('line', x, y, w, h, r, r, 100)
-
-    love.graphics.setLineStyle('rough')
-    love.graphics.setLineWidth(1)
-  else
-    utils.rect('fill', x, y, w, h)
-  end
+  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+  lovg.setLineWidth(self.style.lineWidth or 1)
+  lovg.setLineStyle(self.style.lineStyle or 'rough')
+  utils.rect(self.style.outline and 'line' or 'fill',
+    x,
+    y,
+    w,
+    h,
+    self.style.cornerRadius and r or 0,
+    self.style.cornerRadius and r or 0,
+    utils.defaultCurveSegments
+  )
 end
 
 function baseNode:drawText(color)
@@ -260,7 +260,11 @@ function baseNode:performReleaseAction(data)
         self.callback({ target = self, value = self.value })
       elseif self.type == utils.nodeTypes.MULTI then
         self:change()
-        self.callback({ target = self, value = self.text })
+        self.callback({
+          target = self,
+          value = self.value,
+          index = self.index
+        })
       end
     end
 
