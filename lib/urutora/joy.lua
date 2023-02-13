@@ -10,6 +10,7 @@ function joy:constructor()
   joy.super.constructor(self)
   self.joyX = 0
   self.joyY = 0
+  self.activateOn = self.activateOn or 0.5
 end
 
 function joy:limitMovement()
@@ -19,20 +20,50 @@ function joy:limitMovement()
   if self.joyY <= -self:stickRadius() then self.joyY = -self:stickRadius() end
 end
 
+function joy:getDirection()
+  local direction = ''
+
+  if self:getX() < -self.activateOn then
+    direction = direction .. 'l'
+  elseif self:getX() > self.activateOn then
+    direction = direction .. 'r'
+  end
+
+  if self:getY() < -self.activateOn then
+    direction = direction .. 'u'
+  elseif self:getY() > self.activateOn then
+    direction = direction .. 'd'
+  end
+
+  return direction
+end
+
 function joy:getX() return self.joyX / self:stickRadius() end
 function joy:getY() return self.joyY / self:stickRadius() end
 
 function joy:draw()
-  if self.image then
+  if self.layer1 then
+    utils.draw(self.layer1, self:centerX(), self:centerY(), {centered = true})
+  end
+
+  if self.layer2 then
+    utils.draw(self.layer2,
+      math.floor(self:centerX() + self.joyX / 5),
+      math.floor(self:centerY() + self.joyY / 5),
+      {centered = true}
+    )
+  end
+
+  if self.layer3 then
     love.graphics.setColor(1, 1, 1)
     if not self.enabled then
       lovg.setShader(utils.disabledImgShader)
     end
-    lovg.draw(self.image,
-    math.floor(self:centerX() + self.joyX), math.floor(self:centerY() + self.joyY),
-    0, 1, 1,
-    math.floor(self.image:getWidth() / 2),
-    math.floor(self.image:getHeight() / 2))
+    utils.draw(self.layer3,
+      math.floor(self:centerX() + self.joyX),
+      math.floor(self:centerY() + self.joyY),
+      {centered = true}
+    )
     if not self.enabled then
       lovg.setShader()
     end

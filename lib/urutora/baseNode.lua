@@ -238,10 +238,19 @@ function baseNode:performMovedAction(data)
       self.joyX = self.joyX + data.dx / utils.sx
       self.joyY = self.joyY + data.dy / utils.sy
       self:limitMovement()
+      self.callback({
+        target = self,
+        type = 'moved',
+        value = {
+          x = self:getX(),
+          y = self:getY(),
+          direction = self:getDirection()
+        }
+      })
     end
   elseif self.type == utils.nodeTypes.PANEL then
     if love.mouse.isDown(utils.mouseButtons.RIGHT) then
-
+      -- drag panels pending
     end
   end
 end
@@ -269,9 +278,10 @@ function baseNode:performReleaseAction(data)
     end
 
     if self.type == utils.nodeTypes.JOY then
-      self.callback({ target = self, value = {
-        lastX = self.joyX,
-        lastY = self.joyY
+      local lastX, lastY = self:getX(), self:getY()
+      self.callback({ target = self, type = 'released', value = {
+        lastX = lastX,
+        lastY = lastY
       }})
       self.joyX, self.joyY = 0, 0
     end
@@ -285,10 +295,11 @@ function baseNode:performMouseWheelAction(data)
 
   if self.pointed then
     if self.type == utils.nodeTypes.PANEL then
+      self:showSlider()
       local v = self:getScrollY()
-      self:setScrollY(v + (-data.y) * utils.scroll_speed)
+      self:setScrollY(v + (-data.y) * (self.scrollSpeed or utils.scrollSpeed))
     elseif self.type == utils.nodeTypes.SLIDER then
-      self:setValue(self.value + (-data.y) * utils.scroll_speed)
+      self:setValue(self.value + (-data.y) * utils.scrollSpeed)
       self.callback({ target = self, value = self.value })
     end
   end

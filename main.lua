@@ -1,42 +1,38 @@
 local urutora = require('lib/urutora')
 local u
+local styleManager = require('style-manager')
 
 -- todos:
 
--- fix slider movement inside scrolled panels
--- fix padding for panels
+-- fix slider movement inside scrolled panels                - done
+-- fix padding for panels                                    - done
 -- add modals for messages and questions (yes/no)
--- add scroll indicators (not sliders)
+-- add scroll indicators (not sliders)                       - done
 -- make images and animations gray when disabled             - done
 -- link sliders to panel's scrolling
--- digital joystick (8-directional)
+-- digital joystick (8-directional)                          - done
 -- multitouch support
--- style hot swap
+-- style hot swap                                            - done
 -- blinking cursor in text fields and cursor displacement
 -- disable/enable elements recursively                       - done
--- change naming of some methods (addAt, colspanAt, etc)
 -- custom images for buttons (background and label icons)
 -- custom images for sliders
 -- adjust scroll speed to the size of the panel
+-- alignment for images and animations
+-- create progress bars
+-- create notifications
+-- drag panels
+-- span panels to a given grid or are
 
 local bgColor = { 0.2, 0.1, 0.3 }
-local canvas
-local marco = love.graphics.newImage('img/marco.png')
-local unnamed = love.graphics.newImage('img/unnamed.png')
-local arrow = love.graphics.newImage('img/arrow.png')
-local kitana = love.graphics.newImage('img/clickbait_kitana.png')
-local bgs = {
-  love.graphics.newImage('img/bg1.png'),
-  love.graphics.newImage('img/bg2.png'),
-  love.graphics.newImage('img/bg3.png')
-}
 for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end 
 bgIndex = 1
 bgRotation = 0
 
 local function initStuff()
   u = urutora:new()
-  canvas = love.graphics.newCanvas(320, 180)
+  w, h = 320 * 1, 180 * 1
+  canvas = love.graphics.newCanvas(w, h)
   canvas:setFilter('nearest', 'nearest')
   sx = love.graphics.getWidth() / canvas:getWidth()
   sy = love.graphics.getHeight() / canvas:getHeight()
@@ -44,64 +40,53 @@ local function initStuff()
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
 
-  -- love.mouse.setRelativeMode(true)
+  clickSound = love.audio.newSource('sounds/click2.ogg', 'static')
+
+  love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
   u.setResolution(canvas:getWidth(), canvas:getHeight())
 end
 
-local function handleStyleChanges(evt)
-  if evt.index == 1 then
-    evt.target.parent.parent:setStyle({
-      lineWidth = 1,
-      lineStyle = 'rough',
-      outline = false,
-      cornerRadius = 0, -- percent
-      bgColor = urutora.utils.colors.LOVE_BLUE,
-      fgColor = urutora.utils.colors.WHITE,
-      font = font1
-    })
-    u:getByTag('russian'):setStyle({ font = font2 })
-  end
-  if evt.index == 2 then
-    evt.target.parent.parent:setStyle({
-      outline = false,
-      cornerRadius = 0.2, -- percent
-      bgColor = {0, 0.2, 0.3, 0.5},
-      fgColor = urutora.utils.colors.DARK_GRAY,
-      disableFgColor = {.5, .5, .5},
-      font = font3
-    })
-  end
-  if evt.index == 3 then
-    evt.target.parent.parent:setStyle({
-      lineWidth = 2,
-      lineStyle = 'smooth',
-      cornerRadius = 0.5, -- percent
-      outline = true,
-      bgColor = {1, 0.6, 0},
-      fgColor = {1, 0.6, 0},
-      font = font3
-    })
-  end
-end
-
 local function initPanelC()
-
+  local panelC = u.panel({
+    debug = true,
+    rows = 8, cols = 1,
+    verticalScale = 2,
+    tag = 'panelc',
+    bgColor = {0, 1, 0, 0.3},
+    scrollSpeed = 1/16
+    -- move 1/16 of the vewport for every mousewheel event
+    -- this is relative to the number of rows within the panel
+  })
+  local function toggleDebug(evt)
+    evt.target.parent.debug = not evt.target.parent.debug
+  end
+  for i = 1, panelC.rows do
+    panelC:addAt(i, 1, u.button({ text = 'Button ' .. i }):action(toggleDebug))
+  end
+  return panelC
 end
 
-local function initPanelB()
+local function initPanelB(anotherPanel)
   return u.panel({
     -- debug = true,
     rows = 10, cols = 2,
+    -- csy = 20,
+    verticalScale = 2,
     tag = 'panelb',
-    csy = 20
+    bgColor = {1, 0, 0, 0.3},
+    -- move 1/10 of the vewport for every mousewheel event
+    -- this is relative to the number of rows within the panel
+    scrollSpeed = 0.1
   })
   :colspanAt(1, 1, 2) -- panel label
-  :colspanAt(4, 1, 0.25) -- vertical slider
-  :rowspanAt(4, 1, 4) -- vertical slider
-  :addAt(2, 1, u.multi({ items = { 'Style 1', 'Style 2', 'Style 3' } }):action(function(evt)
+  :colspanAt(6, 2, 0.2) -- vertical slider
+  :rowspanAt(6, 2, 4) -- vertical slider
+  :rowspanAt(6, 1, 4) -- panel C
+  :spacingAt(6, 1, 0) -- panel C
+  :addAt(2, 1, u.multi({ items = { 'Blue', 'Olive', 'Neon' } }):action(function(evt)
     bgIndex = bgIndex == 3 and 1 or bgIndex + 1
-    handleStyleChanges(evt)
+    styleManager.handleStyleChanges(u, evt, font1, font2, font3)
   end))
   :addAt(2, 2, u.toggle()
     :action(function (evt)
@@ -113,8 +98,12 @@ local function initPanelB()
     end))
   :addAt(3, 2, u.toggle():center())
   :addAt(1, 1, u.label({ text = 'Panel B (scroll)' }))
-  :addAt(4, 1, u.slider({ axis = 'y' }))
-  :addAt(4, 2, u.slider())
+  :addAt(6, 2, u.slider({ axis = 'y' }))
+  :addAt(4, 2, u.label({ text = 'joyX: 0', tag = 'xLabel' }):left())
+  :addAt(5, 2, u.label({ text = 'joyY: 0', tag = 'yLabel' }):left())
+  :addAt(4, 1, u.label({ text = '', tag = 'directionLabel' }))
+  :addAt(5, 1, u.label({ text = '', tag = 'lastCoordLabel' }))
+  :addAt(6, 1, anotherPanel)
 end
 
 local function initPanelA(anotherPanel)
@@ -123,13 +112,15 @@ local function initPanelA(anotherPanel)
   return u.panel({
     -- debug = true,
     rows = 9, cols = 4,
-    w = 320, h = 180,
+    w = w, h = h,
     tag = 'panela'
   })
-  :spacingAt(5, 3, 0)
+  :spacingAt(5, 3, 0) -- panel B
+  -- :spacingAt(2, 3, 0) -- old love logo
+  -- :spacingAt(2, 4, 0) -- MSlug enemy
   :rowspanAt(8, 2, 2) -- 2 rows for the joystick
   :rowspanAt(2, 3, 2) -- love2d logo
-  :rowspanAt(2, 4, 2) -- Kitana
+  :rowspanAt(2, 4, 2) -- Animation
   :colspanAt(4, 3, 2) -- Click label
   :colspanAt(5, 3, 2) -- panel B
   :rowspanAt(5, 3, 5) -- panel B
@@ -150,7 +141,7 @@ local function initPanelA(anotherPanel)
   :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' } }))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
   :addAt(6, 2, u.toggle():right())
-  :addAt(7, 1, u.label({ text = 'Diable B:' }):right())
+  :addAt(7, 1, u.label({ text = 'Enable B:' }):right())
   :addAt(7, 2, u.toggle({ value = true })
     :action(function(evt)
       if evt.value then
@@ -160,20 +151,46 @@ local function initPanelA(anotherPanel)
       end
     end))
   :addAt(8, 1, u.label({ text = 'Joystick:' }):right())
-  :addAt(8, 2, u.joy({ image = love.graphics.newImage('img/ball.png') }))
+  :addAt(8, 2, u.joy({
+    layer1 = joyLayer1,
+    layer2 = joyLayer2,
+    layer3 = joyLayer3,
+    activateOn = 0.7, -- percent
+    tag = 'joy'
+  }):action(function(evt)
+    local directionLabel = u:getByTag('directionLabel')
+    local lastCoordLabel = u:getByTag('lastCoordLabel')
+    local xLabel = u:getByTag('xLabel')
+    local yLabel = u:getByTag('yLabel')
+
+    if evt.type == 'moved' then
+      local x, y = u.utils.toFixed(evt.value.x, 2), u.utils.toFixed(evt.value.y, 2)
+      xLabel.text = 'joyX: ' .. x
+      yLabel.text = 'joyY: ' .. y
+      directionLabel.text = evt.value.direction
+    elseif evt.type == 'released' then
+      local lx = u.utils.toFixed(evt.value.lastX, 2)
+      local ly = u.utils.toFixed(evt.value.lastY, 2)
+
+      xLabel.text = 'joyX: 0'
+      yLabel.text = 'joyY: 0'
+      directionLabel.text = ''
+      lastCoordLabel.text = lx .. ', ' .. ly
+    end
+  end))
 
   :addAt(1, 3, u.label({ text = 'Image:' }))
   :addAt(1, 4, u.label({ text = 'Animation:' }))
-  :addAt(2, 3, u.image({ image = unnamed })
+  :addAt(2, 3, u.image({ image = logo })
     :action(function(evt)
       evt.target.keepAspectRatio = not evt.target.keepAspectRatio
     end))
   :addAt(2, 4, u.animation({
-      image = kitana,
-      frames = 21,
-      frameWidth = 80,
-      frameHeight = 60,
-      frameDelay = 0.2
+      image = anim,
+      frames = 26,
+      frameWidth = 110,
+      frameHeight = 84,
+      frameDelay = 0.08
     })
     :action(function(evt)
       evt.target.keepOriginalSize = not evt.target.keepOriginalSize
@@ -186,8 +203,8 @@ function love.load()
   initStuff()
   local panelC = initPanelC()
   local panelB = initPanelB(panelC)
-  local panelA = initPanelA(panelB)
-
+  panelA = initPanelA(panelB)
+  -- panelA:disable()
   u:add(panelA)
 
   --activation and deactivation elements by tag
@@ -230,7 +247,7 @@ function love.draw()
   love.graphics.setCanvas(canvas)
   love.graphics.clear(bgColor)
   love.graphics.setColor(1, 1, 1)
-  drawBg()
+  drawBg() -- spinning squares
   u:draw()
   drawCursor()
   love.graphics.setColor(1, 1, 1)

@@ -26,8 +26,8 @@ function animation:draw()
     local sx, sy
     local x = self.x
     local y = self.y
-    sx = (self.w - 1) / self.anim.w
-    sy = (self.h - 1) / self.anim.h
+    sx = self.w / self.anim.w
+    sy = self.h / self.anim.h
 
     if self.keepAspectRatio then
       sx = math.min(sx, sy)

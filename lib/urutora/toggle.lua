@@ -27,9 +27,9 @@ function toggle:draw()
   else
     base_drawText(self, self.style.disableFgColor)
   end
-  local c = self.value and self.style.fgColor or utils.style.disableFgColor
+  local c = self.value and self.style.fgColor or utils.style.disableBgColor
   if not self.enabled then
-    c = utils.style.disableFgColor
+    c = utils.style.disableBgColor
   end
   love.graphics.setColor(c)
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)

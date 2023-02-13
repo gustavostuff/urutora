@@ -17,10 +17,16 @@ function panel:constructor()
   self.spacing = self.spacing or 4
   self.ox = self.ox or 0
   self.oy = self.oy or 0
+  self.scrollSpeed = self.scrollSpeed or 0.1
+  self.sliderOpacity = 0
 
   self._maxx = (self.cols) * (self.csx or 0)
   self._maxy = (self.rows) * (self.csy or 0)
 
+  self:initDebugGrid()
+end
+
+function panel:initDebugGrid()
   self.debugGrid = {}
   local contrastRatio = 0.3
   for y = 1, self.rows do
@@ -74,6 +80,22 @@ function panel:calculateRect(row, col)
   return x, y, w, h
 end
 
+function panel:updateDimensions(newNode)
+
+
+
+  -- todo:
+  -- panel C gets squashed because updateNodes position gets called
+  -- on C creation, then on B creation
+
+
+
+  newNode.csy = newNode.h / newNode.rows * (newNode.verticalScale or 1)
+  newNode._maxy = newNode.h * (newNode.verticalScale or 1)
+  newNode:updateNodesPosition()
+  newNode:initDebugGrid()
+end
+
 function panel:addAt(row, col, newNode)
   local x, y, w, h = self:calculateRect(row, col)
   newNode:setBounds(x, y, w, h)
@@ -84,7 +106,9 @@ function panel:addAt(row, col, newNode)
   self.children[row * self.cols + col] = newNode
 
   --recalculate panel nodes position
-  if utils.isPanel(newNode) then newNode:updateNodesPosition() end
+  if utils.isPanel(newNode) then
+    self:updateDimensions(newNode)
+  end
   return self
 end
 
@@ -180,6 +204,10 @@ function panel:getScissorOffset()
   end
 end
 
+function panel:showSlider()
+  self.sliderOpacity = 1
+end
+
 local function _drawBg(panel)
   local colorBkp = {love.graphics.getColor()}
   if panel.bgColor then
@@ -195,14 +223,16 @@ end
 local function _drawScrollIndicator(panel, offsetX, offsetY)
   if not panel.csy then return end
   local _, fgColor = panel:getLayerColors()
+  fgColor = utils.withOpacity(fgColor, panel.sliderOpacity or 0)
   local sliderW = panel.spacing / 2
+  local sliderH = (panel.h / panel:getActualSizeY()) * panel.h
   lovg.setColor(fgColor)
 
   lovg.rectangle('fill',
     panel.x + panel.w - sliderW,
-    panel:getScrollY(),
+    panel.y + (panel:getScrollY() * (panel.h - sliderH)),
     sliderW,
-    10
+    sliderH
   )
 end
 
@@ -219,10 +249,13 @@ local function _drawDebug(panel)
       cellH
     )
   end
+
+  utils.prettyPrint('h: ' .. panel.h, panel.x, panel.y, {fgColor = {1,0,0}})
 end
 
 function panel:draw()
   local scx, scy, csx, csy = love.graphics.getScissor()
+  local tx, ty = math.floor(-self.ox), math.floor(-self.oy)
 
   local x = self.x
   local y = self.y
@@ -231,8 +264,9 @@ function panel:draw()
     ox, oy = self.parent:getScissorOffset()
   end
   lovg.push()
-  lovg.translate(math.floor(-self.ox), math.floor(-self.oy))
+  lovg.translate(tx, ty)
   lovg.intersectScissor(x - ox, y - oy, self.w, self.h)
+
   _drawBg(self)
   for _, node in pairs(self.children) do
     if node.visible then
@@ -241,8 +275,9 @@ function panel:draw()
       node:drawText()
     end
   end
-  _drawScrollIndicator(self, ox, oy)
   _drawDebug(self)
+  lovg.translate(-tx, -ty)
+  _drawScrollIndicator(self, ox, oy)
 
   lovg.setScissor(scx, scy, csx, csy)
   lovg.pop()
@@ -257,6 +292,7 @@ function panel:update(dt)
       if node.update then node:update(dt) end
     end
   end
+  self.sliderOpacity = (self.sliderOpacity > 0) and (self.sliderOpacity - dt) or 0
 end
 
 function panel:pointInsideNode(x, y)

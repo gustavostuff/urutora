@@ -12,8 +12,8 @@ function love.conf(t)
 
   t.window.title = "urutora demo"
   t.window.icon = nil
-  t.window.width = 320 * 2
-  t.window.height = 180 * 2
+  t.window.width = 320 * 4
+  t.window.height = 180 * 4
   t.window.borderless = true
   t.window.resizable = false
   t.window.minwidth = 1
@@ -30,7 +30,7 @@ function love.conf(t)
   t.window.x = nil
   t.window.y = nil
 
-  t.modules.audio = false
+  t.modules.audio = true
   t.modules.data = true
   t.modules.event = true
   t.modules.font = true
@@ -41,7 +41,7 @@ function love.conf(t)
   t.modules.math = true
   t.modules.mouse = true
   t.modules.physics = false
-  t.modules.sound = false
+  t.modules.sound = true
   t.modules.system = true
   t.modules.thread = false
   t.modules.timer = true

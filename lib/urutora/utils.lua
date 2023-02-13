@@ -23,7 +23,7 @@ local utils = {
   },
   sx = 1,
   sy = 1,
-  scroll_speed = 0.1,
+  scrollSpeed = 0.1,
   defaultCurveSegments = 100
 }
 
@@ -88,6 +88,11 @@ utils.style = {
   disableFgColor = utils.colors.DARK_GRAY,
 }
 
+function utils.toFixed(value, numberOfDecimals)
+  if not value then return '<nil>' end
+  return string.format('%.' .. numberOfDecimals .. 'f', value)
+end
+
 function utils.withOpacity(color, alpha)
   local newColor = { unpack(color) }
   table.insert(newColor, alpha)
@@ -111,10 +116,24 @@ function utils.print(text, x, y)
 end
 
 function utils.prettyPrint(text, x, y, data)
+  data = data or {}
   love.graphics.setColor(data.bgColor or {0, 0, 0})
   love.graphics.print(text, math.floor(x - 1), math.floor(y + 1))
   love.graphics.setColor(data.fgColor or {1, 1, 1})
   love.graphics.print(text, math.floor(x), math.floor(y))
+end
+
+function utils.draw(texture, x, y, data)
+  data = data or {}
+  love.graphics.draw(texture,
+    math.floor(x),
+    math.floor(y),
+    math.rad(data.rotation or 0),
+    data.scale or 1,
+    data.scale or 1,
+    math.floor(data.centered and (texture:getWidth() / 2) or 0),
+    math.floor(data.centered and (texture:getHeight() / 2) or 0)
+  )
 end
 
 function utils.rect(mode, x, y, w, h, rx, ry, segments)
