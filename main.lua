@@ -54,14 +54,35 @@ local function initPanelC()
     bgColor = {0, 1, 0, 0.3},
     -- move 1/16 of the vewport for every mousewheel event
     -- this is relative to the number of rows within the panel
-    scrollSpeed = 1/16
+    scrollSpeed = 1/16 -- 16 wheel steps to fully scroll
   })
+  :rowspanAt(7, 1, 2)
+
   local function toggleDebug(evt)
     evt.target.parent.debug = not evt.target.parent.debug
   end
-  for i = 1, panelC.rows do
+  for i = 1, panelC.rows - 1 do
     panelC:addAt(i, 1, u.button({ text = 'Button ' .. i }):action(toggleDebug))
   end
+
+  -- level 4 panel:
+  panelC
+    :spacingAt(7, 1, 0)
+    :addAt(7, 1, u.panel({
+      rows = 6,
+      cols = 1,
+      verticalScale = 3,
+      scrollSpeed = 1/4, -- 4 wheel steps to fully scroll
+      bgColor = {1, 1, 0, 0.4}
+      })
+        :addAt(1, 1, u.button({ text = 'Btn 1' }))
+        :addAt(2, 1, u.button({ text = 'Btn 2' }))
+        :addAt(3, 1, u.button({ text = 'Btn 3' }))
+        :addAt(4, 1, u.button({ text = 'Btn 4' }))
+        :addAt(5, 1, u.button({ text = 'Btn 5' }))
+        :addAt(6, 1, u.button({ text = 'Btn 6' }))
+    )
+
   return panelC
 end
 
@@ -72,9 +93,7 @@ local function initPanelB(anotherPanel)
     verticalScale = 2,
     tag = 'panelb',
     bgColor = {1, 0, 0, 0.3},
-    -- move 1/10 of the vewport for every mousewheel event
-    -- this is relative to the number of rows within the panel
-    scrollSpeed = 0.1
+    scrollSpeed = 1/10 -- 10 wheel steps to fully scroll
   })
   :colspanAt(1, 1, 2) -- panel label
   :colspanAt(6, 2, 0.2) -- vertical slider
