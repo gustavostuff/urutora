@@ -12,18 +12,22 @@ local function initStuff()
   w, h = 320 * 1, 180 * 1
   canvas = love.graphics.newCanvas(w, h)
   canvas:setFilter('nearest', 'nearest')
+  canvasX, canvasY = 0, 0
   sx = love.graphics.getWidth() / canvas:getWidth()
   sy = love.graphics.getHeight() / canvas:getHeight()
 
   font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
+  font1:setFilter('nearest', 'nearest')
+  font2:setFilter('nearest', 'nearest')
+
   transparentCursorImg = love.image.newImageData(1, 1)
   love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
 
   -- love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
-  u.setResolution(canvas:getWidth(), canvas:getHeight())
+  u.setDimensions(canvasX, canvasY, sx, sy)
 end
 
 local function initPanelC()
@@ -69,10 +73,7 @@ local function initPanelB(anotherPanel)
     :action(function (evt)
       evt.target.parent.debug = evt.value
     end))
-  :addAt(3, 1, u.toggle()
-    :action(function (evt)
-      evt.target.parent.parent.debug = evt.value
-    end))
+  :addAt(3, 1, u.toggle())
   :addAt(3, 2, u.toggle():center())
   :addAt(1, 1, u.label({ text = 'Panel B (scroll)' }))
   :addAt(6, 2, u.slider({ axis = 'y' }))
@@ -114,16 +115,18 @@ local function initPanelA(anotherPanel)
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
   :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' } }))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
-  :addAt(6, 2, u.toggle():right())
+  :addAt(6, 2, u.toggle():right()
+  :action(function (evt)
+    evt.target.parent.debug = not evt.target.parent.debug
+  end))
   :addAt(7, 1, u.label({ text = 'Enable B:' }):right())
-  :addAt(7, 2, u.toggle({ value = true })
-    :action(function(evt)
-      if evt.value then
-        anotherPanel:enable()
-      else
-        anotherPanel:disable()
-      end
-    end))
+  :addAt(7, 2, u.progressBar({ value = 0.4, direction = -1 }):action(function (evt)
+    if evt.type == 'full' then
+      evt.target.direction = evt.target.direction * -1 
+    elseif evt.type == 'empty' then
+      evt.target.direction = evt.target.direction * -1
+    end
+  end))
   :addAt(8, 1, u.label({ text = 'Joystick:' }):right())
   :addAt(8, 2, u.joy({
     layer1 = joyLayer1,
@@ -161,10 +164,10 @@ local function initPanelA(anotherPanel)
     end))
   :addAt(2, 4, u.animation({
       image = anim,
-      frames = 26,
-      frameWidth = 110,
-      frameHeight = 84,
-      frameDelay = 0.08
+      frames = 80,
+      frameWidth = 80,
+      frameHeight = 70,
+      frameDelay = 0.05
     })
     :action(function(evt)
       evt.target.keepOriginalSize = not evt.target.keepOriginalSize
@@ -210,10 +213,8 @@ function drawCursor()
   if love.mouse.isDown(1) then
     love.graphics.setColor(1, 0, 0)
   end
-  love.graphics.draw(arrow,
-    math.floor(love.mouse.getX() / sx),
-    math.floor(love.mouse.getY() / sy)
-  )
+  local x, y = u.utils:getMouse()
+  love.graphics.draw(arrow, math.floor(x), math.floor(y))
 end
 
 function love.draw()
@@ -226,7 +227,7 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.setCanvas()
 
-  love.graphics.draw(canvas, 0, 0, 0, sx, sy)
+  love.graphics.draw(canvas, canvasX, canvasY, 0, sx, sy)
   love.graphics.print('FPS: ' .. love.timer.getFPS())
 end
 

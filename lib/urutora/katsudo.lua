@@ -15,7 +15,10 @@ function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
   if type(img) == "string" then
     img = love.graphics.newImage(img)
   end
-  img:setFilter('nearest', 'nearest')
+  img:setFilter(
+    katsudo.rough and 'nearest' or 'linear',
+    katsudo.rough and 'nearest' or 'linear'
+  )
 
   newAnim.img = img
   local imgW = newAnim.img:getWidth()

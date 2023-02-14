@@ -154,8 +154,12 @@ function utils.circ(mode, x, y, r)
   love.graphics.circle(mode, math.floor(x), math.floor(y), math.floor(r))
 end
 
-function utils.getMouse()
-  return love.mouse.getX() / utils.sx, love.mouse.getY() / utils.sy
+function utils:getMouse()
+  local x, y = love.mouse.getPosition()
+  x = (x / self.sx) - self.x
+  y = (y / self.sy) - self.y
+
+  return x, y
 end
 
 function utils.pointInsideRect(px, py, x, y, w, h)

@@ -246,8 +246,6 @@ local function _drawDebug(panel)
       cellH
     )
   end
-
-  utils.prettyPrint('h: ' .. panel.h, panel.x, panel.y, {fgColor = {1,0,0}})
 end
 
 function panel:draw()
@@ -281,7 +279,7 @@ function panel:draw()
 end
 
 function panel:update(dt)
-  local x, y = utils.getMouse()
+  local x, y = utils:getMouse()
 
   for _, node in pairs(self.children) do
     if node.enabled then

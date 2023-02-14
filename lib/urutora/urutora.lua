@@ -4,15 +4,16 @@ local class = require(modules .. 'class')
 
 local lovg = love.graphics
 
-local panel 	  = require(modules .. 'panel')
-local image 	  = require(modules .. 'image')
-local animation = require(modules .. 'animation')
-local baseNode = require(modules .. 'baseNode')
-local text 		  = require(modules .. 'text')
-local multi 	  = require(modules .. 'multi')
-local slider 	  = require(modules .. 'slider')
-local toggle 	  = require(modules .. 'toggle')
-local joy 		  = require(modules .. 'joy')
+local panel 	    = require(modules .. 'panel')
+local image 	    = require(modules .. 'image')
+local animation   = require(modules .. 'animation')
+local baseNode   = require(modules .. 'baseNode')
+local text 		    = require(modules .. 'text')
+local multi 	    = require(modules .. 'multi')
+local slider 	    = require(modules .. 'slider')
+local toggle 	    = require(modules .. 'toggle')
+local progressBar = require(modules .. 'progressBar')
+local joy 		    = require(modules .. 'joy')
 
 local katsudo = require(modules .. 'katsudo') 
 
@@ -23,10 +24,13 @@ function urutora.setDefaultFont(font)
   utils.default_font = font
 end
 
-function urutora.setResolution(w, h)
-  utils.sx = lovg.getWidth() / w
-  utils.sy = lovg.getHeight() / h
+function urutora.setDimensions(x, y, scaleX, scaleY)
+  utils.x = x
+  utils.y = y
+  utils.sx = scaleX
+  utils.sy = scaleY
 end
+urutora.setDimensions(0, 0, 1, 1)
 
 function urutora:constructor()
   self.nodes = {}
@@ -85,6 +89,12 @@ end
 function urutora.toggle(data)
   local node = toggle:new_from(data)
   node.type = utils.nodeTypes.TOGGLE
+  return node
+end
+
+function urutora.progressBar(data)
+  local node = progressBar:new_from(data)
+  node.type = utils.nodeTypes.PROGRESS_BAR
   return node
 end
 
@@ -194,7 +204,7 @@ function urutora:draw()
 end
 
 function urutora:update(dt)
-  local x, y = utils.getMouse()
+  local x, y = utils:getMouse()
 
   for _, v in ipairs(self.nodes) do
     if v.enabled then

@@ -38,7 +38,7 @@ function slider:setValue(value)
 end
 
 function slider:update(dt)
-  local x, y = utils.getMouse()
+  local x, y = utils:getMouse()
   local ox = self.parent and self.parent.ox or 0
   local oy = self.parent and self.parent.oy or 0
 
