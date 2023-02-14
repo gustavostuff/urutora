@@ -85,14 +85,19 @@ function panel:updateDimensions(newNode)
 
 
   -- todo:
-  -- panel C gets squashed because updateNodes position gets called
+  -- panel C gets squashed because updateNodesPosition() gets called
   -- on C creation, then on B creation
 
 
 
-  newNode.csy = newNode.h / newNode.rows * (newNode.verticalScale or 1)
-  newNode._maxy = newNode.h * (newNode.verticalScale or 1)
+  -- newNode.csy = newNode.h / newNode.rows * (newNode.verticalScale or 1)
+  -- self.csy = newNode.csy
+  -- newNode._maxy = newNode.h * (newNode.verticalScale or 1)
+
+
   newNode:updateNodesPosition()
+
+
   newNode:initDebugGrid()
 end
 
@@ -184,6 +189,10 @@ function panel:moveTo(x, y)
 end
 
 function panel:updateNodesPosition()
+  self.csy = self.h / self.rows * (self.verticalScale or 1)
+  self.csy = self.csy
+  self._maxy = self.h * (self.verticalScale or 1)
+
   for _, node in pairs(self.children) do
     local x, y, w, h = self:calculateRect(node._row, node._col)
     node:setBounds(x, y, w, h)

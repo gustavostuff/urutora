@@ -40,8 +40,6 @@ local function initStuff()
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
 
-  clickSound = love.audio.newSource('sounds/click2.ogg', 'static')
-
   love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
   u.setResolution(canvas:getWidth(), canvas:getHeight())
@@ -49,14 +47,14 @@ end
 
 local function initPanelC()
   local panelC = u.panel({
-    debug = true,
+    -- debug = true,
     rows = 8, cols = 1,
     verticalScale = 2,
     tag = 'panelc',
     bgColor = {0, 1, 0, 0.3},
-    scrollSpeed = 1/16
     -- move 1/16 of the vewport for every mousewheel event
     -- this is relative to the number of rows within the panel
+    scrollSpeed = 1/16
   })
   local function toggleDebug(evt)
     evt.target.parent.debug = not evt.target.parent.debug
@@ -71,7 +69,6 @@ local function initPanelB(anotherPanel)
   return u.panel({
     -- debug = true,
     rows = 10, cols = 2,
-    -- csy = 20,
     verticalScale = 2,
     tag = 'panelb',
     bgColor = {1, 0, 0, 0.3},
@@ -84,10 +81,11 @@ local function initPanelB(anotherPanel)
   :rowspanAt(6, 2, 4) -- vertical slider
   :rowspanAt(6, 1, 4) -- panel C
   :spacingAt(6, 1, 0) -- panel C
-  :addAt(2, 1, u.multi({ items = { 'Blue', 'Olive', 'Neon' } }):action(function(evt)
-    bgIndex = bgIndex == 3 and 1 or bgIndex + 1
-    styleManager.handleStyleChanges(u, evt, font1, font2, font3)
-  end))
+  :addAt(2, 1, u.multi({ items = { 'Blue', 'Olive', 'Neon' } })
+    :action(function(evt)
+      bgIndex = bgIndex == 3 and 1 or bgIndex + 1
+      styleManager.handleStyleChanges(u, evt, font1, font2, font3)
+    end))
   :addAt(2, 2, u.toggle()
     :action(function (evt)
       evt.target.parent.debug = evt.value
