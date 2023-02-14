@@ -1,6 +1,6 @@
 # urutora
 
-## :warning: Currently unstable, working on stuff
+## :warning: A wiki and more features are still pending (like multitouch)
 
 GUI Library for LÖVE
 
@@ -122,7 +122,16 @@ u.text({ text, x, y, w, h })
 
 ```lua
 -- returns a joystick component
-u.joy({ x, y, w, h })
+u.joy({
+  x,
+  y
+  w,
+  h,
+  layer1,
+  layer2,
+  layer3,
+  activateOn
+})
 ```
 
 ## Notes
