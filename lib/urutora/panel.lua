@@ -21,7 +21,7 @@ function panel:constructor()
   self.sliderOpacity = 0
 
   self._maxx = (self.cols) * (self.csx or 0)
-  self._maxy = (self.rows) * (self.csy or 0)
+  self._maxy = (self.rows) * (self.cellHeight or 0)
 
   self:initDebugGrid()
 end
@@ -61,7 +61,7 @@ function panel:clear()
 end
 
 function panel:calculateRect(row, col)
-  local w, h = self.csx or (self.w / self.cols), self.csy or (self.h / self.rows)
+  local w, h = self.csx or (self.w / self.cols), self.cellHeight or (self.h / self.rows)
   local x, y = w * (col - 1), h * (row - 1)
   local s = self.customSpacings[row .. ',' .. col] or self.spacing
   local rs = (self.rowspans[col] or {})[row] or 1
@@ -81,27 +81,14 @@ function panel:calculateRect(row, col)
 end
 
 function panel:updateDimensions(newNode)
-
-
-
-  -- todo:
-  -- panel C gets squashed because updateNodesPosition() gets called
-  -- on C creation, then on B creation
-
-
-
-  -- newNode.csy = newNode.h / newNode.rows * (newNode.verticalScale or 1)
-  -- self.csy = newNode.csy
-  -- newNode._maxy = newNode.h * (newNode.verticalScale or 1)
-
-
   newNode:updateNodesPosition()
-
-
   newNode:initDebugGrid()
 end
 
 function panel:addAt(row, col, newNode)
+  if utils.isPanel(newNode) then
+    self.customSpacings[row .. ',' .. col] = 0
+  end
   local x, y, w, h = self:calculateRect(row, col)
   newNode:setBounds(x, y, w, h)
   utils.fixToggleBounds(newNode)
@@ -138,7 +125,7 @@ function panel:getActualSizeX()
 end
 
 function panel:getActualSizeY()
-  if self.csy then
+  if self.cellHeight then
     return self._maxy
   else
     return self.h
@@ -189,8 +176,9 @@ function panel:moveTo(x, y)
 end
 
 function panel:updateNodesPosition()
-  self.csy = self.h / self.rows * (self.verticalScale or 1)
-  self.csy = self.csy
+  self.cellWidth = self.w / self.cols * (self.horizontalScale or 1) -- <---- CONTINUE HERE
+  self.cellHeight = self.h / self.rows * (self.verticalScale or 1)
+  self._maxx = self.w * (self.horizontalScale or 1)
   self._maxy = self.h * (self.verticalScale or 1)
 
   for _, node in pairs(self.children) do
@@ -230,7 +218,7 @@ local function _drawBg(panel)
 end
 
 local function _drawScrollIndicator(panel, offsetX, offsetY)
-  if not panel.csy then return end
+  if not panel.cellHeight then return end
   local _, fgColor = panel:getLayerColors()
   fgColor = utils.withOpacity(fgColor, panel.sliderOpacity or 0)
   local sliderW = panel.spacing / 2
@@ -263,7 +251,7 @@ local function _drawDebug(panel)
 end
 
 function panel:draw()
-  local scx, scy, csx, csy = love.graphics.getScissor()
+  local scx, scy, csx, cellHeight = love.graphics.getScissor()
   local tx, ty = math.floor(-self.ox), math.floor(-self.oy)
 
   local x = self.x
@@ -288,7 +276,7 @@ function panel:draw()
   lovg.translate(-tx, -ty)
   _drawScrollIndicator(self, ox, oy)
 
-  lovg.setScissor(scx, scy, csx, csy)
+  lovg.setScissor(scx, scy, csx, cellHeight)
   lovg.pop()
 end
 

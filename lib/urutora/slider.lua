@@ -39,12 +39,14 @@ end
 
 function slider:update(dt)
   local x, y = utils.getMouse()
+  local ox = self.parent and self.parent.ox or 0
+  local oy = self.parent and self.parent.oy or 0
 
   if self.pressed then
     if self.axis == 'x' then
-      self:setValue((x - (self.px)) / (self.w - self.padding * 2))
+      self:setValue(((x + oy) - self.px) / (self.w - self.padding * 2))
     else
-      self:setValue((y - (self.py)) / (self.h - self.padding * 2))
+      self:setValue(((y + oy) - self.py) / (self.h - self.padding * 2))
     end
   end
 end

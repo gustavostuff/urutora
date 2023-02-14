@@ -42,6 +42,10 @@ function joy:getX() return self.joyX / self:stickRadius() end
 function joy:getY() return self.joyY / self:stickRadius() end
 
 function joy:draw()
+  love.graphics.setColor(1, 1, 1)
+  if not self.enabled then
+    lovg.setShader(utils.disabledImgShader)
+  end
   if self.layer1 then
     utils.draw(self.layer1, self:centerX(), self:centerY(), {centered = true})
   end
@@ -55,22 +59,18 @@ function joy:draw()
   end
 
   if self.layer3 then
-    love.graphics.setColor(1, 1, 1)
-    if not self.enabled then
-      lovg.setShader(utils.disabledImgShader)
-    end
     utils.draw(self.layer3,
       math.floor(self:centerX() + self.joyX),
       math.floor(self:centerY() + self.joyY),
       {centered = true}
     )
-    if not self.enabled then
-      lovg.setShader()
-    end
   else
     local _, fgc = self:getLayerColors()
     lovg.setColor(fgc)
     utils.circ('fill', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
+  end
+  if not self.enabled then
+    lovg.setShader()
   end
 end
 

@@ -2,28 +2,6 @@ local urutora = require('lib/urutora')
 local u
 local styleManager = require('style-manager')
 
--- todos:
-
--- fix slider movement inside scrolled panels                - done
--- fix padding for panels                                    - done
--- add modals for messages and questions (yes/no)
--- add scroll indicators (not sliders)                       - done
--- make images and animations gray when disabled             - done
--- link sliders to panel's scrolling
--- digital joystick (8-directional)                          - done
--- multitouch support
--- style hot swap                                            - done
--- blinking cursor in text fields and cursor displacement
--- disable/enable elements recursively                       - done
--- custom images for buttons (background and label icons)
--- custom images for sliders
--- adjust scroll speed to the size of the panel
--- alignment for images and animations
--- create progress bars
--- create notifications
--- drag panels
--- span panels to a given grid or are
-
 local bgColor = { 0.2, 0.1, 0.3 }
 for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end 
 bgIndex = 1
@@ -36,11 +14,14 @@ local function initStuff()
   canvas:setFilter('nearest', 'nearest')
   sx = love.graphics.getWidth() / canvas:getWidth()
   sy = love.graphics.getHeight() / canvas:getHeight()
+
   font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
+  transparentCursorImg = love.image.newImageData(1, 1)
+  love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
 
-  love.mouse.setRelativeMode(true)
+  -- love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
   u.setResolution(canvas:getWidth(), canvas:getHeight())
 end
@@ -51,38 +32,18 @@ local function initPanelC()
     rows = 8, cols = 1,
     verticalScale = 2,
     tag = 'panelc',
-    bgColor = {0, 1, 0, 0.3},
+    -- bgColor = {0, 1, 0, 0.3},
     -- move 1/16 of the vewport for every mousewheel event
     -- this is relative to the number of rows within the panel
     scrollSpeed = 1/16 -- 16 wheel steps to fully scroll
   })
-  :rowspanAt(7, 1, 2)
 
   local function toggleDebug(evt)
     evt.target.parent.debug = not evt.target.parent.debug
   end
-  for i = 1, panelC.rows - 1 do
+  for i = 1, panelC.rows do
     panelC:addAt(i, 1, u.button({ text = 'Button ' .. i }):action(toggleDebug))
   end
-
-  -- level 4 panel:
-  panelC
-    :spacingAt(7, 1, 0)
-    :addAt(7, 1, u.panel({
-      rows = 6,
-      cols = 1,
-      verticalScale = 3,
-      scrollSpeed = 1/4, -- 4 wheel steps to fully scroll
-      bgColor = {1, 1, 0, 0.4}
-      })
-        :addAt(1, 1, u.button({ text = 'Btn 1' }))
-        :addAt(2, 1, u.button({ text = 'Btn 2' }))
-        :addAt(3, 1, u.button({ text = 'Btn 3' }))
-        :addAt(4, 1, u.button({ text = 'Btn 4' }))
-        :addAt(5, 1, u.button({ text = 'Btn 5' }))
-        :addAt(6, 1, u.button({ text = 'Btn 6' }))
-    )
-
   return panelC
 end
 
@@ -92,14 +53,13 @@ local function initPanelB(anotherPanel)
     rows = 10, cols = 2,
     verticalScale = 2,
     tag = 'panelb',
-    bgColor = {1, 0, 0, 0.3},
+    -- bgColor = {1, 0, 0, 0.3},
     scrollSpeed = 1/10 -- 10 wheel steps to fully scroll
   })
   :colspanAt(1, 1, 2) -- panel label
   :colspanAt(6, 2, 0.2) -- vertical slider
   :rowspanAt(6, 2, 4) -- vertical slider
   :rowspanAt(6, 1, 4) -- panel C
-  :spacingAt(6, 1, 0) -- panel C
   :addAt(2, 1, u.multi({ items = { 'Blue', 'Olive', 'Neon' } })
     :action(function(evt)
       bgIndex = bgIndex == 3 and 1 or bgIndex + 1
@@ -132,9 +92,6 @@ local function initPanelA(anotherPanel)
     w = w, h = h,
     tag = 'panela'
   })
-  :spacingAt(5, 3, 0) -- panel B
-  -- :spacingAt(2, 3, 0) -- old love logo
-  -- :spacingAt(2, 4, 0) -- MSlug enemy
   :rowspanAt(8, 2, 2) -- 2 rows for the joystick
   :rowspanAt(2, 3, 2) -- love2d logo
   :rowspanAt(2, 4, 2) -- Animation
@@ -221,7 +178,6 @@ function love.load()
   local panelC = initPanelC()
   local panelB = initPanelB(panelC)
   panelA = initPanelA(panelB)
-  -- panelA:disable()
   u:add(panelA)
 
   --activation and deactivation elements by tag
@@ -288,5 +244,12 @@ function love.keypressed(k, scancode, isrepeat)
   end
   if k == 'm' then
     love.mouse.setRelativeMode(not love.mouse.getRelativeMode())
+  end
+  if k == 'f9' then
+    if not panelA.enabled then
+      panelA:enable()
+    else
+      panelA:disable()
+    end
   end
 end
