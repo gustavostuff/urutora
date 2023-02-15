@@ -28,11 +28,10 @@ function toggle:draw()
     base_drawText(self, self.style.disableFgColor)
   end
 
-  local c = self.value and self.style.fgColor or utils.style.disableBgColor
+  local c = self.style.fgColor
   if not self.enabled then
-    c = utils.style.disableFgColor
+    c = utils.style.disableBgColor
   end
-  c = utils.withOpacity(c, 1)
   
   love.graphics.setColor(c)
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)

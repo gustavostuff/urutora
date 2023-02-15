@@ -67,7 +67,10 @@ function joy:draw()
   else
     local _, fgc = self:getLayerColors()
     lovg.setColor(fgc)
-    utils.circ('fill', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
+    local lsBkp = lovg.getLineStyle()
+    lovg.setLineStyle('smooth')
+    lovg.circle('line', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
+    lovg.setLineStyle(lsBkp)
   end
   if not self.enabled then
     lovg.setShader()

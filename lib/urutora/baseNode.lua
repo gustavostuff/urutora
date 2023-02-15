@@ -155,19 +155,27 @@ end
 
 function baseNode:drawBaseRectangle(color, ...)
   local bgc, _ = self:getLayerColors()
-  lovg.setColor(color or bgc)
   local x, y, w, h = self.x, self.y, self.w, self.h
-
+  local c = color or bgc
+  
   if ... then x, y, w, h = ... end
   
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   lovg.setLineWidth(self.style.lineWidth or 1)
   lovg.setLineStyle(self.style.lineStyle or 'rough')
+  
+  lovg.setColor(utils.withOpacity(c, 0.4))
+  if self.pointed then
+    utils.rect('fill', x, y, w, h,
+      self.style.cornerRadius and r or 0,
+      self.style.cornerRadius and r or 0,
+      utils.defaultCurveSegments
+    )
+  end
+
+  lovg.setColor(c)
   utils.rect(self.style.outline and 'line' or 'fill',
-    x,
-    y,
-    w,
-    h,
+    x, y, w, h,
     self.style.cornerRadius and r or 0,
     self.style.cornerRadius and r or 0,
     utils.defaultCurveSegments

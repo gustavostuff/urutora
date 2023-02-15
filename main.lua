@@ -1,6 +1,6 @@
 local urutora = require('lib/urutora')
 local u
-local styleManager = require('style-manager')
+local styleManager = require('styleManager')
 
 local bgColor = { 0.2, 0.1, 0.3 }
 for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end 
@@ -16,15 +16,21 @@ local function initCanvasStuff()
   sy = love.graphics.getHeight() / canvas:getHeight()
 end
 
-local function resizeStuff(w, h)
-  canvasX = love.graphics.getWidth() / 2  - (canvas:getWidth() / 2 * sx)
-  canvasY = love.graphics.getHeight() / 2  - (canvas:getHeight() / 2 * sy)
-  u.setDimensions(
-    math.floor(canvasX),
-    math.floor(canvasY),
-    math.floor(sx),
-    math.floor(sy)
-  )
+local function doResizeStuff(w, h)
+  sx = math.floor(w / canvas:getWidth())
+  sx = sx < 1 and 1 or sx
+  sy = sx
+
+  if (canvas:getHeight() * sy) > h then
+    sy = math.floor(h / canvas:getHeight())
+    sy = sy < 1 and 1 or sy
+    sx = sy
+  end
+
+  canvasX = w / 2 - (canvas:getWidth() / 2) * sx
+  canvasY = h / 2 - (canvas:getHeight() / 2) * sy
+
+  u.setDimensions(canvasX, canvasY, sx, sy)
 end
 
 local function initFontStuff()
@@ -34,7 +40,7 @@ local function initFontStuff()
   font1:setFilter('nearest', 'nearest')
   font2:setFilter('nearest', 'nearest')
   u.setDefaultFont(font1)
-  resizeStuff(love.graphics.getDimensions())
+  doResizeStuff(love.graphics.getDimensions())
 end
 
 local function initStuff()
@@ -43,7 +49,7 @@ local function initStuff()
   initCanvasStuff()
   initFontStuff()
   transparentCursorImg = love.image.newImageData(1, 1)
-  -- love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
+  love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
   -- love.mouse.setRelativeMode(true)
 end
 
@@ -137,7 +143,7 @@ local function initPanelA(anotherPanel)
     evt.target.parent.debug = not evt.target.parent.debug
   end))
   :addAt(7, 1, u.label({ text = 'Enable B:' }):right())
-  :addAt(7, 2, u.progressBar({ value = 0.4, direction = -1 }):action(function (evt)
+  :addAt(7, 2, u.progressBar({ speed = 0.25, value = 0.4, direction = -1 }):action(function (evt)
     if evt.type == 'full' then
       evt.target.direction = evt.target.direction * -1 
     elseif evt.type == 'empty' then
@@ -249,7 +255,7 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.setCanvas()
 
-  love.graphics.draw(canvas, canvasX, canvasY, 0, sx, sy)
+  love.graphics.draw(canvas, math.floor(canvasX), math.floor(canvasY), 0, sx, sy)
   love.graphics.print('FPS: ' .. love.timer.getFPS())
 end
 
@@ -278,5 +284,5 @@ function love.keypressed(k, scancode, isrepeat)
 end
 
 function love.resize(w, h)
-  resizeStuff(w, h)
+  doResizeStuff(w, h)
 end

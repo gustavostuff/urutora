@@ -154,8 +154,8 @@ end
 
 function utils:getMouse()
   local x, y = love.mouse.getPosition()
-  x = (x / self.sx) - self.x
-  y = (y / self.sy) - self.y
+  x = (x - self.x) / self.sx
+  y = (y - self.y) / self.sy
 
   return x, y
 end
