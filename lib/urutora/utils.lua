@@ -75,8 +75,9 @@ utils.colors = {
   WHITE           = { love.math.colorFromBytes(222, 238, 214) },
   GRAY            = { love.math.colorFromBytes(78, 74, 78) },
   DARK_GRAY       = { love.math.colorFromBytes(20, 12, 28) },
-  LOVE_BLUE       = { love.math.colorFromBytes(89, 157, 220) },
-  LOVE_BLUE_LIGHT = { love.math.colorFromBytes(99, 175, 245) },
+  LOVE_BLUE       = { love.math.colorFromBytes(39, 170, 225) },
+  LOVE_BLUE_LIGHT = { love.math.colorFromBytes(87, 183, 225) },
+  LOVE_PINK        = { love.math.colorFromBytes(231, 74, 153) },
   RED             = { love.math.colorFromBytes(208, 70, 72) },
 }
 
@@ -84,7 +85,7 @@ utils.style = {
   padding = utils.default_font:getHeight() / 2,
   bgColor = utils.colors.LOVE_BLUE,
   fgColor = utils.colors.WHITE,
-  disableBgColor = {.5, .5, .5, .5},
+  disableBgColor = {0.5, 0.5, 0.5, 0.5},
   disableFgColor = utils.colors.DARK_GRAY,
 }
 
@@ -94,10 +95,7 @@ function utils.toFixed(value, numberOfDecimals)
 end
 
 function utils.withOpacity(color, alpha)
-  local newColor = { unpack(color) }
-  table.insert(newColor, alpha)
-
-  return newColor
+  return { color[1], color[2], color[3], alpha or 1 }
 end
 
 function utils.needsBase(node)

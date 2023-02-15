@@ -7,27 +7,44 @@ for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end
 bgIndex = 1
 bgRotation = 0
 
-local function initStuff()
-  u = urutora:new()
+local function initCanvasStuff()
   w, h = 320 * 1, 180 * 1
   canvas = love.graphics.newCanvas(w, h)
   canvas:setFilter('nearest', 'nearest')
   canvasX, canvasY = 0, 0
   sx = love.graphics.getWidth() / canvas:getWidth()
   sy = love.graphics.getHeight() / canvas:getHeight()
+end
 
+local function resizeStuff(w, h)
+  canvasX = love.graphics.getWidth() / 2  - (canvas:getWidth() / 2 * sx)
+  canvasY = love.graphics.getHeight() / 2  - (canvas:getHeight() / 2 * sy)
+  u.setDimensions(
+    math.floor(canvasX),
+    math.floor(canvasY),
+    math.floor(sx),
+    math.floor(sy)
+  )
+end
+
+local function initFontStuff()
   font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
   font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
   font1:setFilter('nearest', 'nearest')
   font2:setFilter('nearest', 'nearest')
-
-  transparentCursorImg = love.image.newImageData(1, 1)
-  love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
-
-  -- love.mouse.setRelativeMode(true)
   u.setDefaultFont(font1)
-  u.setDimensions(canvasX, canvasY, sx, sy)
+  resizeStuff(love.graphics.getDimensions())
+end
+
+local function initStuff()
+  u = urutora:new()
+
+  initCanvasStuff()
+  initFontStuff()
+  transparentCursorImg = love.image.newImageData(1, 1)
+  -- love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
+  -- love.mouse.setRelativeMode(true)
 end
 
 local function initPanelC()
@@ -181,7 +198,12 @@ function love.load()
   local panelC = initPanelC()
   local panelB = initPanelB(panelC)
   panelA = initPanelA(panelB)
+
   u:add(panelA)
+  panelA:setStyle({
+    hoverBgColor = u.utils.colors.LOVE_PINK
+  })
+  u:getByTag('russian'):setStyle({ font = font2 })
 
   --activation and deactivation elements by tag
   --u:deactivateByTag('panela')
@@ -253,4 +275,8 @@ function love.keypressed(k, scancode, isrepeat)
       panelA:disable()
     end
   end
+end
+
+function love.resize(w, h)
+  resizeStuff(w, h)
 end

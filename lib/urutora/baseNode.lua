@@ -49,6 +49,7 @@ end
 function baseNode:setStyle(style, lock)
   if self.style.lock and not lock then return end
 
+  self.style = utils.style
   local t = { lock = lock }
   for k, v in pairs(self.style) do
     t[k] = v
@@ -139,11 +140,11 @@ function baseNode:getLayerColors()
     fgColor = self.style.disableFgColor
   else
     if self.pressed then
-      bgColor = self.style.pressedbgColor or utils.darker(self.style.bgColor)
-      fgColor = self.style.pressedfgColor or self.style.fgColor
+      bgColor = self.style.pressedBgColor or utils.darker(self.style.bgColor)
+      fgColor = self.style.pressedFgColor or self.style.fgColor
     elseif self.pointed then
-      bgColor = self.style.hoverbgColor or utils.brighter(self.style.bgColor)
-      fgColor = self.style.hoverfgColor or self.style.fgColor
+      bgColor = self.style.hoverBgColor or utils.brighter(self.style.bgColor)
+      fgColor = self.style.hoverFgColor or self.style.fgColor
     else
       bgColor = self.style.bgColor
       fgColor = self.style.fgColor

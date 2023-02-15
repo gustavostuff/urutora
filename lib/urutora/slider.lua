@@ -20,14 +20,24 @@ function slider:draw()
   lovg.setColor(fgc)
   local mode = self.style.outline and 'line' or 'fill'
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+  local mark = self.style.sliderMark
+
   if self.axis == 'x' then
     local w = math.floor(self.h / 2)
     local x = self.x + (self.w - w) * self.value
-    utils.rect(mode, x, self.y, w, self.h, r, r, utils.defaultCurveSegments)
+    if mark then
+      utils.draw(mark, x + w / 2, self.y + self.h / 2, {centered = true})
+    else
+      utils.rect(mode, x, self.y, w, self.h, r, r, utils.defaultCurveSegments)
+    end
   else
     local h = math.floor(self.w / 2)
     local y = self.y + (self.h - h) * self.value
-    utils.rect(mode, self.x, y, self.w, h, r, r, utils.defaultCurveSegments)
+    if mark then
+      utils.draw(mark, self.x + h, y + h / 2, {centered = true})
+    else
+      utils.rect(mode, self.x, y, self.w, h, r, r, utils.defaultCurveSegments)
+    end
   end
 end
 

@@ -10,6 +10,7 @@ return {
         cornerRadius = 0, -- percent
         bgColor = u.utils.colors.LOVE_BLUE,
         fgColor = u.utils.colors.WHITE,
+        hoverBgColor = u.utils.colors.LOVE_PINK,
         font = font1
       })
       u:getByTag('russian'):setStyle({ font = font2 })
@@ -33,7 +34,8 @@ return {
         bgColor = {1, 0, 0.5},
         fgColor = {1, 1, 1},
         font = font1,
-        -- sliderMark = sliderAndToggle
+        sliderMark = sliderAndToggle,
+        toggleMark = sliderAndToggle
       })
       u:getByTag('russian'):setStyle({ font = font2 })
     end

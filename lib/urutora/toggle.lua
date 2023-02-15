@@ -27,22 +27,32 @@ function toggle:draw()
   else
     base_drawText(self, self.style.disableFgColor)
   end
+
   local c = self.value and self.style.fgColor or utils.style.disableBgColor
   if not self.enabled then
-    c = utils.style.disableBgColor
+    c = utils.style.disableFgColor
   end
+  c = utils.withOpacity(c, 1)
+  
   love.graphics.setColor(c)
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   local mode = self.style.outline and 'line' or 'fill'
   local x = self.x + self.switchPadding
   x = x + ((self.value and self.w / 2) or 0)
-  love.graphics.rectangle(mode,
-    x,
-    self.y + self.switchPadding,
-    self.w / 2 - self.switchPadding * 2,
-    self.h - self.switchPadding * 2,
-    r, r, utils.defaultCurveSegments
-  )
+  local mark = self.style.toggleMark
+
+  if mark then
+    local x = self.value and (self.x + self.w * 3/4) or (self.x + self.w / 4)
+    utils.draw(mark, x, self.y + self.h / 2, {centered = true})
+  else
+    love.graphics.rectangle(mode,
+      x,
+      self.y + self.switchPadding,
+      self.w / 2 - self.switchPadding * 2,
+      self.h - self.switchPadding * 2,
+      r, r, utils.defaultCurveSegments
+    )
+  end
 end
 
 function toggle:change()

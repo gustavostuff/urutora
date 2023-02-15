@@ -14,8 +14,8 @@ function love.conf(t)
   t.window.icon = nil
   t.window.width = 320 * 4
   t.window.height = 180 * 4
-  t.window.borderless = true
-  t.window.resizable = false
+  t.window.borderless = false
+  t.window.resizable = true
   t.window.minwidth = 1
   t.window.minheight = 1
   t.window.fullscreen = false
