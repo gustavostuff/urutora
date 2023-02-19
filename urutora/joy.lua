@@ -42,7 +42,7 @@ function joy:getX() return self.joyX / self:stickRadius() end
 function joy:getY() return self.joyY / self:stickRadius() end
 
 function joy:draw()
-  love.graphics.setColor(1, 1, 1)
+  lg.setColor(1, 1, 1)
   if not self.enabled then
     lovg.setShader(utils.disabledImgShader)
   end

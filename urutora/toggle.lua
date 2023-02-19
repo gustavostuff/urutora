@@ -33,7 +33,7 @@ function toggle:draw()
     c = self.style.disableFgColor
   end
   
-  love.graphics.setColor(c)
+  lg.setColor(c)
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   local mode = self.style.outline and 'line' or 'fill'
   local x = self.x + self.switchPadding
@@ -44,7 +44,7 @@ function toggle:draw()
     local x = self.value and (self.x + self.w * 3/4) or (self.x + self.w / 4)
     utils.draw(mark, x, self.y + self.h / 2, {centered = true})
   else
-    love.graphics.rectangle(mode,
+    lg.rectangle(mode,
       x,
       self.y + self.switchPadding,
       self.w / 2 - self.switchPadding * 2,

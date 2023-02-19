@@ -40,8 +40,8 @@ function progressbar:draw()
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
 
   if self.value <= 0 then return end -- avoids a glitch
-  love.graphics.setColor(fgc)
-  love.graphics.rectangle(mode,
+  lg.setColor(fgc)
+  lg.rectangle(mode,
     self.x,
     self.y,
     self.w * self.value,

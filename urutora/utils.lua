@@ -1,5 +1,5 @@
 local utils = {
-  default_font = love.graphics.newFont(14),
+  default_font = lg.newFont(14),
   nodeTypes = {
     LABEL 	= 1,
     BUTTON 	= 2,
@@ -86,7 +86,7 @@ utils.style = {
   bgColor = utils.colors.LOVE_BLUE,
   fgColor = utils.colors.WHITE,
   disableBgColor = {0.5, 0.5, 0.5, 0.5},
-  disableFgColor = utils.colors.BLACK,
+  disableFgColor = {0.35, 0.35, 0.35},
 }
 
 function utils.toFixed(value, numberOfDecimals)
@@ -110,20 +110,20 @@ function utils.needsBase(node)
 end
 
 function utils.print(text, x, y)
-  love.graphics.print(text, math.floor(x), math.floor(y))
+  lg.print(text, math.floor(x), math.floor(y))
 end
 
 function utils.prettyPrint(text, x, y, data)
   data = data or {}
-  love.graphics.setColor(data.bgColor or {0, 0, 0})
-  love.graphics.print(text, math.floor(x - 1), math.floor(y + 1))
-  love.graphics.setColor(data.fgColor or {1, 1, 1})
-  love.graphics.print(text, math.floor(x), math.floor(y))
+  lg.setColor(data.bgColor or {0, 0, 0})
+  lg.print(text, math.floor(x - 1), math.floor(y + 1))
+  lg.setColor(data.fgColor or {1, 1, 1})
+  lg.print(text, math.floor(x), math.floor(y))
 end
 
 function utils.draw(texture, x, y, data)
   data = data or {}
-  love.graphics.draw(texture,
+  lg.draw(texture,
     math.floor(x),
     math.floor(y),
     math.rad(data.rotation or 0),
@@ -135,7 +135,7 @@ function utils.draw(texture, x, y, data)
 end
 
 function utils.rect(mode, x, y, w, h, rx, ry, segments)
-  love.graphics.rectangle(mode,
+  lg.rectangle(mode,
     math.floor(x),
     math.floor(y),
     math.floor(w),
@@ -145,15 +145,15 @@ function utils.rect(mode, x, y, w, h, rx, ry, segments)
 end
 
 function utils.line(a, b, c, d)
-  love.graphics.line(math.floor(a), math.floor(b), math.floor(c), math.floor(d))
+  lg.line(math.floor(a), math.floor(b), math.floor(c), math.floor(d))
 end
 
 function utils.circ(mode, x, y, r)
-  love.graphics.circle(mode, math.floor(x), math.floor(y), math.floor(r))
+  lg.circle(mode, math.floor(x), math.floor(y), math.floor(r))
 end
 
 function utils:getMouse()
-  local x, y = love.mouse.getPosition()
+  local x, y = lm.getPosition()
   x = (x - self.x) / self.sx
   y = (y - self.y) / self.sy
 
@@ -182,7 +182,7 @@ function utils.fixToggleBounds(node)
   end
 end
 
-utils.disabledImgShader = love.graphics.newShader([[
+utils.disabledImgShader = lg.newShader([[
   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
     vec4 pixel = Texel(texture, texture_coords);
     number average = (pixel.r + pixel.b + pixel.g) / 3.0;

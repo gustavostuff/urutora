@@ -7,7 +7,7 @@ local lovg = love.graphics
 local panel 	    = require(modules .. 'panel')
 local image 	    = require(modules .. 'image')
 local animation   = require(modules .. 'animation')
-local baseNode   = require(modules .. 'baseNode')
+local baseNode    = require(modules .. 'baseNode')
 local text 		    = require(modules .. 'text')
 local multi 	    = require(modules .. 'multi')
 local slider 	    = require(modules .. 'slider')
@@ -38,68 +38,68 @@ function urutora:constructor()
 end
 
 function urutora.panel(data, nameid)
-  local node = panel:new_from(data)
+  local node = panel:newFrom(data)
   node.type = utils.nodeTypes.PANEL
   node.nameid = nameid
   return node
 end
 
 function urutora.image(data)
-  local node = image:new_from(data)
+  local node = image:newFrom(data)
   node.type = utils.nodeTypes.IMAGE
   return node
 end
 
 function urutora.animation(data)
-  local node = animation:new_from(data)
+  local node = animation:newFrom(data)
   node.type = utils.nodeTypes.ANIMATION
   return node
 end
 
 function urutora.label(data)
-  local node = baseNode:new_from(data)
+  local node = baseNode:newFrom(data)
   node.type = utils.nodeTypes.LABEL
   return node
 end
 
 function urutora.text(data)
-  local node = text:new_from(data)
+  local node = text:newFrom(data)
   node.type = utils.nodeTypes.TEXT
   return node
 end
 
 function urutora.multi(data)
-  local node = multi:new_from(data)
+  local node = multi:newFrom(data)
   node.type = utils.nodeTypes.MULTI
   return node
 end
 
 function urutora.button(data)
-  local node = baseNode:new_from(data)
+  local node = baseNode:newFrom(data)
   node.type = utils.nodeTypes.BUTTON
   return node
 end
 
 function urutora.slider(data)
-  local node = slider:new_from(data)
+  local node = slider:newFrom(data)
   node.type = utils.nodeTypes.SLIDER
   return node
 end
 
 function urutora.toggle(data)
-  local node = toggle:new_from(data)
+  local node = toggle:newFrom(data)
   node.type = utils.nodeTypes.TOGGLE
   return node
 end
 
 function urutora.progressBar(data)
-  local node = progressBar:new_from(data)
+  local node = progressBar:newFrom(data)
   node.type = utils.nodeTypes.PROGRESS_BAR
   return node
 end
 
 function urutora.joy(data)
-  local node = joy:new_from(data)
+  local node = joy:newFrom(data)
   node.type = utils.nodeTypes.JOY
   return node
 end

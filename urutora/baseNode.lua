@@ -259,7 +259,7 @@ function baseNode:performMovedAction(data)
       })
     end
   elseif self.type == utils.nodeTypes.PANEL then
-    if love.mouse.isDown(utils.mouseButtons.RIGHT) then
+    if lm.isDown(utils.mouseButtons.RIGHT) then
       -- drag panels pending
     end
   end

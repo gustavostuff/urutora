@@ -14,7 +14,7 @@ local function new(self, ...)
   return t
 end
 
-local function new_from(self, from, ...)
+local function newFrom(self, from, ...)
   local t = setmetatable(from or {}, self)
   if self.constructor then self.constructor(t, ...) end
   return t
@@ -38,7 +38,7 @@ end
 new_class = function(name, base_class)
   local t = {
     new 		= new,
-    new_from 	= new_from,
+    newFrom 	= newFrom,
     extend 		= extend,
     implement 	= implement,
     super 		= base_class,

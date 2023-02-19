@@ -206,15 +206,15 @@ function panel:showSlider()
 end
 
 local function _drawBg(panel)
-  local colorBkp = {love.graphics.getColor()}
+  local colorBkp = {lg.getColor()}
   if panel.bgColor then
-    love.graphics.setColor(panel.bgColor)
+    lg.setColor(panel.bgColor)
     if not panel.enabled then
-      love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+      lg.setColor(0.5, 0.5, 0.5, 0.5)
     end
-    love.graphics.rectangle('fill', panel.x, panel.y, panel.w, panel:getActualSizeY())
+    lg.rectangle('fill', panel.x, panel.y, panel.w, panel:getActualSizeY())
   end
-  love.graphics.setColor(colorBkp)
+  lg.setColor(colorBkp)
 end
 
 local function _drawScrollIndicator(panel, offsetX, offsetY)
@@ -238,8 +238,8 @@ local function _drawDebug(panel)
   local cellW = (panel.w / panel.cols)
   local cellH = (panel:getActualSizeY() / panel.rows)
   for _, cell in ipairs(panel.debugGrid) do
-    love.graphics.setColor(cell.color)
-    love.graphics.rectangle('fill',
+    lg.setColor(cell.color)
+    lg.rectangle('fill',
       panel.x + (cell.x - 1) * cellW,
       panel.y + (cell.y - 1) * cellH,
       cellW,
@@ -249,7 +249,7 @@ local function _drawDebug(panel)
 end
 
 function panel:draw()
-  local scx, scy, csx, cellHeight = love.graphics.getScissor()
+  local scx, scy, csx, cellHeight = lg.getScissor()
   local tx, ty = math.floor(-self.ox), math.floor(-self.oy)
 
   local x = self.x

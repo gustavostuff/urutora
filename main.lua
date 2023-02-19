@@ -1,3 +1,6 @@
+_G.lg = love.graphics
+_G.lm = love.mouse
+
 local urutora = require('urutora')
 local u
 local styleManager = require('styleManager')
@@ -30,11 +33,11 @@ bgRotation = 0
 
 local function initCanvasStuff()
   w, h = 320 * 1, 180 * 1
-  canvas = love.graphics.newCanvas(w, h)
+  canvas = lg.newCanvas(w, h)
   canvas:setFilter('nearest', 'nearest')
   canvasX, canvasY = 0, 0
-  sx = love.graphics.getWidth() / canvas:getWidth()
-  sy = love.graphics.getHeight() / canvas:getHeight()
+  sx = lg.getWidth() / canvas:getWidth()
+  sy = lg.getHeight() / canvas:getHeight()
 end
 
 local function doResizeStuff(w, h)
@@ -55,13 +58,13 @@ local function doResizeStuff(w, h)
 end
 
 local function initFontStuff()
-  font1 = love.graphics.newFont('fonts/proggy/proggy-tiny.ttf', 16)
-  font2 = love.graphics.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
-  font3 = love.graphics.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
+  font1 = lg.newFont('fonts/proggy/proggy-tiny.ttf', 16)
+  font2 = lg.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
+  font3 = lg.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
   font1:setFilter('nearest', 'nearest')
   font2:setFilter('nearest', 'nearest')
   u.setDefaultFont(font1)
-  doResizeStuff(love.graphics.getDimensions())
+  doResizeStuff(lg.getDimensions())
 end
 
 local function initStuff()
@@ -70,8 +73,8 @@ local function initStuff()
   initCanvasStuff()
   initFontStuff()
   transparentCursorImg = love.image.newImageData(1, 1)
-  love.mouse.setCursor(love.mouse.newCursor(transparentCursorImg))
-  -- love.mouse.setRelativeMode(true)
+  lm.setCursor(lm.newCursor(transparentCursorImg))
+  -- lm.setRelativeMode(true)
 end
 
 local function initPanelC()
@@ -246,7 +249,7 @@ end
 
 local function drawBg()
   local bg = bgs[bgIndex]
-  love.graphics.draw(bg,
+  lg.draw(bg,
     canvas:getWidth() / 2,
     canvas:getHeight() / 2,
     math.rad(bgRotation),
@@ -258,25 +261,25 @@ local function drawBg()
 end
 
 function drawCursor()
-  if love.mouse.isDown(1) then
-    love.graphics.setColor(1, 0, 0)
+  if lm.isDown(1) then
+    lg.setColor(1, 0, 0)
   end
   local x, y = u.utils:getMouse()
-  love.graphics.draw(arrow, math.floor(x), math.floor(y))
+  lg.draw(arrow, math.floor(x), math.floor(y))
 end
 
 function love.draw()
-  love.graphics.setCanvas(canvas)
-  love.graphics.clear(bgColor)
-  love.graphics.setColor(1, 1, 1)
+  lg.setCanvas(canvas)
+  lg.clear(bgColor)
+  lg.setColor(1, 1, 1)
   drawBg() -- spinning squares
   u:draw()
   drawCursor()
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.setCanvas()
+  lg.setColor(1, 1, 1)
+  lg.setCanvas()
 
-  love.graphics.draw(canvas, math.floor(canvasX), math.floor(canvasY), 0, sx, sy)
-  love.graphics.print('FPS: ' .. love.timer.getFPS())
+  lg.draw(canvas, math.floor(canvasX), math.floor(canvasY), 0, sx, sy)
+  lg.print('FPS: ' .. love.timer.getFPS())
 end
 
 function love.mousepressed(x, y, button) u:pressed(x, y, button) end
@@ -292,7 +295,7 @@ function love.keypressed(k, scancode, isrepeat)
     love.event.quit()
   end
   if k == 'm' then
-    love.mouse.setRelativeMode(not love.mouse.getRelativeMode())
+    lm.setRelativeMode(not lm.getRelativeMode())
   end
   if k == 'f9' then
     if not panelA.enabled then

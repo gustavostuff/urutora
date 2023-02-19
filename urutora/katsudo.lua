@@ -13,7 +13,7 @@ function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
   end
 
   if type(img) == "string" then
-    img = love.graphics.newImage(img)
+    img = lg.newImage(img)
   end
   img:setFilter(
     katsudo.rough and 'nearest' or 'linear',
@@ -38,7 +38,7 @@ function katsudo.new(img, quadWidth, quadHeight, numberOfQuads, millis, style)
   local x, y = 0, 0
   for i = 1, newAnim.numberOfQuads do
     table.insert(newAnim.items, {
-      quad = love.graphics.newQuad(x, y, quadWidth, quadHeight, imgW, imgH),
+      quad = lg.newQuad(x, y, quadWidth, quadHeight, imgW, imgH),
       delay = millis or 0.1
     })
     x = x + quadWidth
@@ -65,7 +65,7 @@ function katsudo.rotate(img, speed, reverse)
   end
 
   if type(img) == "string" then
-    img = love.graphics.newImage(img)
+    img = lg.newImage(img)
   end
 
   local newAnim = {}
@@ -214,14 +214,14 @@ function katsudo:setDelay(millis, index, theRestAlso)
 end
 
 function katsudo:draw(...)
-  love.graphics.push('all')
+  lg.push('all')
   if self.animType == 'frames' then
     local q = self.items[self.index].quad
-    love.graphics.draw(self.img, q, ...)
+    lg.draw(self.img, q, ...)
   elseif self.animType == 'rotation' then
-    love.graphics.draw(self.img, ...)
+    lg.draw(self.img, ...)
   end
-  love.graphics.pop()
+  lg.pop()
 end
 
 return katsudo
