@@ -142,7 +142,7 @@ local function initPanelA(anotherPanel)
   :action(function (evt)
     evt.target.parent.debug = not evt.target.parent.debug
   end))
-  :addAt(7, 1, u.label({ text = 'Enable B:' }):right())
+  :addAt(7, 1, u.label({ text = 'Prog. bar:' }):right())
   :addAt(7, 2, u.progressBar({ speed = 0.25, value = 0.4, direction = -1 }):action(function (evt)
     if evt.type == 'full' then
       evt.target.direction = evt.target.direction * -1 
