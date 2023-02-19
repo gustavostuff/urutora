@@ -179,7 +179,12 @@ function urutora:setFocusedNode(node)
       v.focused = false
     end
   end
-  if node then node.focused = true end
+  if node then
+    node.focused = true
+    if utils.isTextField(node) then
+      node:resetCursor()
+    end
+  end
 end
 
 function urutora:draw()

@@ -11,10 +11,14 @@ function text:constructor()
   text.super.constructor(self)
   self.align = utils.alignments.LEFT
   self.text = self.text or ''
-  self.cursorChar = '_'
-  self.cursorTimer = 0
+  self:resetCursor()
   self.cursorDelay = 0.25
   if self.outline == nil then self.outline = true end
+end
+
+function text:resetCursor()
+  self.cursorChar = '_'
+  self.cursorTimer = 0
 end
 
 function text:draw()
