@@ -85,6 +85,7 @@ end
 
 function baseNode:disable()
   self:setEnabled(false)
+  self.pointed = false
   return self
 end
 function baseNode:enable()

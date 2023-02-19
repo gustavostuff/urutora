@@ -11,21 +11,32 @@ function text:constructor()
   text.super.constructor(self)
   self.align = utils.alignments.LEFT
   self.text = self.text or ''
+  self.cursorChar = '_'
+  self.cursorTimer = 0
+  self.cursorDelay = 0.25
   if self.outline == nil then self.outline = true end
 end
 
 function text:draw()
   local _, fgc = self:getLayerColors()
+  lovg.setColor(fgc)
   local y = self.y + self.h - 2
   local textY = self:centerY() - utils.textHeight(self) / 2
   if self.outline then
-    lovg.setColor(utils.brighter(fgc))
     utils.line(self.x, y, self.x + self.w, y)
   end
 
   if self.focused then
     lovg.setColor(fgc)
-    utils.print('_', self.x + utils.textWidth(self), textY)
+    utils.print(self.cursorChar, self.x + utils.textWidth(self), textY)
+  end
+end
+
+function text:update(dt)
+  self.cursorTimer = self.cursorTimer + dt
+  if self.cursorTimer > self.cursorDelay then
+    self.cursorTimer = 0
+    self.cursorChar =  self.cursorChar == '_' and ' ' or '_'
   end
 end
 

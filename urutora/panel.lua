@@ -301,10 +301,11 @@ function panel:pointInsideNode(x, y)
 end
 
 function panel:disable()
-  if not self.enabled then return end
+  self.pointed = false
   local function recursiveDisable(panel)
     panel:setEnabled(false)
     for k, v in pairs(panel.children) do
+      v.pointed = false
       v:setEnabled(false)
       if utils.isPanel(v) then
         recursiveDisable(v)

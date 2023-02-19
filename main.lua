@@ -1,6 +1,27 @@
-local urutora = require('lib/urutora')
+local urutora = require('urutora')
 local u
 local styleManager = require('styleManager')
+
+-- todos:
+
+-- fix slider movement inside scrolled panels                - done
+-- fix padding for panels                                    - done
+-- add modals for messages and questions (yes/no)            
+-- add scroll indicators (not sliders)                       - done
+-- make images and animations gray when disabled             - done
+-- link sliders to panel's scrolling
+-- digital joystick (8-directional)                          - done
+-- multitouch support
+-- style hot swap                                            - done
+-- blinking cursor in text fields and cursor displacement
+-- disable/enable elements recursively                       - done
+-- custom images for buttons (background and label icons)
+-- custom images for sliders 
+
+
+-- NOTES:
+
+-- When using setStyle, all the previous styles is deleted first (reset to default)
 
 local bgColor = { 0.2, 0.1, 0.3 }
 for _, bg in ipairs(bgs) do bg:setFilter('nearest', 'nearest') end 
@@ -131,12 +152,12 @@ local function initPanelA(anotherPanel)
       love.event.quit()
     end))
   :addAt(3, 1, u.label({ text = 'Slider:' }):right())
-  :addAt(3, 2, u.slider({ value = 0.2 }))
+  :addAt(3, 2, u.slider({ value = 0.2, tag = 'slider1' }))
   :addAt(4, 1, u.label({ text = 'Text field:' }):right())
   :addAt(4, 2, u.text({ text = 'привт', tag = 'russian' })
     :setStyle({ font = font2 }))
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
-  :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' } }))
+  :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' }, tag = 'multi1' }))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
   :addAt(6, 2, u.toggle():right()
   :action(function (evt)
@@ -187,7 +208,6 @@ local function initPanelA(anotherPanel)
     end))
   :addAt(2, 4, u.animation({
       image = anim,
-      frames = 80,
       frameWidth = 80,
       frameHeight = 70,
       frameDelay = 0.05
@@ -220,7 +240,7 @@ local y = 0
 
 function love.update(dt)
   u:update(dt)
-  bgRotation = bgRotation + dt * 10
+  bgRotation = bgRotation + dt * 5
   if bgRotation >= 360 then bgRotation = 0 end
 end
 

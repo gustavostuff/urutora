@@ -30,7 +30,7 @@ function toggle:draw()
 
   local c = self.style.fgColor
   if not self.enabled then
-    c = utils.style.disableBgColor
+    c = self.style.disableFgColor
   end
   
   love.graphics.setColor(c)

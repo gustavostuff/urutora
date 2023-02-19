@@ -21,7 +21,7 @@ return {
         cornerRadius = 0.2, -- percent
         bgColor = {0, .4, 0, 0.5},
         fgColor = {0, .2, 0},
-        disableFgColor = {.5, .5, .5},
+        disableFgColor = {0, 0, 0, 0.5},
         font = font3
       })
     end
@@ -33,12 +33,37 @@ return {
         outline = true,
         bgColor = {1, 0, 0.5},
         fgColor = {1, 1, 1},
+        disableFgColor = {0.5, 0.5, 0.5},
         font = font1,
         sliderMark = sliderAndToggle,
         toggleMark = sliderAndToggle,
-        disableFgColor = {.5, .5, .5},
       })
-      u:getByTag('russian'):setStyle({ font = font2 })
+
+      u:getByTag('russian'):setStyle({
+        font = font2,
+        bgColor = {0, 0.8, 0},
+        fgColor = {1, 1, 1},
+        disableFgColor = {0.5, 0.5, 0.5},
+      })
+      u:getByTag('slider1'):setStyle({
+        bgColor = {0, 0.8, 0},
+        fgColor = {1, 1, 1},
+        disableFgColor = {0.5, 0.5, 0.5},
+        outline = true,
+        cornerRadius = 0.5,
+        lineWidth = 2,
+        lineStyle = 'smooth',
+        sliderMark = sliderAndToggle
+      })
+      u:getByTag('multi1'):setStyle({
+        bgColor = {0.6, 0.6, 1},
+        fgColor = {1, 1, 1},
+        disableFgColor = {0.5, 0.5, 0.5},
+        outline = true,
+        cornerRadius = 0.5,
+        lineWidth = 2,
+        lineStyle = 'smooth',
+      })
     end
   end
 }

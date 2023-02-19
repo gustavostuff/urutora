@@ -86,7 +86,7 @@ utils.style = {
   bgColor = utils.colors.LOVE_BLUE,
   fgColor = utils.colors.WHITE,
   disableBgColor = {0.5, 0.5, 0.5, 0.5},
-  disableFgColor = utils.colors.DARK_GRAY,
+  disableFgColor = utils.colors.BLACK,
 }
 
 function utils.toFixed(value, numberOfDecimals)
