@@ -189,9 +189,6 @@ end
 
 function urutora:draw()
   lovg.push('all')
-
-  lovg.setLineWidth(1)
-  lovg.setLineStyle('rough')
   lovg.setFont(utils.default_font)
 
   for _, v in ipairs(self.nodes) do

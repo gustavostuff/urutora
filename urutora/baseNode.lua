@@ -23,6 +23,15 @@ function baseNode:constructor()
 
   self.enabled = true
   self.visible = true
+  self.maskShapeStencil = function()
+    local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+    utils.rect('fill',
+      self.x, self.y, self.w, self.h,
+      r or 0,
+      r or 0,
+      utils.defaultCurveSegments
+    )
+  end
 end
 
 function baseNode:centerX()

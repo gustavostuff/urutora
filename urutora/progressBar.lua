@@ -35,21 +35,25 @@ function progressbar:setValue(value)
 end
 
 function progressbar:draw()
-  local _, fgc = self:getLayerColors()
   local mode = self.style.outline and 'line' or 'fill'
+  self:drawBaseRectangle()
+  local _, fgc = self:getLayerColors()
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
 
   if self.value <= 0 then return end -- avoids a glitch
   lg.setColor(fgc)
-  lg.rectangle(mode,
+  love.graphics.stencil(self.maskShapeStencil, 'replace', 1)
+  love.graphics.setStencilTest('greater', 0)
+  lg.rectangle('fill',
     self.x,
     self.y,
     self.w * self.value,
-    self.h,
-    r,
-    r,
-    utils.defaultCurveSegments
+    self.h
   )
+  if self.style.outline then
+    self:drawBaseRectangle()
+  end
+  love.graphics.setStencilTest()
 end
 
 return progressbar

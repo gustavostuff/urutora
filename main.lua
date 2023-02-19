@@ -269,7 +269,7 @@ function drawCursor()
 end
 
 function love.draw()
-  lg.setCanvas(canvas)
+  lg.setCanvas({ canvas, stencil = true })
   lg.clear(bgColor)
   lg.setColor(1, 1, 1)
   drawBg() -- spinning squares

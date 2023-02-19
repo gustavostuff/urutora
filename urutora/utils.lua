@@ -10,7 +10,8 @@ local utils = {
     PANEL 	= 7,
     JOY 	  = 8,
     IMAGE   = 9,
-    ANIMATION = 10
+    ANIMATION = 10,
+    PROGRESS_BAR = 11
   },
   alignments = {
     LEFT	= 'left',
@@ -27,16 +28,17 @@ local utils = {
   defaultCurveSegments = 100
 }
 
-function utils.isLabel(node)     return node.type == utils.nodeTypes.LABEL end
-function utils.isPanel(node)     return node.type == utils.nodeTypes.PANEL end
-function utils.isMulti(node)     return node.type == utils.nodeTypes.MULTI_OPTION end
-function utils.isImage(node)     return node.type == utils.nodeTypes.IMAGE end
-function utils.isAnimation(node) return node.type == utils.nodeTypes.ANIMATION end
-function utils.isToggle(node)    return node.type == utils.nodeTypes.TOGGLE end
-function utils.isSlider(node)    return node.type == utils.nodeTypes.SLIDER end
-function utils.isButton(node)    return node.type == utils.nodeTypes.BUTTON end
-function utils.isTextField(node) return node.type == utils.nodeTypes.TEXT end
-function utils.isJoy(node)       return node.type == utils.nodeTypes.JOY end
+function utils.isLabel(node)       return node.type == utils.nodeTypes.LABEL end
+function utils.isPanel(node)       return node.type == utils.nodeTypes.PANEL end
+function utils.isMulti(node)       return node.type == utils.nodeTypes.MULTI_OPTION end
+function utils.isImage(node)       return node.type == utils.nodeTypes.IMAGE end
+function utils.isAnimation(node)   return node.type == utils.nodeTypes.ANIMATION end
+function utils.isToggle(node)      return node.type == utils.nodeTypes.TOGGLE end
+function utils.isProgressBar(node) return node.type == utils.nodeTypes.PROGRESS_BAR end
+function utils.isSlider(node)      return node.type == utils.nodeTypes.SLIDER end
+function utils.isButton(node)      return node.type == utils.nodeTypes.BUTTON end
+function utils.isTextField(node)   return node.type == utils.nodeTypes.TEXT end
+function utils.isJoy(node)         return node.type == utils.nodeTypes.JOY end
 
 function utils.textWidth(node)
   if not node.text then return 0 end
@@ -105,7 +107,8 @@ function utils.needsBase(node)
     utils.isLabel(node) or
     utils.isTextField(node) or
     utils.isJoy(node) or
-    utils.isImage(node)
+    utils.isImage(node) or
+    utils.isProgressBar(node)
   )
 end
 
