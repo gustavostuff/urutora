@@ -7,11 +7,11 @@ GUI Library for LÖVE
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
 [![Version](http://img.shields.io/:beta-0.3.0-green.svg)](https://github.com/tavuntu/urutora)
 
-![](https://i.postimg.cc/FKz2JzqX/urutora-1.png)
+![](https://i.postimg.cc/PrvHX8Wq/a.png)
 
-![](https://i.postimg.cc/25tgdmRb/urutora-2.png)
+![](https://i.postimg.cc/v8NMwv6j/b.png)
 
-![](https://i.postimg.cc/2S2s6h0x/urutora-3.png)
+![](https://i.postimg.cc/1X2Z09QP/c.png)
 
 ## Instructions
 

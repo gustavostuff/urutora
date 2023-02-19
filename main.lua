@@ -18,8 +18,7 @@ local styleManager = require('styleManager')
 -- style hot swap                                            - done
 -- blinking cursor in text fields and cursor displacement
 -- disable/enable elements recursively                       - done
--- custom images for buttons (background and label icons)
--- custom images for sliders 
+-- custom 'fixed' images for bgs and fgs
 
 
 -- NOTES:
