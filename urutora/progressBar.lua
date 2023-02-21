@@ -42,8 +42,8 @@ function progressbar:draw()
 
   if self.value <= 0 then return end -- avoids a glitch
   lg.setColor(fgc)
-  love.graphics.stencil(self.maskShapeStencil, 'replace', 1)
-  love.graphics.setStencilTest('greater', 0)
+  lg.stencil(self.maskShapeStencil, 'replace', 1)
+  lg.setStencilTest('greater', 0)
   lg.rectangle('fill',
     self.x,
     self.y,
@@ -53,7 +53,7 @@ function progressbar:draw()
   if self.style.outline then
     self:drawBaseRectangle()
   end
-  love.graphics.setStencilTest()
+  lg.setStencilTest()
 end
 
 return progressbar

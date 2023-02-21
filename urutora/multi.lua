@@ -1,5 +1,6 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local baseNode = require(modules .. 'baseNode')
+local utils = require(modules .. 'utils')
 
 local multi = baseNode:extend('multi')
 
@@ -10,8 +11,10 @@ function multi:constructor()
   self.text = self.items[self.index]
 end
 
-function multi:change()
-  self.index = self.index + 1
+function multi:change(amount)
+  amount = amount or 1
+  self.index = self.index + amount
+  if self.index < 1           then self.index = 1 end
   if self.index > #self.items then self.index = 1 end
   self.text = self.items[self.index]
 end
@@ -32,6 +35,14 @@ function multi:setValue(text)
 
   self.index = index
   self.text = self.items[self.index]
+end
+
+function multi:draw()
+  local layers = self.style.customLayers or {}
+  if layers.bgMulti then
+    lg.setColor(1, 1, 1)
+    utils.draw(layers.bgMulti, self.x, self.y)
+  end
 end
 
 return multi

@@ -2,8 +2,6 @@ local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
 local baseNode = require(modules .. 'baseNode')
 
-local lovg = love.graphics
-
 local joy = baseNode:extend('joy')
 
 function joy:constructor()
@@ -20,22 +18,22 @@ function joy:limitMovement()
   if self.joyY <= -self:stickRadius() then self.joyY = -self:stickRadius() end
 end
 
-function joy:getDirection()
-  local direction = ''
+function joy:getDirections()
+  local directions = {}
 
   if self:getX() < -self.activateOn then
-    direction = direction .. 'l'
+    directions.left = true
   elseif self:getX() > self.activateOn then
-    direction = direction .. 'r'
+    directions.right = true
   end
 
   if self:getY() < -self.activateOn then
-    direction = direction .. 'u'
+    directions.up = true
   elseif self:getY() > self.activateOn then
-    direction = direction .. 'd'
+    directions.down = true
   end
 
-  return direction
+  return directions
 end
 
 function joy:getX() return self.joyX / self:stickRadius() end
@@ -44,7 +42,7 @@ function joy:getY() return self.joyY / self:stickRadius() end
 function joy:draw()
   lg.setColor(1, 1, 1)
   if not self.enabled then
-    lovg.setShader(utils.disabledImgShader)
+    lg.setShader(utils.disabledImgShader)
   end
   if self.layer1 then
     utils.draw(self.layer1, self:centerX(), self:centerY(), {centered = true})
@@ -66,14 +64,14 @@ function joy:draw()
     )
   else
     local _, fgc = self:getLayerColors()
-    lovg.setColor(fgc)
-    local lsBkp = lovg.getLineStyle()
-    lovg.setLineStyle('smooth')
-    lovg.circle('line', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
-    lovg.setLineStyle(lsBkp)
+    lg.setColor(fgc)
+    local lsBkp = lg.getLineStyle()
+    lg.setLineStyle('smooth')
+    lg.circle('line', self:centerX() + self.joyX, self:centerY() + self.joyY, self:stickRadius())
+    lg.setLineStyle(lsBkp)
   end
   if not self.enabled then
-    lovg.setShader()
+    lg.setShader()
   end
 end
 

@@ -3,8 +3,6 @@ local utils = require(modules .. 'utils')
 local baseNode = require(modules .. 'baseNode')
 local utf8 = require('utf8')
 
-local lovg = love.graphics
-
 local text = baseNode:extend('text')
 
 function text:constructor()
@@ -13,7 +11,6 @@ function text:constructor()
   self.text = self.text or ''
   self:resetCursor()
   self.cursorDelay = 0.25
-  if self.outline == nil then self.outline = true end
 end
 
 function text:resetCursor()
@@ -23,15 +20,22 @@ end
 
 function text:draw()
   local _, fgc = self:getLayerColors()
-  lovg.setColor(fgc)
+  lg.setColor(fgc)
   local y = self.y + self.h - 2
   local textY = self:centerY() - utils.textHeight(self) / 2
-  if self.outline then
+  lg.setLineStyle(self.style.lineStyle or utils.style.lineStyle)
+  lg.setLineWidth(self.style.lineWidth or utils.style.lineStyle)
+  
+  local layers = self.style.customLayers or {}
+  if layers.textBg then
+    lg.setColor(1, 1, 1)
+    utils.draw(layers.textBg, self.x, self.y)
+  else
     utils.line(self.x, y, self.x + self.w, y)
   end
 
   if self.focused then
-    lovg.setColor(fgc)
+    lg.setColor(fgc)
     utils.print(self.cursorChar, self.x + utils.textWidth(self), textY)
   end
 end

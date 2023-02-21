@@ -2,8 +2,6 @@ local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local baseNode = require(modules .. 'baseNode')
 local utils = require(modules .. 'utils')
 
-local lovg = love.graphics
-
 local image = baseNode:extend('image')
 
 function image:constructor()
@@ -15,7 +13,7 @@ end
 function image:draw()
   if self.image then
     local _, fgc = self:getLayerColors()
-    lovg.setColor(1, 1, 1, 1)
+    lg.setColor(1, 1, 1, 1)
     local sx, sy
     local x = self.x
     local y = self.y
@@ -36,11 +34,11 @@ function image:draw()
       sx, sy = 1, 1
     end
     if not self.enabled then
-      lovg.setShader(utils.disabledImgShader)
+      lg.setShader(utils.disabledImgShader)
     end
-    lovg.draw(self.image, math.floor(x), math.floor(y), 0, sx, sy)
+    lg.draw(self.image, math.floor(x), math.floor(y), 0, sx, sy)
     if not self.enabled then
-      lovg.setShader()
+      lg.setShader()
     end
   end
 end

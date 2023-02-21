@@ -2,8 +2,6 @@ local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local class = require(modules .. 'class')
 local utils = require(modules .. 'utils')
 
-local lovg = love.graphics
-
 local baseNode = class('baseNode')
 
 function baseNode:constructor()
@@ -164,6 +162,8 @@ function baseNode:getLayerColors()
 end
 
 function baseNode:drawBaseRectangle(color, ...)
+  if self.style.customLayers then return end
+
   local bgc, _ = self:getLayerColors()
   local x, y, w, h = self.x, self.y, self.w, self.h
   local c = color or bgc
@@ -171,19 +171,9 @@ function baseNode:drawBaseRectangle(color, ...)
   if ... then x, y, w, h = ... end
   
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
-  lovg.setLineWidth(self.style.lineWidth or 1)
-  lovg.setLineStyle(self.style.lineStyle or 'rough')
-  
-  lovg.setColor(utils.withOpacity(c, 0.4))
-  if self.pointed then
-    utils.rect('fill', x, y, w, h,
-      self.style.cornerRadius and r or 0,
-      self.style.cornerRadius and r or 0,
-      utils.defaultCurveSegments
-    )
-  end
-
-  lovg.setColor(c)
+  lg.setLineWidth(self.style.lineWidth or 1)
+  lg.setLineStyle(self.style.lineStyle or 'rough')
+  lg.setColor(c)
   utils.rect(self.style.outline and 'line' or 'fill',
     x, y, w, h,
     self.style.cornerRadius and r or 0,
@@ -210,8 +200,8 @@ function baseNode:drawText(color)
     x = math.floor(self.px + self.npw - utils.textWidth(self))
   end
 
-  lovg.setFont(self.style.font or utils.default_font)
-  lovg.setColor(color or fgc)
+  lg.setFont(self.style.font or utils.default_font)
+  lg.setColor(color or fgc)
   utils.print(text, x, y)
 end
 
@@ -263,7 +253,7 @@ function baseNode:performMovedAction(data)
         value = {
           x = self:getX(),
           y = self:getY(),
-          direction = self:getDirection()
+          directions = self:getDirections()
         }
       })
     end

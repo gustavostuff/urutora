@@ -74,7 +74,7 @@ end
 
 utils.colors = {
   BLACK           = { love.math.colorFromBytes(0, 0, 0) },
-  WHITE           = { love.math.colorFromBytes(222, 238, 214) },
+  WHITE           = { love.math.colorFromBytes(255, 255, 255) },
   GRAY            = { love.math.colorFromBytes(78, 74, 78) },
   DARK_GRAY       = { love.math.colorFromBytes(20, 12, 28) },
   LOVE_BLUE       = { love.math.colorFromBytes(39, 170, 225) },
@@ -87,6 +87,8 @@ utils.style = {
   padding = utils.default_font:getHeight() / 2,
   bgColor = utils.colors.LOVE_BLUE,
   fgColor = utils.colors.WHITE,
+  lineStyle = 'rough',
+  lineWidth = 1,
   disableBgColor = {0.5, 0.5, 0.5, 0.5},
   disableFgColor = {0.35, 0.35, 0.35},
 }

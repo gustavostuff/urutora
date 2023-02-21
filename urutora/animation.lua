@@ -3,8 +3,6 @@ local baseNode = require(modules .. 'baseNode')
 local katsudo = require(modules .. 'katsudo')
 local utils = require(modules .. 'utils')
 
-local lovg = love.graphics
-
 local animation = baseNode:extend('animation')
 
 function animation:constructor()
@@ -22,7 +20,7 @@ end
 function animation:draw()
   if self.anim then
     local _, fgc = self:getLayerColors()
-    lovg.setColor(1, 1, 1, 1)
+    lg.setColor(1, 1, 1, 1)
     local sx, sy
     local x = self.x
     local y = self.y
@@ -44,7 +42,7 @@ function animation:draw()
     end
 
     if not self.enabled then
-      lovg.setShader(utils.disabledImgShader)
+      lg.setShader(utils.disabledImgShader)
     end
     self.anim:draw(
       math.floor(x),
@@ -54,7 +52,7 @@ function animation:draw()
       sy
     )
     if not self.enabled then
-      lovg.setShader()
+      lg.setShader()
     end
   end
 end

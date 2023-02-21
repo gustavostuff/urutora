@@ -2,9 +2,8 @@ local modules = (...):gsub('%.[^%.]+$', '') .. "."
 local utils = require(modules .. 'utils')
 local class = require(modules .. 'class')
 
-local lovg = love.graphics
-
 local panel 	    = require(modules .. 'panel')
+local button 	    = require(modules .. 'button')
 local image 	    = require(modules .. 'image')
 local animation   = require(modules .. 'animation')
 local baseNode    = require(modules .. 'baseNode')
@@ -75,7 +74,7 @@ function urutora.multi(data)
 end
 
 function urutora.button(data)
-  local node = baseNode:newFrom(data)
+  local node = button:newFrom(data)
   node.type = utils.nodeTypes.BUTTON
   return node
 end
@@ -169,6 +168,18 @@ function urutora:deactivateByTag(tag)
   return self
 end
 
+function urutora:setStyle(style)
+  for _, v in ipairs(self.nodes) do
+    v:setStyle(style)
+    if utils.isPanel(v) then
+      v:forEach(function (node)
+        node:setStyle(style)
+      end)
+    end
+  end
+  return self
+end
+
 function urutora:setFocusedNode(node)
   for _, v in ipairs(self.nodes) do
     if utils.isPanel(v) then
@@ -188,13 +199,18 @@ function urutora:setFocusedNode(node)
 end
 
 function urutora:draw()
-  lovg.push('all')
-  lovg.setFont(utils.default_font)
+  lg.push('all')
+  lg.setFont(utils.default_font)
+  lg.setLineStyle(utils.style.lineStyle)
+  lg.setLineWidth(utils.style.lineWidth)
 
   for _, v in ipairs(self.nodes) do
     if v.visible then
-      if utils.needsBase(v) then v:drawBaseRectangle() end
-      if v.draw then v:draw() end
+      if utils.needsBase(v) then
+        v:drawBaseRectangle()
+      else
+        if v.draw then v:draw() end
+      end
 
       if not utils.isPanel(v) then
         v:drawText()
@@ -202,7 +218,7 @@ function urutora:draw()
     end
   end
 
-  lovg.pop()
+  lg.pop()
 end
 
 function urutora:update(dt)

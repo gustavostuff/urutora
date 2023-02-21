@@ -27,23 +27,30 @@ function toggle:draw()
   else
     base_drawText(self, self.style.disableFgColor)
   end
-
-  local c = self.style.fgColor
-  if not self.enabled then
-    c = self.style.disableFgColor
-  end
   
-  lg.setColor(c)
+  local _, fgc = self:getLayerColors()
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   local mode = self.style.outline and 'line' or 'fill'
   local x = self.x + self.switchPadding
   x = x + ((self.value and self.w / 2) or 0)
+  local h = self.h
   local mark = self.style.toggleMark
-
+  
+  local layers = self.style.customLayers or {}
+  if layers.bgToggle then
+    lg.setColor(1, 1, 1)
+    utils.draw(layers.bgToggle, self.x, self.y)
+  end
+  if layers.fgToggle then
+    lg.setColor(1, 1, 1)
+    utils.draw(layers.fgToggle, x + h / 2, self.y + h / 2, {centered = true})
+  end
+  
+  lg.setColor(fgc)
   if mark then
     local x = self.value and (self.x + self.w * 3/4) or (self.x + self.w / 4)
     utils.draw(mark, x, self.y + self.h / 2, {centered = true})
-  else
+  elseif not layers.fgToggle then
     lg.rectangle(mode,
       x,
       self.y + self.switchPadding,

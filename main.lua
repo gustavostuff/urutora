@@ -4,6 +4,7 @@ _G.lm = love.mouse
 local urutora = require('urutora')
 local u
 local styleManager = require('styleManager')
+local images = require 'images'
 
 -- todos:
 
@@ -57,11 +58,12 @@ local function doResizeStuff(w, h)
 end
 
 local function initFontStuff()
-  font1 = lg.newFont('fonts/proggy/proggy-tiny.ttf', 16)
-  font2 = lg.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
-  font3 = lg.newFont('fonts/roboto/Roboto-Bold.ttf', 11)
+  font1 = lg.newFont('fonts/proggy/ProggyTiny.ttf', 16)
+  font2 = lg.newFont('fonts/roboto/Roboto-Bold.ttf', 14)
+  font3 = lg.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
   font1:setFilter('nearest', 'nearest')
   font2:setFilter('nearest', 'nearest')
+  font3:setFilter('nearest', 'nearest')
   u.setDefaultFont(font1)
   doResizeStuff(lg.getDimensions())
 end
@@ -74,6 +76,16 @@ local function initStuff()
   transparentCursorImg = love.image.newImageData(1, 1)
   lm.setCursor(lm.newCursor(transparentCursorImg))
   -- lm.setRelativeMode(true)
+  ship1 = {
+    img = ship1Img,
+    x = 100,
+    y = 100
+  }
+  ship2 = {
+    img = ship2Img,
+    x = 110,
+    y = 100
+  }
 end
 
 local function initPanelC()
@@ -82,7 +94,7 @@ local function initPanelC()
     rows = 8, cols = 1,
     verticalScale = 2,
     tag = 'panelc',
-    -- bgColor = {0, 1, 0, 0.3},
+    bgColor = {0, 1, 0, 0.3},
     -- move 1/16 of the vewport for every mousewheel event
     -- this is relative to the number of rows within the panel
     scrollSpeed = 1/16 -- 16 wheel steps to fully scroll
@@ -103,18 +115,14 @@ local function initPanelB(anotherPanel)
     rows = 10, cols = 2,
     verticalScale = 2,
     tag = 'panelb',
-    -- bgColor = {1, 0, 0, 0.3},
+    bgColor = {1, 0, 0, 0.3},
     scrollSpeed = 1/10 -- 10 wheel steps to fully scroll
   })
   :colspanAt(1, 1, 2) -- panel label
   :colspanAt(6, 2, 0.2) -- vertical slider
   :rowspanAt(6, 2, 4) -- vertical slider
   :rowspanAt(6, 1, 4) -- panel C
-  :addAt(2, 1, u.multi({ items = { 'Blue', 'Olive', 'Neon' } })
-    :action(function(evt)
-      bgIndex = bgIndex == 3 and 1 or bgIndex + 1
-      styleManager.handleStyleChanges(u, evt, font1, font2, font3)
-    end))
+  :addAt(2, 1, u.multi({ index = 3, items = { 'One', 'Two', 'Three', 'Four' }, tag = 'multi1' }))
   :addAt(2, 2, u.toggle()
     :action(function (evt)
       evt.target.parent.debug = evt.value
@@ -159,7 +167,11 @@ local function initPanelA(anotherPanel)
   :addAt(4, 2, u.text({ text = 'привт', tag = 'russian' })
     :setStyle({ font = font2 }))
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
-  :addAt(5, 2, u.multi({ index = 3, items = { 'One', 'Two', 'Three' }, tag = 'multi1' }))
+  :addAt(5, 2, u.multi({ items = { 'LÖVE', 'Olive', 'Neon', 'Metal' } })
+    :action(function(evt)
+      bgIndex = bgIndex == 4 and 1 or bgIndex + 1
+      styleManager.handleStyleChanges(u, evt, font1, font2, font3)
+    end))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
   :addAt(6, 2, u.toggle():right()
   :action(function (evt)
@@ -174,33 +186,7 @@ local function initPanelA(anotherPanel)
     end
   end))
   :addAt(8, 1, u.label({ text = 'Joystick:' }):right())
-  :addAt(8, 2, u.joy({
-    layer1 = joyLayer1,
-    layer2 = joyLayer2,
-    layer3 = joyLayer3,
-    activateOn = 0.7, -- percent
-    tag = 'joy'
-  }):action(function(evt)
-    local directionLabel = u:getByTag('directionLabel')
-    local lastCoordLabel = u:getByTag('lastCoordLabel')
-    local xLabel = u:getByTag('xLabel')
-    local yLabel = u:getByTag('yLabel')
-
-    if evt.type == 'moved' then
-      local x, y = u.utils.toFixed(evt.value.x, 2), u.utils.toFixed(evt.value.y, 2)
-      xLabel.text = 'joyX: ' .. x
-      yLabel.text = 'joyY: ' .. y
-      directionLabel.text = evt.value.direction
-    elseif evt.type == 'released' then
-      local lx = u.utils.toFixed(evt.value.lastX, 2)
-      local ly = u.utils.toFixed(evt.value.lastY, 2)
-
-      xLabel.text = 'joyX: 0'
-      yLabel.text = 'joyY: 0'
-      directionLabel.text = ''
-      lastCoordLabel.text = lx .. ', ' .. ly
-    end
-  end))
+  :addAt(8, 2, superJoystick)
 
   :addAt(1, 3, u.label({ text = 'Image:' }))
   :addAt(1, 4, u.label({ text = 'Animation:' }))
@@ -223,6 +209,42 @@ end
 
 function love.load()
   initStuff()
+  superJoystick = u.joy({
+    layer1 = joyLayer1,
+    layer2 = joyLayer2,
+    layer3 = joyLayer3,
+    activateOn = 0.7, -- percent
+    tag = 'joy'
+  }):action(function(evt)
+    local directionLabel = u:getByTag('directionLabel')
+    local lastCoordLabel = u:getByTag('lastCoordLabel')
+    local xLabel = u:getByTag('xLabel')
+    local yLabel = u:getByTag('yLabel')
+
+    if evt.type == 'moved' then
+      local x, y = u.utils.toFixed(evt.value.x, 2), u.utils.toFixed(evt.value.y, 2)
+      xLabel.text = 'joyX: ' .. x
+      yLabel.text = 'joyY: ' .. y
+      local dir = evt.value.directions
+      directionLabel.text = (function()
+        return (
+          (dir.left  and 'l' or '') ..
+          (dir.right and 'r' or '') ..
+          (dir.up    and 'u' or '') ..
+          (dir.down  and 'd' or '')
+        )
+      end)()
+    elseif evt.type == 'released' then
+      local lx = u.utils.toFixed(evt.value.lastX, 2)
+      local ly = u.utils.toFixed(evt.value.lastY, 2)
+
+      xLabel.text = 'joyX: 0'
+      yLabel.text = 'joyY: 0'
+      directionLabel.text = ''
+      lastCoordLabel.text = lx .. ', ' .. ly
+    end
+  end)
+
   local panelC = initPanelC()
   local panelB = initPanelB(panelC)
   panelA = initPanelA(panelB)
@@ -231,7 +253,7 @@ function love.load()
   panelA:setStyle({
     hoverBgColor = u.utils.colors.LOVE_PINK
   })
-  u:getByTag('russian'):setStyle({ font = font2 })
+  u:getByTag('russian'):setStyle({ font = font3 })
 
   --activation and deactivation elements by tag
   --u:deactivateByTag('panela')
@@ -244,6 +266,22 @@ function love.update(dt)
   u:update(dt)
   bgRotation = bgRotation + dt * 5
   if bgRotation >= 360 then bgRotation = 0 end
+  ship1.x = ship1.x + superJoystick:getX()
+  ship1.y = ship1.y + superJoystick:getY()
+
+  local dir = superJoystick:getDirections()
+  if dir.left then
+    ship2.x = ship2.x - dt * 60
+  end
+  if dir.right then
+    ship2.x = ship2.x + dt * 60
+  end
+  if dir.up then
+    ship2.y = ship2.y - dt * 60
+  end
+  if dir.down then
+    ship2.y = ship2.y + dt * 60
+  end
 end
 
 local function drawBg()
@@ -265,6 +303,12 @@ function drawCursor()
   end
   local x, y = u.utils:getMouse()
   lg.draw(arrow, math.floor(x), math.floor(y))
+  lg.setColor(1, 1, 1)
+end
+
+function drawShips()
+  u.utils.draw(ship1.img, ship1.x, ship1.y, {centered = true})
+  u.utils.draw(ship2.img, ship2.x, ship2.y, {centered = true})
 end
 
 function love.draw()
@@ -274,6 +318,7 @@ function love.draw()
   drawBg() -- spinning squares
   u:draw()
   drawCursor()
+  drawShips()
   lg.setColor(1, 1, 1)
   lg.setCanvas()
 

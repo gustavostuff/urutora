@@ -2,8 +2,6 @@ local modules = (...):gsub('%.[^%.]+$', '') .. '.'
 local utils = require(modules .. 'utils')
 local baseNode = require(modules .. 'baseNode')
 
-local lovg = love.graphics
-
 local panel = baseNode:extend('panel')
 
 function panel:constructor()
@@ -45,8 +43,11 @@ end
 function panel:setStyle(style)
   self.super.setStyle(self, style)
   for _, v in pairs(self.children) do
+    if v.style.lock then goto continue end
     v:setStyle(style)
+    ::continue::
   end
+  self:updateNodesPosition()
   return self
 end
 
@@ -176,7 +177,7 @@ function panel:moveTo(x, y)
 end
 
 function panel:updateNodesPosition()
-  self.cellWidth = self.w / self.cols * (self.horizontalScale or 1) -- <---- CONTINUE HERE
+  self.cellWidth = self.w / self.cols * (self.horizontalScale or 1)
   self.cellHeight = self.h / self.rows * (self.verticalScale or 1)
   self._maxx = self.w * (self.horizontalScale or 1)
   self._maxy = self.h * (self.verticalScale or 1)
@@ -223,9 +224,9 @@ local function _drawScrollIndicator(panel, offsetX, offsetY)
   fgColor = utils.withOpacity(fgColor, panel.sliderOpacity or 0)
   local sliderW = panel.spacing / 2
   local sliderH = (panel.h / panel:getActualSizeY()) * panel.h
-  lovg.setColor(fgColor)
+  lg.setColor(fgColor)
 
-  lovg.rectangle('fill',
+  lg.rectangle('fill',
     panel.x + panel.w - sliderW,
     panel.y + (panel:getScrollY() * (panel.h - sliderH)),
     sliderW,
@@ -258,9 +259,9 @@ function panel:draw()
   if self.parent then
     ox, oy = self.parent:getScissorOffset()
   end
-  lovg.push()
-  lovg.translate(tx, ty)
-  lovg.intersectScissor(x - ox, y - oy, self.w, self.h)
+  lg.push()
+  lg.translate(tx, ty)
+  lg.intersectScissor(x - ox, y - oy, self.w, self.h)
 
   _drawBg(self)
   for _, node in pairs(self.children) do
@@ -271,11 +272,11 @@ function panel:draw()
     end
   end
   _drawDebug(self)
-  lovg.translate(-tx, -ty)
+  lg.translate(-tx, -ty)
   _drawScrollIndicator(self, ox, oy)
 
-  lovg.setScissor(scx, scy, csx, cellHeight)
-  lovg.pop()
+  lg.setScissor(scx, scy, csx, cellHeight)
+  lg.pop()
 end
 
 function panel:update(dt)
