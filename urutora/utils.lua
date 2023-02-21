@@ -114,7 +114,19 @@ function utils.needsBase(node)
   )
 end
 
-function utils.print(text, x, y)
+utils.split = function (input, sep)
+  if not sep then
+    sep = '%s'
+  end
+
+  local t = {}
+  for str in string.gmatch(input, '([^' .. sep .. ']+)') do
+    table.insert(t, str)
+  end
+  return t
+end
+
+function utils.print(text, x, y, data)
   lg.print(text, math.floor(x), math.floor(y))
 end
 

@@ -56,7 +56,7 @@ function slider:draw()
     end
 
     if mark then
-      utils.draw(mark, self.x + w, y + w / 2, {centered = true})
+      utils.draw(mark, self.x + w / 2, y + w / 2, {centered = true})
     elseif layers.fgSlider then
       utils.draw(layers.fgSlider, self.x + w, y + w / 2, {centered = true})
     else
