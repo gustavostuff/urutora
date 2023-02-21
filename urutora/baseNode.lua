@@ -53,18 +53,19 @@ function baseNode:setBounds(x, y, w, h)
   self.nph = self.h - self.padding * 2
 end
 
-function baseNode:setStyle(style, lock)
-  if self.style.lock and not lock then return end
+function baseNode:setStyle(style, nodeType)
+  if (self.type == nodeType) or (not nodeType) then
+    self.style = utils.style
+    local t = {}
+    for k, v in pairs(self.style) do
+      t[k] = v
+    end
+    for k, v in pairs(style) do
+      t[k] = v
+    end
+    self.style = t
+  end
 
-  self.style = utils.style
-  local t = { lock = lock }
-  for k, v in pairs(self.style) do
-    t[k] = v
-  end
-  for k, v in pairs(style) do
-    t[k] = v
-  end
-  self.style = t
   return self
 end
 

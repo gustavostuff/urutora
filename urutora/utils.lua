@@ -151,6 +151,13 @@ function utils.draw(texture, x, y, data)
   )
 end
 
+function utils.drawWithShader(node, texture, x, y, data)
+  lg.setColor(1, 1, 1)
+  if not node.enabled then lg.setShader(utils.disabledImgShader) end
+  utils.draw(texture, x, y, data, {centered = true})
+  if not node.enabled then lg.setShader() end
+end
+
 function utils.rect(mode, x, y, w, h, rx, ry, segments)
   lg.rectangle(mode,
     math.floor(x),
@@ -203,9 +210,9 @@ utils.disabledImgShader = lg.newShader([[
   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
     vec4 pixel = Texel(texture, texture_coords);
     number average = (pixel.r + pixel.b + pixel.g) / 3.0;
-    pixel.r = average * 0.5;
-    pixel.g = average * 0.5;
-    pixel.b = average * 0.5;
+    pixel.r = average * 0.3;
+    pixel.g = average * 0.3;
+    pixel.b = average * 0.3;
     return pixel;
   }
 ]])

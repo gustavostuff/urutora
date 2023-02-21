@@ -36,23 +36,28 @@ end
 
 function progressbar:draw()
   local mode = self.style.outline and 'line' or 'fill'
+  local layers = self.style.customLayers or {}
   self:drawBaseRectangle()
   local _, fgc = self:getLayerColors()
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+  local progress = self.w * self.value 
 
-  if self.value <= 0 then return end -- avoids a glitch
-  lg.setColor(fgc)
   lg.stencil(self.maskShapeStencil, 'replace', 1)
   lg.setStencilTest('greater', 0)
-  lg.rectangle('fill',
-    self.x,
-    self.y,
-    self.w * self.value,
-    self.h
-  )
+
+  if layers.bgProgressbar then
+    utils.drawWithShader(self, layers.bgProgressbar, self.x, self.y)
+  end
+  lg.setColor(self.enabled and self.style.progressBarGooColor or fgc)
+  lg.rectangle('fill', self.x, self.y, progress, self.h)
+
+  if layers.fgProgressbar then
+    utils.drawWithShader(self, layers.fgProgressbar, self.x, self.y)
+  end
   if self.style.outline then
     self:drawBaseRectangle()
   end
+
   lg.setStencilTest()
 end
 

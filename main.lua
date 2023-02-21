@@ -4,7 +4,9 @@ _G.lm = love.mouse
 local urutora = require('urutora')
 local u
 local styleManager = require('styleManager')
-local images = require 'images'
+require 'images'
+require 'fonts'
+
 
 -- todos:
 
@@ -57,22 +59,12 @@ local function doResizeStuff(w, h)
   u.setDimensions(canvasX, canvasY, sx, sy)
 end
 
-local function initFontStuff()
-  font1 = lg.newFont('fonts/proggy/ProggyTiny.ttf', 16)
-  font2 = lg.newFont('fonts/roboto/Roboto-Bold.ttf', 14)
-  font3 = lg.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
-  font1:setFilter('nearest', 'nearest')
-  font2:setFilter('nearest', 'nearest')
-  font3:setFilter('nearest', 'nearest')
-  u.setDefaultFont(font1)
-  doResizeStuff(lg.getDimensions())
-end
-
 local function initStuff()
   u = urutora:new()
 
   initCanvasStuff()
-  initFontStuff()
+  u.setDefaultFont(font1)
+  doResizeStuff(lg.getDimensions())
   transparentCursorImg = love.image.newImageData(1, 1)
   lm.setCursor(lm.newCursor(transparentCursorImg))
   -- lm.setRelativeMode(true)
@@ -94,9 +86,8 @@ local function initPanelC()
     rows = 8, cols = 1,
     verticalScale = 2,
     tag = 'panelc',
-    bgColor = {0, 1, 0, 0.3},
+    -- bgColor = {0.2, 0.2, 0.7, 1},
     -- move 1/16 of the vewport for every mousewheel event
-    -- this is relative to the number of rows within the panel
     scrollSpeed = 1/16 -- 16 wheel steps to fully scroll
   })
 
@@ -115,7 +106,7 @@ local function initPanelB(anotherPanel)
     rows = 10, cols = 2,
     verticalScale = 2,
     tag = 'panelb',
-    bgColor = {1, 0, 0, 0.3},
+    -- bgColor = {0.6, 0.1, 0.3, 1},
     scrollSpeed = 1/10 -- 10 wheel steps to fully scroll
   })
   :colspanAt(1, 1, 2) -- panel label
@@ -157,7 +148,6 @@ local function initPanelA(anotherPanel)
   :addAt(1, 2, u.label({ text = 'Panel A' }))
   :addAt(2, 1, u.label({ text = 'Button:' }):right())
   :addAt(2, 2, u.button({ text = 'Exit' })
-    :setStyle({ bgColor = {0.7, 0.2, 0.2} })
     :action(function(evt)
       love.event.quit()
     end))
@@ -169,8 +159,8 @@ local function initPanelA(anotherPanel)
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
   :addAt(5, 2, u.multi({ items = { 'LÖVE', 'Olive', 'Neon', 'Metal' } })
     :action(function(evt)
-      bgIndex = bgIndex == 4 and 1 or bgIndex + 1
-      styleManager.handleStyleChanges(u, evt, font1, font2, font3)
+      bgIndex = evt.index
+      styleManager.handleStyleChanges(u, evt)
     end))
   :addAt(6, 1, u.label({ text = 'Toggle:' }):right())
   :addAt(6, 2, u.toggle():right()
@@ -250,10 +240,11 @@ function love.load()
   panelA = initPanelA(panelB)
 
   u:add(panelA)
-  panelA:setStyle({
-    hoverBgColor = u.utils.colors.LOVE_PINK
-  })
   u:getByTag('russian'):setStyle({ font = font3 })
+  -- simulate event
+  styleManager.handleStyleChanges(u, {
+    index = 1
+  })
 
   --activation and deactivation elements by tag
   --u:deactivateByTag('panela')
@@ -323,7 +314,7 @@ function love.draw()
   lg.setCanvas()
 
   lg.draw(canvas, math.floor(canvasX), math.floor(canvasY), 0, sx, sy)
-  lg.print('FPS: ' .. love.timer.getFPS())
+  -- lg.print('FPS: ' .. love.timer.getFPS())
 end
 
 function love.mousepressed(x, y, button) u:pressed(x, y, button) end

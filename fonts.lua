@@ -1,0 +1,6 @@
+font1 = lg.newFont('fonts/proggy/ProggyTiny.ttf', 16)
+font2 = lg.newFont('fonts/roboto/Roboto-Bold.ttf', 14)
+font3 = lg.newFont('fonts/proggy/proggy-square-rr.ttf', 16)
+font1:setFilter('nearest', 'nearest')
+font2:setFilter('nearest', 'nearest')
+font3:setFilter('nearest', 'nearest')

@@ -38,12 +38,11 @@ function toggle:draw()
   
   local layers = self.style.customLayers or {}
   if layers.bgToggle then
-    lg.setColor(1, 1, 1)
-    utils.draw(layers.bgToggle, self.x, self.y)
+    utils.drawWithShader(self, layers.bgToggle, self.x, self.y)
   end
   if layers.fgToggle then
-    lg.setColor(1, 1, 1)
-    utils.draw(layers.fgToggle, x + h / 2, self.y + h / 2, {centered = true})
+    local img = self.value and layers.fgToggleOn and layers.fgToggleOn or layers.fgToggle
+    utils.drawWithShader(self, img, self.x, self.y)
   end
   
   lg.setColor(fgc)

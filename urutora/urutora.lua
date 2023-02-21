@@ -168,12 +168,17 @@ function urutora:deactivateByTag(tag)
   return self
 end
 
-function urutora:setStyle(style)
+function urutora:setStyle(style, nodeType)
   for _, v in ipairs(self.nodes) do
-    v:setStyle(style)
+    if (v.type == nodeType) or (not nodeType) then
+      v:setStyle(style, nodeType)
+    end
+
     if utils.isPanel(v) then
       v:forEach(function (node)
-        node:setStyle(style)
+        if (node.type == nodeType) or (not nodeType) then
+          node:setStyle(style, nodeType)
+        end
       end)
     end
   end

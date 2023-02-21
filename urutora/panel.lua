@@ -40,12 +40,11 @@ function panel:initDebugGrid()
   end
 end
 
-function panel:setStyle(style)
-  self.super.setStyle(self, style)
+function panel:setStyle(style, nodeType)
   for _, v in pairs(self.children) do
-    if v.style.lock then goto continue end
-    v:setStyle(style)
-    ::continue::
+    if (v.type == nodeType) or (not nodeType) then
+      v:setStyle(style, nodeType)
+    end
   end
   self:updateNodesPosition()
   return self

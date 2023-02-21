@@ -14,53 +14,47 @@ function slider:constructor()
 end
 
 function slider:draw()
-  local _, fgc = self:getLayerColors()
-  lg.setColor(fgc)
+  local bgc, fgc = self:getLayerColors()
   local mode = self.style.outline and 'line' or 'fill'
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   local mark = self.style.sliderMark
-
+  local layers = self.style.customLayers or {}
+  lg.setColor(bgc)
   if self.axis == 'x' then
-    local w = self.h
-    local x = self.x + self.h / 2 - w / 2 + (self.w - self.h) * self.value
-    local layers = self.style.customLayers or {}
+    local n = self.h / 2
+    local x = self.x + n / 2 + (self.w - self.h) * self.value
     
+    -- bg
     if layers.bgSlider then
-      lg.setColor(1, 1, 1)
-      utils.draw(layers.bgSlider, self.x, self.y)
-    end
-    if layers.fgSlider then
-      lg.setColor(1, 1, 1)
-      utils.draw(layers.fgSlider, x + w / 2, self.y + self.h / 2, {centered = true})
+      utils.drawWithShader(self, layers.bgSlider, self.x, self.y)
     end
 
-    if mark then
-      utils.draw(mark, x + w / 2, self.y + self.h / 2, {centered = true})
-    elseif layers.fgSlider then
-      utils.draw(layers.fgSlider, x + w / 2, self.y + self.h / 2, {centered = true})
+    -- fg
+    lg.setColor(fgc)
+    local img = layers.fgSlider
+    img = mark or (self.pointed and layers.fgSliderOn or img)
+    if img then
+      utils.drawWithShader(self, img , x + n / 2, self.y + self.h / 2, {centered = true})
     else
-      utils.rect(mode, x, self.y, w, self.h, r, r, utils.defaultCurveSegments)
+      utils.rect(mode, x, self.y, n, self.h, r, r, utils.defaultCurveSegments)
     end
   else
-    local w = self.w
-    local y = self.y + (self.h - w) * self.value
-    local layers = self.style.customLayers or {}
+    local n = self.w / 2
+    local y = self.y + n + (self.h - self.w) * self.value
 
-    if layers.bgSlider then
-      lg.setColor(1, 1, 1)
-      utils.draw(layers.bgSlider, self.x, self.y)
-    end
-    if layers.fgSlider then
-      lg.setColor(1, 1, 1)
-      utils.draw(layers.fgSlider, self.x + w, y + w / 2, {centered = true})
+    -- bg
+    if layers.bgSliderVertical then
+      utils.drawWithShader(self, layers.bgSliderVertical, self.x, self.y)
     end
 
-    if mark then
-      utils.draw(mark, self.x + w / 2, y + w / 2, {centered = true})
-    elseif layers.fgSlider then
-      utils.draw(layers.fgSlider, self.x + w, y + w / 2, {centered = true})
+    -- fg
+    lg.setColor(fgc)
+    local img = layers.fgSliderVertical
+    img = mark or (self.pointed and layers.fgSliderVerticalOn or img)
+    if img then
+      utils.drawWithShader(self, img, self.x + n, y, {centered = true})
     else
-      utils.rect(mode, self.x, y, self.w, w, r, r, utils.defaultCurveSegments)
+      utils.rect(mode, self.x, y - n / 2, self.w, n, r, r, utils.defaultCurveSegments)
     end
   end
 end

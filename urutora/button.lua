@@ -15,8 +15,7 @@ end
 function button:draw()
   local layers = self.style.customLayers or {}
   if layers.bgButton then
-    lg.setColor(1, 1, 1)
-    utils.draw(layers.bgButton, self.x, self.y)
+    utils.drawWithShader(self, layers.bgButton, self.x, self.y)
   end
 end
 

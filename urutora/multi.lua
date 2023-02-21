@@ -40,8 +40,7 @@ end
 function multi:draw()
   local layers = self.style.customLayers or {}
   if layers.bgMulti then
-    lg.setColor(1, 1, 1)
-    utils.draw(layers.bgMulti, self.x, self.y)
+    utils.drawWithShader(self, layers.bgMulti, self.x, self.y)
   end
 end
 
