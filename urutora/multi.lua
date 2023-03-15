@@ -14,8 +14,8 @@ end
 function multi:change(amount)
   amount = amount or 1
   self.index = self.index + amount
-  if self.index < 1           then self.index = 1 end
-  if self.index > #self.items then self.index = 1 end
+  if self.index < 1           then self.index = #self.items end
+  if self.index > #self.items then self.index = 1           end
   self.text = self.items[self.index]
 end
 

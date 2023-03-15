@@ -1,4 +1,5 @@
 marco = lg.newImage('img/marco.png')
+enemy = lg.newImage('img/enemy.png')
 logo = lg.newImage('img/logo.png')
 arrow = lg.newImage('img/arrow.png')
 anim = lg.newImage('img/clickbait_kitana.png')

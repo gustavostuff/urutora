@@ -63,7 +63,7 @@ local function initStuff()
   u = urutora:new()
 
   initCanvasStuff()
-  u.setDefaultFont(font1)
+  u.setDefaultFont(proggyTiny)
   doResizeStuff(lg.getDimensions())
   transparentCursorImg = love.image.newImageData(1, 1)
   lm.setCursor(lm.newCursor(transparentCursorImg))
@@ -134,8 +134,10 @@ local function initPanelA(anotherPanel)
   -- addAt(row, col) 1-base indexed
   return u.panel({
     -- debug = true,
-    rows = 9, cols = 4,
+    rows = 18, cols = 4,
     w = w, h = h,
+    scrollSpeed = 1/18,
+    verticalScale = 2,
     tag = 'panela'
   })
   :rowspanAt(8, 2, 2) -- 2 rows for the joystick
@@ -155,7 +157,7 @@ local function initPanelA(anotherPanel)
   :addAt(3, 2, u.slider({ value = 0.2, tag = 'slider1' }))
   :addAt(4, 1, u.label({ text = 'Text field:' }):right())
   :addAt(4, 2, u.text({ text = 'привт', tag = 'russian' })
-    :setStyle({ font = font2 }))
+    :setStyle({ font = robotoBold }))
   :addAt(5, 1, u.label({ text = 'Multi:' }):right())
   :addAt(5, 2, u.multi({ items = { 'LÖVE', 'Olive', 'Neon', 'Metal' } })
     :action(function(evt)
@@ -185,10 +187,11 @@ local function initPanelA(anotherPanel)
       evt.target.keepAspectRatio = not evt.target.keepAspectRatio
     end))
   :addAt(2, 4, u.animation({
-      image = anim,
-      frameWidth = 80,
-      frameHeight = 70,
-      frameDelay = 0.05
+      image = enemy,
+      frames = 26,
+      frameWidth = 110,
+      frameHeight = 84,
+      frameDelay = 0.08
     })
     :action(function(evt)
       evt.target.keepOriginalSize = not evt.target.keepOriginalSize
@@ -204,7 +207,6 @@ function love.load()
     layer2 = joyLayer2,
     layer3 = joyLayer3,
     activateOn = 0.7, -- percent
-    tag = 'joy'
   }):action(function(evt)
     local directionLabel = u:getByTag('directionLabel')
     local lastCoordLabel = u:getByTag('lastCoordLabel')
@@ -240,7 +242,7 @@ function love.load()
   panelA = initPanelA(panelB)
 
   u:add(panelA)
-  u:getByTag('russian'):setStyle({ font = font3 })
+  u:getByTag('russian'):setStyle({ font = proggySquare })
   -- simulate event
   styleManager.handleStyleChanges(u, {
     index = 1

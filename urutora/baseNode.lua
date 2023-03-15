@@ -32,6 +32,29 @@ function baseNode:constructor()
   end
 end
 
+function baseNode:setGroup(g)
+  self.group = g
+
+  if self.children then
+    for _, child in ipairs(self.children) do
+      child:setGroup(g)
+    end
+  end
+
+  return self
+end
+
+function baseNode:deactivateGroup(g)
+  self:deactivate()
+  if self.children then
+    for _, child in ipairs(self.children) do
+      child:deactivate()
+    end
+  end
+
+  return self
+end
+
 function baseNode:centerX()
   return self.x + self.w / 2
 end
@@ -113,6 +136,8 @@ end
 function baseNode:action(f)
   if type(f) == 'function' then
     self.callback = f
+  else
+    error('A function is required.')
   end
   return self
 end
@@ -281,7 +306,7 @@ function baseNode:performReleaseAction(data)
         self:change()
         self.callback({
           target = self,
-          value = self.value,
+          value = self.text,
           index = self.index
         })
       end

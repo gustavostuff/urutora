@@ -85,6 +85,18 @@ function panel:updateDimensions(newNode)
   newNode:initDebugGrid()
 end
 
+function panel:setGroup(g)
+  self.group = g
+
+  if self.children then
+    for _, child in ipairs(self.children) do
+      child:setGroup(g)
+    end
+  end
+
+  return self
+end
+
 function panel:addAt(row, col, newNode)
   if utils.isPanel(newNode) then
     self.customSpacings[row .. ',' .. col] = 0
@@ -141,7 +153,7 @@ end
 function panel:setScrollY(value)
   value = math.max(0, math.min(value, 1))
   local dy = self:getActualSizeY() - self.h
-  if dy > 0 then self.oy = math.floor(dy * value) end
+  if dy > 0 then self.oy = (dy * value) end
 end
 
 function panel:getScrollX()
@@ -273,6 +285,11 @@ function panel:draw()
   _drawDebug(self)
   lg.translate(-tx, -ty)
   _drawScrollIndicator(self, ox, oy)
+
+  if true or self.parent then
+    love.graphics.setColor(1,1,1)
+    love.graphics.print(self.oy or '', self.x, self.y)
+  end
 
   lg.setScissor(scx, scy, csx, cellHeight)
   lg.pop()

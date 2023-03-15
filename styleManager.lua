@@ -1,16 +1,15 @@
 require 'images'
 require 'fonts'
-local urutora = require 'urutora'
 
 local emptyStyle = {}
 
 local oliveStyle = {
   outline = false,
   cornerRadius = 0.2, -- percent
-  bgColor = {0, .4, 0, 0.5},
-  fgColor = {0, .3, 0},
-  disableFgColor = {0, 0, 0, 0.5},
-  font = font2
+  bgColor = {0, 0.4, 0, 0.5},
+  fgColor = {0, 0.3, 0},
+  disableFgColor = {0, 0, 0, 0.3},
+  font = robotoBold
 }
 
 local neonStyle = {
@@ -22,7 +21,7 @@ local neonStyle = {
   fgColor = {1, 1, 1},
   hoverBgColor = {1, 0.9, 0},
   disableFgColor = {0.5, 0.5, 0.5},
-  font = font1,
+  font = neonClub,
   sliderMark = sliderAndToggle,
   toggleMark = sliderAndToggle,
 }
@@ -57,14 +56,14 @@ return {
     if evt.index == 1 then
       u:setStyle(emptyStyle)
       -- only this fonts has the Cyrillic alphabet:
-      u:getByTag('russian').style.font = font3
+      u:getByTag('russian').style.font = proggySquare
     end
     if evt.index == 2 then
       u:setStyle(oliveStyle)
     end
     if evt.index == 3 then
       u:setStyle(neonStyle)
-      u:getByTag('russian').style.font = font3
+      u:getByTag('russian').style.font = proggySquare
     end
     if evt.index == 4 then
       u:setStyle(metalStyle)
@@ -72,7 +71,7 @@ return {
       metalStyle.fgColor = {love.math.colorFromBytes(212, 222, 248)}
       u:setStyle(metalStyle, u.utils.nodeTypes.LABEL)
       metalStyle.fgColor = {love.math.colorFromBytes(67, 78, 108)}
-      u:getByTag('russian').style.font = font3
+      u:getByTag('russian').style.font = proggySquare
     end
   end
 }

@@ -26,6 +26,13 @@ function image:draw()
 
       x = x + (self.w - (self.image_w * sx)) / 2
       y = y + (self.h - (self.image_h * sy)) / 2
+
+      if self.align == utils.alignments.LEFT then
+        x = self.x
+      end
+      if self.align == utils.alignments.RIGHT then
+        x = self.w - self.image_w * sx
+      end
     end
 
     if self.keepOriginalSize then

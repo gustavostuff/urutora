@@ -14,10 +14,11 @@ local toggle 	    = require(modules .. 'toggle')
 local progressBar = require(modules .. 'progressBar')
 local joy 		    = require(modules .. 'joy')
 
-local katsudo = require(modules .. 'katsudo') 
+local kat = require(modules .. 'katsudo') 
 
 local urutora = class('urutora')
 urutora.utils = utils
+urutora.katsudo = kat
 
 function urutora.setDefaultFont(font)
   utils.default_font = font
@@ -168,6 +169,38 @@ function urutora:deactivateByTag(tag)
   return self
 end
 
+function urutora:activateGroup(g)
+  for _, v in ipairs(self.nodes) do
+    if v.group and v.group == g then
+      v:activate()
+    end
+  end
+end
+
+function urutora:deactivateGroup(g)
+  for _, v in ipairs(self.nodes) do
+    if v.group and v.group == g then
+      v:deactivate()
+    end
+  end
+end
+
+function urutora:setGroupVisible(g, value)
+  for _, v in ipairs(self.nodes) do
+    if v.group and v.group == g then
+      v:setVisible(value)
+    end
+  end
+end
+
+function urutora:setGroupEnabled(g, value)
+  for _, v in ipairs(self.nodes) do
+    if v.group and v.group == g then
+      v:setEnabled(value)
+    end
+  end
+end
+
 function urutora:setStyle(style, nodeType)
   for _, v in ipairs(self.nodes) do
     if (v.type == nodeType) or (not nodeType) then
@@ -214,7 +247,9 @@ function urutora:draw()
       if utils.needsBase(v) then
         v:drawBaseRectangle()
       else
-        if v.draw then v:draw() end
+        if v.draw then
+          v:draw()
+        end
       end
 
       if not utils.isPanel(v) then
@@ -235,7 +270,7 @@ function urutora:update(dt)
       if v.update then v:update(dt) end
     end
   end
-  katsudo.update(dt)
+  self.katsudo.update(dt)
 end
 
 function urutora:pressed(x, y, button)
