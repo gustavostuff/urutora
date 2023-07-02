@@ -1,17 +1,15 @@
 # urutora
 
-## :warning: A wiki and more features are still pending (like multitouch)
-
 GUI Library for LÖVE
 
 [![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/tavuntu/urutora/blob/master/LICENSE.md)
 [![Version](http://img.shields.io/:beta-0.3.0-green.svg)](https://github.com/tavuntu/urutora)
 
-![](https://i.postimg.cc/PrvHX8Wq/a.png)
+![](https://i.postimg.cc/tggJf77M/1.png)
 
-![](https://i.postimg.cc/v8NMwv6j/b.png)
+![](https://i.postimg.cc/tTZTqf3d/2.png)
 
-![](https://i.postimg.cc/1X2Z09QP/c.png)
+![](https://i.postimg.cc/vmSTdMVH/3.png)
 
 ## Instructions
 
