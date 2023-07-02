@@ -12,8 +12,8 @@ function love.conf(t)
 
   t.window.title = 'Urutora'
   t.window.icon = nil
-  t.window.width = 320 * 2
-  t.window.height = 180 * 2
+  t.window.width = 320 * 3
+  t.window.height = 180 * 3
   t.window.borderless = true
   t.window.resizable = true
   t.window.minwidth = 320
