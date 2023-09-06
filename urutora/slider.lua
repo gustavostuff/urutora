@@ -18,7 +18,7 @@ function slider:draw()
   local mode = self.style.outline and 'line' or 'fill'
   local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
   local mark = self.style.sliderMark
-  local layers = self.style.customLayers or {}
+  local layers = self.customLayers or self.style.customLayers or {}
   lg.setColor(bgc)
   if self.axis == 'x' then
     local n = self.h / 2
@@ -36,6 +36,7 @@ function slider:draw()
     if img then
       utils.drawWithShader(self, img , x + n / 2, self.y + self.h / 2, {centered = true})
     else
+      lg.setColor(fgc)
       utils.rect(mode, x, self.y, n, self.h, r, r, utils.defaultCurveSegments)
     end
   else

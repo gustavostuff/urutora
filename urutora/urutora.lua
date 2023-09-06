@@ -172,7 +172,7 @@ end
 function urutora:activateGroup(g)
   for _, v in ipairs(self.nodes) do
     if v.group and v.group == g then
-      v:activate()
+      v:activateGroup(g)
     end
   end
 end
@@ -180,7 +180,7 @@ end
 function urutora:deactivateGroup(g)
   for _, v in ipairs(self.nodes) do
     if v.group and v.group == g then
-      v:deactivate()
+      v:deactivateGroup(g)
     end
   end
 end
@@ -286,21 +286,25 @@ end
 
 function urutora:moved(x, y, dx, dy)
   for _, v in ipairs(self.nodes) do
-    v:performMovedAction({
-      x = x,
-      y = y,
-      dx = dx,
-      dy = dy
-    })
+    if v.enabled then
+      v:performMovedAction({
+        x = x,
+        y = y,
+        dx = dx,
+        dy = dy
+      })
+    end
   end
 end
 
 function urutora:released(x, y)
   for _, v in ipairs(self.nodes) do
-    v:performReleaseAction({
-      x = x,
-      y = y
-    })
+    if v.enabled then
+      v:performReleaseAction({
+        x = x,
+        y = y
+      })
+    end
   end
 end
 

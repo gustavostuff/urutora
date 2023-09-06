@@ -154,8 +154,12 @@ end
 function utils.drawWithShader(node, texture, x, y, data)
   lg.setColor(1, 1, 1)
   if not node.enabled then lg.setShader(utils.disabledImgShader) end
+  if node.pointed then lg.setShader(utils.pointedImgShader) end
+  if node.pressed then lg.setShader(utils.pressedImgShader) end
+
   utils.draw(texture, x, y, data, {centered = true})
-  if not node.enabled then lg.setShader() end
+
+  lg.setShader()
 end
 
 function utils.rect(mode, x, y, w, h, rx, ry, segments)
@@ -214,6 +218,40 @@ utils.disabledImgShader = lg.newShader([[
     pixel.g = average * 0.4;
     pixel.b = average * 0.4;
     return pixel;
+  }
+]])
+
+utils.pointedImgShader = lg.newShader([[
+  float brightness = 0.1;
+  float contrast = 1.2;
+
+  vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords) {
+      vec4 pixel = Texel(tex, tex_coords);
+      
+      // Increase brightness
+      pixel.rgb += brightness;
+      
+      // Increase contrast
+      pixel.rgb = (pixel.rgb - 0.5) * contrast + 0.5;
+
+      return pixel * color;
+  }
+]])
+
+utils.pressedImgShader = lg.newShader([[
+  float brightness = 0.1;
+  float contrast = 1.1;
+
+  vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords) {
+      vec4 pixel = Texel(tex, tex_coords);
+      
+      // Decrease brightness
+      pixel.rgb -= brightness;
+      
+      // Decrease contrast
+      pixel.rgb = (pixel.rgb - 0.5) / contrast + 0.5;
+
+      return pixel * color;
   }
 ]])
 

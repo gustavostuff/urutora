@@ -125,6 +125,13 @@ function panel:findFromTag(tag)
     if v.tag and v.tag == tag then
       return v
     end
+
+    if utils.isPanel(v) then
+      local ret = v:findFromTag(tag)
+      if ret then
+        return ret
+      end
+    end
   end
 end
 
@@ -288,7 +295,6 @@ function panel:draw()
 
   if true or self.parent then
     love.graphics.setColor(1,1,1)
-    love.graphics.print(self.oy or '', self.x, self.y)
   end
 
   lg.setScissor(scx, scy, csx, cellHeight)
@@ -348,18 +354,29 @@ function panel:enable()
   return self
 end
 
+function panel:deactivate()
+  self:disable()
+  self:hide()
+end
+
+function panel:activate()
+  self:enable()
+  self:show()
+end
+
 function panel:hide()
   self:setVisible(false)
-  for k, v in pairs(self.children) do
-    v:setVisible(false)
-  end
+  self:forEach(function (node)
+    node:setVisible(false)
+  end)
   return self
 end
+
 function panel:show()
   self:setVisible(true)
-  for k, v in pairs(self.children) do
-    v:setVisible(true)
-  end
+  self:forEach(function (node)
+    node:setVisible(true)
+  end)
   return self
 end
 

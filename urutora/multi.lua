@@ -38,9 +38,10 @@ function multi:setValue(text)
 end
 
 function multi:draw()
-  local layers = self.style.customLayers or {}
-  if layers.bgMulti then
-    utils.drawWithShader(self, layers.bgMulti, self.x, self.y)
+  local layers = self.customLayers or self.style.customLayers or {}
+  local bg = layers.bg or layers.bgMulti
+  if bg then
+    utils.drawWithShader(self, bg, self.x, self.y)
   end
 end
 

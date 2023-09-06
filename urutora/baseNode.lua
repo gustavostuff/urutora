@@ -48,7 +48,18 @@ function baseNode:deactivateGroup(g)
   self:deactivate()
   if self.children then
     for _, child in ipairs(self.children) do
-      child:deactivate()
+      child:deactivateGroup()
+    end
+  end
+
+  return self
+end
+
+function baseNode:activateGroup(g)
+  self:activate()
+  if self.children then
+    for _, child in ipairs(self.children) do
+      child:activateGroup()
     end
   end
 

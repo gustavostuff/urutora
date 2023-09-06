@@ -13,7 +13,7 @@ function button:constructor()
 end
 
 function button:draw()
-  local layers = self.style.customLayers or {}
+  local layers = self.customLayers or self.style.customLayers or {}
   if layers.bgButton then
     utils.drawWithShader(self, layers.bgButton, self.x, self.y)
   end
