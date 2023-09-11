@@ -153,6 +153,24 @@ function baseNode:action(f)
   return self
 end
 
+function baseNode:enter(f)
+  if type(f) == 'function' then
+    self.callback_enter = f
+  else
+    error('A function is required.')
+  end
+  return self
+end
+
+function baseNode:leave(f)
+  if type(f) == 'function' then
+    self.callback_leave = f
+  else
+    error('A function is required.')
+  end
+  return self
+end
+
 function baseNode:left()
   self.align = utils.alignments.LEFT
   return self
@@ -349,6 +367,16 @@ function baseNode:performMouseWheelAction(data)
       self.callback({ target = self, value = self.value })
     end
   end
+end
+
+function baseNode:performEnterAction()
+  if not self.enabled then return end
+  if self.callback_enter then self.callback_enter({ target = self }) end
+end
+
+function baseNode:performLeaveAction()
+  if not self.enabled then return end
+  if self.callback_leave then self.callback_leave({ target = self }) end
 end
 
 return baseNode
