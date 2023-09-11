@@ -306,7 +306,15 @@ function panel:update(dt)
 
   for _, node in pairs(self.children) do
     if node.enabled then
-      node.pointed = self.pointed and node:pointInsideNode(x, y) and not utils.isLabel(node)
+      local pointed = self.pointed and node:pointInsideNode(x, y) and not utils.isLabel(node)
+      if node.pointed ~= nil and pointed ~= node.pointed then
+        if pointed then
+          node:performEnterAction()
+        else
+          node:performLeaveAction()
+        end
+      end
+      node.pointed = pointed
       if node.update then node:update(dt) end
     end
   end
