@@ -73,7 +73,7 @@ function slider:update(dt)
 
   if self.pressed then
     if self.axis == 'x' then
-      self:setValue(((x + oy) - self.px) / (self.w - self.padding * 2))
+      self:setValue(((x + ox) - self.px) / (self.w - self.padding * 2))
     else
       self:setValue(((y + oy) - self.py) / (self.h - self.padding * 2))
     end
