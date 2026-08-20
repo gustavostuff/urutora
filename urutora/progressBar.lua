@@ -1,4 +1,5 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
+local lg = love.graphics
 local utils = require(modules .. 'utils')
 local baseNode = require(modules .. 'baseNode')
 
@@ -12,35 +13,37 @@ function progressbar:constructor()
 end
 
 function progressbar:update(dt)
+  local prev = self.value
   self.value = self.value + dt * self.direction * self.speed
 
   if self.value >= 1 then
     self.value = 1
-    self.callback({
-      target = self,
-      type = 'full'
-    })
-  end
-  if self.value <= 0 then
+    if prev < 1 then
+      self.callback({
+        target = self,
+        type = 'full'
+      })
+    end
+  elseif self.value <= 0 then
     self.value = 0
-    self.callback({
-      target = self,
-      type = 'empty'
-    })
+    if prev > 0 then
+      self.callback({
+        target = self,
+        type = 'empty'
+      })
+    end
   end
 end
 
 function progressbar:setValue(value)
-  self.value = value and value <= 1 and value >= 0
+  self.value = math.max(0, math.min(1, value or 0))
 end
 
 function progressbar:draw()
-  local mode = self.style.outline and 'line' or 'fill'
-  local layers = self.style.customLayers or {}
+  local layers = self:getLayers()
   self:drawBaseRectangle()
   local _, fgc = self:getLayerColors()
-  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
-  local progress = self.w * self.value 
+  local progress = self.w * self.value
 
   lg.stencil(self.maskShapeStencil, 'replace', 1)
   lg.setStencilTest('greater', 0)

@@ -1,4 +1,5 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
+local lg = love.graphics
 local baseNode = require(modules .. 'baseNode')
 local utils = require(modules .. 'utils')
 
@@ -27,16 +28,15 @@ function toggle:draw()
   else
     base_drawText(self, self.style.disableFgColor)
   end
-  
+
   local _, fgc = self:getLayerColors()
-  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+  local r = self:cornerRadius()
   local mode = self.style.outline and 'line' or 'fill'
   local x = self.x + self.switchPadding
   x = x + ((self.value and self.w / 2) or 0)
-  local h = self.h
   local mark = self.style.toggleMark
-  
-  local layers = self.style.customLayers or {}
+
+  local layers = self:getLayers()
   if layers.bgToggle then
     utils.drawWithShader(self, layers.bgToggle, self.x, self.y)
   end
@@ -44,11 +44,11 @@ function toggle:draw()
     local img = self.value and layers.fgToggleOn and layers.fgToggleOn or layers.fgToggle
     utils.drawWithShader(self, img, self.x, self.y)
   end
-  
+
   lg.setColor(fgc)
   if mark then
-    local x = self.value and (self.x + self.w * 3/4) or (self.x + self.w / 4)
-    utils.draw(mark, x, self.y + self.h / 2, {centered = true})
+    local mx = self.value and (self.x + self.w * 3 / 4) or (self.x + self.w / 4)
+    utils.draw(mark, mx, self.y + self.h / 2, utils.CENTERED)
   elseif not layers.fgToggle then
     lg.rectangle(mode,
       x,
@@ -63,6 +63,15 @@ end
 function toggle:change()
   self.value = not self.value
   return self
+end
+
+function toggle:performReleaseAction(data)
+  if not self.enabled then return end
+  if self.pressed and self.pointed then
+    self:change()
+    self.callback({ target = self, value = self.value })
+  end
+  self.pressed = false
 end
 
 return toggle

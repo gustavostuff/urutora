@@ -1,7 +1,9 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
+local lg = love.graphics
 local baseNode = require(modules .. 'baseNode')
 local katsudo = require(modules .. 'katsudo')
 local utils = require(modules .. 'utils')
+local media = require(modules .. 'media')
 
 local animation = baseNode:extend('animation')
 
@@ -18,43 +20,25 @@ function animation:constructor()
 end
 
 function animation:draw()
-  if self.anim then
-    local _, fgc = self:getLayerColors()
-    lg.setColor(1, 1, 1, 1)
-    local sx, sy
-    local x = self.x
-    local y = self.y
-    sx = self.w / self.anim.w
-    sy = self.h / self.anim.h
-
-    if self.keepAspectRatio then
-      sx = math.min(sx, sy)
-      sy = sx
-
-      x = x + (self.w - (self.anim.w * sx)) / 2
-      y = y + (self.h - (self.anim.h * sy)) / 2
-    end
-
-    if self.keepOriginalSize then
-      x = self.x + self.w / 2 - self.anim.w / 2
-      y = self.y + self.h / 2 - self.anim.h / 2
-      sx, sy = 1, 1
-    end
-
+  if not self.anim then return end
+  lg.setColor(1, 1, 1, 1)
+  media.fitAndDraw(self, self.anim.w, self.anim.h, function (x, y, sx, sy)
     if not self.enabled then
       lg.setShader(utils.disabledImgShader)
     end
-    self.anim:draw(
-      math.floor(x),
-      math.floor(y),
-      0,
-      sx,
-      sy
-    )
+    self.anim:draw(x, y, 0, sx, sy)
     if not self.enabled then
       lg.setShader()
     end
+  end)
+end
+
+function animation:performReleaseAction(data)
+  if not self.enabled then return end
+  if self.pressed and self.pointed then
+    self.callback({ target = self })
   end
+  self.pressed = false
 end
 
 return animation

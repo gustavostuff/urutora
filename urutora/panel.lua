@@ -1,8 +1,15 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
+local lg = love.graphics
 local utils = require(modules .. 'utils')
 local baseNode = require(modules .. 'baseNode')
+local panelLayout = require(modules .. 'panelLayout')
+local panelScroll = require(modules .. 'panelScroll')
 
 local panel = baseNode:extend('panel')
+
+local DEFAULT_SPACING = 4
+local DEFAULT_SCROLL_SPEED = 0.1
+local DEBUG_CONTRAST = 0.3
 
 function panel:constructor()
   panel.super.constructor(self)
@@ -12,29 +19,30 @@ function panel:constructor()
   self.cols = self.cols or 1
   self.rowspans = {}
   self.colspans = {}
-  self.spacing = self.spacing or 4
+  self.spacing = self.spacing or DEFAULT_SPACING
   self.ox = self.ox or 0
   self.oy = self.oy or 0
-  self.scrollSpeed = self.scrollSpeed or 0.1
+  self.scrollSpeed = self.scrollSpeed or DEFAULT_SCROLL_SPEED
   self.sliderOpacity = 0
 
-  self._maxx = (self.cols) * (self.csx or 0)
-  self._maxy = (self.rows) * (self.cellHeight or 0)
+  self.cellWidth = self.cellWidth or self.csx
+  self.csx = self.cellWidth
+  self._maxx = self.cols * (self.cellWidth or 0)
+  self._maxy = self.rows * (self.cellHeight or 0)
 
   self:initDebugGrid()
 end
 
 function panel:initDebugGrid()
   self.debugGrid = {}
-  local contrastRatio = 0.3
   for y = 1, self.rows do
     for x = 1, self.cols do
       table.insert(self.debugGrid, {
         x = x,
         y = y,
         color = ((x + y) % 2 == 0) and
-          {contrastRatio, contrastRatio, contrastRatio, 0.3} or
-          {1 - contrastRatio, 1 - contrastRatio, 1 - contrastRatio, 0.3}
+          { DEBUG_CONTRAST, DEBUG_CONTRAST, DEBUG_CONTRAST, 0.3 } or
+          { 1 - DEBUG_CONTRAST, 1 - DEBUG_CONTRAST, 1 - DEBUG_CONTRAST, 0.3 }
       })
     end
   end
@@ -58,26 +66,11 @@ function panel:clear()
   self.oy = 0
   self._maxx = 0
   self._maxy = 0
+  panelScroll.invalidateScissorCache(self)
 end
 
 function panel:calculateRect(row, col)
-  local w, h = self.csx or (self.w / self.cols), self.cellHeight or (self.h / self.rows)
-  local x, y = w * (col - 1), h * (row - 1)
-  local s = self.customSpacings[row .. ',' .. col] or self.spacing
-  local rs = (self.rowspans[col] or {})[row] or 1
-  local cs = (self.colspans[col] or {})[row] or 1
-
-  local widthColspan = (w * cs)
-  local heightRowspan = (h * rs)
-
-  local mx = x + widthColspan
-  local my = y + heightRowspan
-  if self._maxx < mx then self._maxx = mx end
-  if self._maxy < my then self._maxy = my end
-
-  x, y = self.x + x + s / 2, self.y + y + s / 2
-  w, h = widthColspan - s, heightRowspan - s
-  return x, y, w, h
+  return panelLayout.calculateRect(self, row, col)
 end
 
 function panel:updateDimensions(newNode)
@@ -85,21 +78,9 @@ function panel:updateDimensions(newNode)
   newNode:initDebugGrid()
 end
 
-function panel:setGroup(g)
-  self.group = g
-
-  if self.children then
-    for _, child in ipairs(self.children) do
-      child:setGroup(g)
-    end
-  end
-
-  return self
-end
-
 function panel:addAt(row, col, newNode)
   if utils.isPanel(newNode) then
-    self.customSpacings[row .. ',' .. col] = 0
+    self.customSpacings[panelLayout.spacingKey(row, col)] = 0
   end
   local x, y, w, h = self:calculateRect(row, col)
   newNode:setBounds(x, y, w, h)
@@ -109,7 +90,6 @@ function panel:addAt(row, col, newNode)
   newNode._col = col
   self.children[row * self.cols + col] = newNode
 
-  --recalculate panel nodes position
   if utils.isPanel(newNode) then
     self:updateDimensions(newNode)
   end
@@ -138,41 +118,35 @@ end
 function panel:getActualSizeX()
   if self.csx then
     return self._maxx
-  else
-    return self.w
   end
+  return self.w
 end
 
 function panel:getActualSizeY()
   if self.cellHeight then
     return self._maxy
-  else
-    return self.h
   end
+  return self.h
 end
 
 function panel:setScrollX(value)
-  value = math.max(0, math.min(value, 1))
-  local dx = self:getActualSizeX() - self.w
-  if dx > 0 then self.ox = dx * value end
+  panelScroll.setScrollX(self, value)
 end
 
 function panel:setScrollY(value)
-  value = math.max(0, math.min(value, 1))
-  local dy = self:getActualSizeY() - self.h
-  if dy > 0 then self.oy = (dy * value) end
+  panelScroll.setScrollY(self, value)
 end
 
 function panel:getScrollX()
-  return self.ox / (self:getActualSizeX() - self.w)
+  return panelScroll.getScrollX(self)
 end
 
 function panel:getScrollY()
-  return self.oy / (self:getActualSizeY() - self.h)
+  return panelScroll.getScrollY(self)
 end
 
 function panel:spacingAt(row, col, size)
-  self.customSpacings[row .. ',' .. col] = size
+  self.customSpacings[panelLayout.spacingKey(row, col)] = size
   return self
 end
 
@@ -195,72 +169,58 @@ function panel:moveTo(x, y)
 end
 
 function panel:updateNodesPosition()
-  self.cellWidth = self.w / self.cols * (self.horizontalScale or 1)
-  self.cellHeight = self.h / self.rows * (self.verticalScale or 1)
-  self._maxx = self.w * (self.horizontalScale or 1)
-  self._maxy = self.h * (self.verticalScale or 1)
+  panelLayout.updateNodesPosition(self)
+end
 
-  for _, node in pairs(self.children) do
-    local x, y, w, h = self:calculateRect(node._row, node._col)
-    node:setBounds(x, y, w, h)
-    if utils.isPanel(node) then
-      node:updateNodesPosition()
-    end
-    utils.fixToggleBounds(node)
-  end
+function panel:invalidateScissorCache()
+  panelScroll.invalidateScissorCache(self)
 end
 
 function panel:getScissorOffset()
-  local parent = self.parent
-  if parent then
-    local ox, oy = parent:getScissorOffset()
-    return self.ox + ox, self.oy + oy
-  else
-    return self.ox, self.oy
-  end
+  return panelScroll.getScissorOffset(self)
 end
 
 function panel:showSlider()
   self.sliderOpacity = 1
 end
 
-local function _drawBg(panel)
-  local colorBkp = {lg.getColor()}
-  if panel.bgColor then
-    lg.setColor(panel.bgColor)
-    if not panel.enabled then
+local function drawBg(p)
+  local r, g, b, a = lg.getColor()
+  if p.bgColor then
+    lg.setColor(p.bgColor)
+    if not p.enabled then
       lg.setColor(0.5, 0.5, 0.5, 0.5)
     end
-    lg.rectangle('fill', panel.x, panel.y, panel.w, panel:getActualSizeY())
+    lg.rectangle('fill', p.x, p.y, p.w, p:getActualSizeY())
   end
-  lg.setColor(colorBkp)
+  lg.setColor(r, g, b, a)
 end
 
-local function _drawScrollIndicator(panel, offsetX, offsetY)
-  if not panel.cellHeight then return end
-  local _, fgColor = panel:getLayerColors()
-  fgColor = utils.withOpacity(fgColor, panel.sliderOpacity or 0)
-  local sliderW = panel.spacing / 2
-  local sliderH = (panel.h / panel:getActualSizeY()) * panel.h
+local function drawScrollIndicator(p)
+  if not p.cellHeight then return end
+  local _, fgColor = p:getLayerColors()
+  fgColor = utils.withOpacity(fgColor, p.sliderOpacity or 0)
+  local sliderW = p.spacing / 2
+  local sliderH = (p.h / p:getActualSizeY()) * p.h
   lg.setColor(fgColor)
 
   lg.rectangle('fill',
-    panel.x + panel.w - sliderW,
-    panel.y + (panel:getScrollY() * (panel.h - sliderH)),
+    p.x + p.w - sliderW,
+    p.y + (p:getScrollY() * (p.h - sliderH)),
     sliderW,
     sliderH
   )
 end
 
-local function _drawDebug(panel)
-  if not panel.debug then return end
-  local cellW = (panel.w / panel.cols)
-  local cellH = (panel:getActualSizeY() / panel.rows)
-  for _, cell in ipairs(panel.debugGrid) do
+local function drawDebug(p)
+  if not p.debug then return end
+  local cellW = p.w / p.cols
+  local cellH = p:getActualSizeY() / p.rows
+  for _, cell in ipairs(p.debugGrid) do
     lg.setColor(cell.color)
     lg.rectangle('fill',
-      panel.x + (cell.x - 1) * cellW,
-      panel.y + (cell.y - 1) * cellH,
+      p.x + (cell.x - 1) * cellW,
+      p.y + (cell.y - 1) * cellH,
       cellW,
       cellH
     )
@@ -268,7 +228,7 @@ local function _drawDebug(panel)
 end
 
 function panel:draw()
-  local scx, scy, csx, cellHeight = lg.getScissor()
+  local scx, scy, scw, sch = lg.getScissor()
   local tx, ty = math.floor(-self.ox), math.floor(-self.oy)
 
   local x = self.x
@@ -281,7 +241,7 @@ function panel:draw()
   lg.translate(tx, ty)
   lg.intersectScissor(x - ox, y - oy, self.w, self.h)
 
-  _drawBg(self)
+  drawBg(self)
   for _, node in pairs(self.children) do
     if node.visible then
       if utils.needsBase(node) then node:drawBaseRectangle() end
@@ -289,45 +249,33 @@ function panel:draw()
       node:drawText()
     end
   end
-  _drawDebug(self)
+  drawDebug(self)
   lg.translate(-tx, -ty)
-  _drawScrollIndicator(self, ox, oy)
+  drawScrollIndicator(self)
 
-  if true or self.parent then
-    love.graphics.setColor(1,1,1)
-  end
-
-  lg.setScissor(scx, scy, csx, cellHeight)
+  lg.setScissor(scx, scy, scw, sch)
   lg.pop()
 end
 
-function panel:update(dt)
-  local x, y = utils:getMouse()
+function panel:update(dt, mx, my)
+  if not mx then
+    mx, my = utils:getMouse()
+  end
 
   for _, node in pairs(self.children) do
     if node.enabled then
-      node.pointed = self.pointed and node:pointInsideNode(x, y) and not utils.isLabel(node)
-      if node.update then node:update(dt) end
+      node.pointed = self.pointed and node:pointInsideNode(mx, my) and not utils.isLabel(node)
+      if node.update then node:update(dt, mx, my) end
     end
   end
   self.sliderOpacity = (self.sliderOpacity > 0) and (self.sliderOpacity - dt) or 0
 end
 
-function panel:pointInsideNode(x, y)
-  local parent = self.parent
-  local ox, oy = 0, 0
-  if parent then
-    ox, oy = parent:getScissorOffset()
-  end
-
-  return utils.pointInsideRect(x, y, self.x - ox, self.y - oy, self.w, self.h)
-end
-
 function panel:disable()
   self.pointed = false
-  local function recursiveDisable(panel)
-    panel:setEnabled(false)
-    for k, v in pairs(panel.children) do
+  local function recursiveDisable(p)
+    p:setEnabled(false)
+    for _, v in pairs(p.children) do
       v.pointed = false
       v:setEnabled(false)
       if utils.isPanel(v) then
@@ -341,9 +289,9 @@ end
 
 function panel:enable()
   if self.enabled then return end
-  local function recursiveEnable(panel)
-    panel:setEnabled(true)
-    for k, v in pairs(panel.children) do
+  local function recursiveEnable(p)
+    p:setEnabled(true)
+    for _, v in pairs(p.children) do
       v:setEnabled(true)
       if utils.isPanel(v) then
         recursiveEnable(v)
@@ -421,6 +369,13 @@ function panel:performReleaseAction(data)
       node:performReleaseAction(data)
     end
   end
+end
+
+function panel:performMouseWheelAction(data)
+  if not self.enabled or not self.pointed then return end
+  self:showSlider()
+  local v = self:getScrollY()
+  self:setScrollY(v + (-data.y) * (self.scrollSpeed or utils.scrollSpeed))
 end
 
 return panel

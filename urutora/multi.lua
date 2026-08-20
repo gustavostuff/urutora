@@ -17,12 +17,14 @@ function multi:change(amount)
   if self.index < 1           then self.index = #self.items end
   if self.index > #self.items then self.index = 1           end
   self.text = self.items[self.index]
+  self._textW = nil
 end
 
 function multi:setIndex(index)
   if index > 0 and index <= #self.items then
     self.index = index
     self.text = self.items[self.index]
+    self._textW = nil
   end
 end
 
@@ -35,14 +37,28 @@ function multi:setValue(text)
 
   self.index = index
   self.text = self.items[self.index]
+  self._textW = nil
 end
 
 function multi:draw()
-  local layers = self.customLayers or self.style.customLayers or {}
+  local layers = self:getLayers()
   local bg = layers.bg or layers.bgMulti
   if bg then
     utils.drawWithShader(self, bg, self.x, self.y)
   end
+end
+
+function multi:performReleaseAction(data)
+  if not self.enabled then return end
+  if self.pressed and self.pointed then
+    self:change()
+    self.callback({
+      target = self,
+      value = self.text,
+      index = self.index
+    })
+  end
+  self.pressed = false
 end
 
 return multi

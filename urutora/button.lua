@@ -1,23 +1,23 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
-local baseNode = require(modules .. 'baseNode')
+local lg = love.graphics
 local utils = require(modules .. 'utils')
+local baseNode = require(modules .. 'baseNode')
 
 local button = baseNode:extend('button')
 
-local base_drawText = button.super.drawText
-local base_drawBaseRectangle = button.super.drawBaseRectangle
-
-function button:constructor()
-  button.super.constructor(self)
-  local layers = self.style.customLayers or {}
-end
-
 function button:draw()
-  local layers = self.customLayers or self.style.customLayers or {}
+  local layers = self:getLayers()
   if layers.bgButton then
     utils.drawWithShader(self, layers.bgButton, self.x, self.y)
   end
 end
 
+function button:performReleaseAction(data)
+  if not self.enabled then return end
+  if self.pressed and self.pointed then
+    self.callback({ target = self })
+  end
+  self.pressed = false
+end
 
 return button

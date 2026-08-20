@@ -1,4 +1,5 @@
 local modules = (...):gsub('%.[^%.]+$', '') .. '.'
+local lg = love.graphics
 local class = require(modules .. 'class')
 local utils = require(modules .. 'utils')
 
@@ -8,21 +9,20 @@ function baseNode:constructor()
   self.callback = function () end
   self.align = self.align or utils.alignments.CENTER
 
-  local f = utils.default_font
-  local p = self.padding or utils.style.padding
+  local f = utils.getDefaultFont()
+  local p = self.padding or utils.style.padding or (f:getHeight() / 2)
   self:setBounds(
     self.x or 0,
     self.y or 0,
-    (self.w or (self.text and f:getWidth(self.text)) or 20),
-    (self.h or (self.text and f:getHeight()) or 20)
+    (self.w or (self.text and f:getWidth(self.text)) or utils.DEFAULT_NODE_SIZE),
+    (self.h or (self.text and f:getHeight()) or utils.DEFAULT_NODE_SIZE)
   )
 
   self.style = utils.style
-
   self.enabled = true
   self.visible = true
   self.maskShapeStencil = function()
-    local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+    local r = self:cornerRadius()
     utils.rect('fill',
       self.x, self.y, self.w, self.h,
       r or 0,
@@ -32,11 +32,19 @@ function baseNode:constructor()
   end
 end
 
+function baseNode:cornerRadius()
+  return math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+end
+
+function baseNode:getLayers()
+  return utils.getLayers(self)
+end
+
 function baseNode:setGroup(g)
   self.group = g
 
   if self.children then
-    for _, child in ipairs(self.children) do
+    for _, child in pairs(self.children) do
       child:setGroup(g)
     end
   end
@@ -45,37 +53,40 @@ function baseNode:setGroup(g)
 end
 
 function baseNode:deactivateGroup(g)
-  self:deactivate()
+  if (not g) or (self.group == g) then
+    self:deactivate()
+  end
   if self.children then
-    for _, child in ipairs(self.children) do
-      child:deactivateGroup()
+    for _, child in pairs(self.children) do
+      child:deactivateGroup(g)
     end
   end
-
   return self
 end
 
 function baseNode:activateGroup(g)
-  self:activate()
+  if (not g) or (self.group == g) then
+    self:activate()
+  end
   if self.children then
-    for _, child in ipairs(self.children) do
-      child:activateGroup()
+    for _, child in pairs(self.children) do
+      child:activateGroup(g)
     end
   end
-
   return self
 end
 
 function baseNode:centerX()
   return self.x + self.w / 2
 end
+
 function baseNode:centerY()
   return self.y + self.h / 2
 end
 
 function baseNode:setBounds(x, y, w, h)
-  local f = utils.default_font
-  self.padding = utils.style.padding
+  local f = utils.getDefaultFont()
+  self.padding = utils.style.padding or (f:getHeight() / 2)
 
   self.x = x
   self.y = y
@@ -87,17 +98,31 @@ function baseNode:setBounds(x, y, w, h)
   self.nph = self.h - self.padding * 2
 end
 
+function baseNode:invalidateColorCache()
+  self._hoverBg = nil
+  self._pressedBg = nil
+end
+
 function baseNode:setStyle(style, nodeType)
   if (self.type == nodeType) or (not nodeType) then
-    self.style = utils.style
     local t = {}
-    for k, v in pairs(self.style) do
+    for k, v in pairs(utils.style) do
       t[k] = v
     end
     for k, v in pairs(style) do
       t[k] = v
     end
+    if style.customLayers then
+      local layers = {}
+      for k, v in pairs(style.customLayers) do
+        layers[k] = v
+      end
+      t.customLayers = layers
+    end
     self.style = t
+    self:invalidateColorCache()
+    self._textW = nil
+    self._textH = nil
   end
 
   return self
@@ -130,6 +155,7 @@ function baseNode:disable()
   self.pointed = false
   return self
 end
+
 function baseNode:enable()
   self:setEnabled(true)
   return self
@@ -139,6 +165,7 @@ function baseNode:hide()
   self:setVisible(false)
   return self
 end
+
 function baseNode:show()
   self:setVisible(true)
   return self
@@ -185,10 +212,18 @@ function baseNode:getLayerColors()
     fgColor = self.style.disableFgColor
   else
     if self.pressed then
-      bgColor = self.style.pressedBgColor or utils.darker(self.style.bgColor)
+      bgColor = self.style.pressedBgColor or self._pressedBg
+      if not bgColor then
+        self._pressedBg = utils.darker(self.style.bgColor)
+        bgColor = self._pressedBg
+      end
       fgColor = self.style.pressedFgColor or self.style.fgColor
     elseif self.pointed then
-      bgColor = self.style.hoverBgColor or utils.brighter(self.style.bgColor)
+      bgColor = self.style.hoverBgColor or self._hoverBg
+      if not bgColor then
+        self._hoverBg = utils.brighter(self.style.bgColor)
+        bgColor = self._hoverBg
+      end
       fgColor = self.style.hoverFgColor or self.style.fgColor
     else
       bgColor = self.style.bgColor
@@ -201,13 +236,13 @@ end
 function baseNode:drawBaseRectangle(color, ...)
   if self.style.customLayers then return end
 
-  local bgc, _ = self:getLayerColors()
+  local bgc = self:getLayerColors()
   local x, y, w, h = self.x, self.y, self.w, self.h
   local c = color or bgc
-  
+
   if ... then x, y, w, h = ... end
-  
-  local r = math.min(self.w, self.h) * (self.style.cornerRadius or 0)
+
+  local r = self:cornerRadius()
   lg.setLineWidth(self.style.lineWidth or 1)
   lg.setLineStyle(self.style.lineStyle or 'rough')
   lg.setColor(c)
@@ -227,128 +262,43 @@ function baseNode:drawText(color)
   end
 
   local _, fgc = self:getLayerColors()
-  local x = self:centerX() - utils.textWidth(self) / 2
+  local textW = utils.textWidth(self)
+  local x = self:centerX() - textW / 2
   local y = self:centerY() - utils.textHeight(self) / 2
   if self.type == utils.nodeTypes.TEXT then
     x = math.floor(self.x)
   elseif self.align == utils.alignments.LEFT then
     x = math.floor(self.px)
   elseif self.align == utils.alignments.RIGHT then
-    x = math.floor(self.px + self.npw - utils.textWidth(self))
+    x = math.floor(self.px + self.npw - textW)
   end
 
-  lg.setFont(self.style.font or utils.default_font)
+  lg.setFont(self.style.font or utils.getDefaultFont())
   lg.setColor(color or fgc)
   utils.print(text, x, y)
 end
 
+-- Default input: press sets pressed/focused. Widgets override for special behavior.
 function baseNode:performPressedAction(data)
   if not self.enabled then return end
-
-  local urutora = data.urutora
   if self.pointed then
     self.pressed = true
-    urutora.focused_node = self
-    -- special cases
-    if utils.isSlider(self) then
-      self:update()
-      self.callback({ target = self, value = self.value })
-    end
+    data.urutora.focused_node = self
   end
 end
 
 function baseNode:performKeyboardAction(data)
-  if self.type == utils.nodeTypes.TEXT then
-    if self.focused then
-      local previousText = data.text
-      self:textInput(data.text, data.scancode)
-      self.callback({ target = self, value = {
-        previousText = previousText,
-        newText = self.text,
-        scancode = data.scancode,
-        textAdded = data.text
-      }})
-    end
-  end
 end
 
 function baseNode:performMovedAction(data)
-  if not self.enabled then return end
-
-  if self.type == utils.nodeTypes.SLIDER then
-    if self.focused then
-      self.callback({ target = self, value = self.value })
-    end
-  elseif self.type == utils.nodeTypes.JOY then
-    if self.pressed then
-      self.joyX = self.joyX + data.dx / utils.sx
-      self.joyY = self.joyY + data.dy / utils.sy
-      self:limitMovement()
-      self.callback({
-        target = self,
-        type = 'moved',
-        value = {
-          x = self:getX(),
-          y = self:getY(),
-          directions = self:getDirections()
-        }
-      })
-    end
-  elseif self.type == utils.nodeTypes.PANEL then
-    if lm.isDown(utils.mouseButtons.RIGHT) then
-      -- drag panels pending
-    end
-  end
 end
 
 function baseNode:performReleaseAction(data)
   if not self.enabled then return end
-
-  if self.pressed then
-    if self.pointed then
-      if self.type == utils.nodeTypes.BUTTON or
-      self.type == utils.nodeTypes.IMAGE or
-      self.type == utils.nodeTypes.ANIMATION then
-        self.callback({ target = self })
-      elseif self.type == utils.nodeTypes.TOGGLE then
-        self:change()
-        self.callback({ target = self, value = self.value })
-      elseif self.type == utils.nodeTypes.MULTI then
-        self:change()
-        self.callback({
-          target = self,
-          value = self.text,
-          index = self.index
-        })
-      end
-    end
-
-    if self.type == utils.nodeTypes.JOY then
-      local lastX, lastY = self:getX(), self:getY()
-      self.callback({ target = self, type = 'released', value = {
-        lastX = lastX,
-        lastY = lastY
-      }})
-      self.joyX, self.joyY = 0, 0
-    end
-  end
-
   self.pressed = false
 end
 
 function baseNode:performMouseWheelAction(data)
-  if not self.enabled then return end
-
-  if self.pointed then
-    if self.type == utils.nodeTypes.PANEL then
-      self:showSlider()
-      local v = self:getScrollY()
-      self:setScrollY(v + (-data.y) * (self.scrollSpeed or utils.scrollSpeed))
-    elseif self.type == utils.nodeTypes.SLIDER then
-      self:setValue(self.value + (-data.y) * utils.scrollSpeed)
-      self.callback({ target = self, value = self.value })
-    end
-  end
 end
 
 return baseNode
